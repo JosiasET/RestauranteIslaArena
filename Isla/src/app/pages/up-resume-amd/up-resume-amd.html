@@ -1,1 +1,117 @@
 <p>up-resume-amd works!</p>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-fish"></i> Marisquería "El Puerto" <i class="fas fa-anchor"></i></h1>
+            <p class="subtitle">Panel de Control de Ganancias</p>
+
+            <div class="period-selector">
+                <button class="period-btn active" data-period="day">
+                    <i class="fas fa-calendar-day"></i> Día
+                </button>
+                <button class="period-btn" data-period="week">
+                    <i class="fas fa-calendar-week"></i> Semana
+                </button>
+                <button class="period-btn" data-period="month">
+                    <i class="fas fa-calendar-alt"></i> Mes
+                </button>
+                <button class="period-btn" data-period="year">
+                    <i class="fas fa-calendar"></i> Año
+                </button>
+            </div>
+        </header>
+
+        <!-- Cards de ganancias -->
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-utensils"></i> Ganancias de Platillos
+                </div>
+                <div class="card-value">${{valorResta}}</div>
+                <div class="card-trend trend-up">
+                    <i class="fas fa-arrow-up"></i> 12.5% vs mes anterior
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-drumstick-bite"></i> Ganancias de Productos Crudos
+                </div>
+                <div class="card-value">${{valorCrudo}}</div>
+                <div class="card-trend trend-down">
+                    <i class="fas fa-arrow-down"></i> 3.2% vs mes anterior
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-chart-line"></i> Ganancias Totales
+                </div>
+                <div class="card-value">${{total}}</div>
+                <div class="card-trend trend-up">
+                    <i class="fas fa-arrow-up"></i> 8.7% vs mes anterior
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficas principales -->
+        <div class="charts-container">
+            <div class="chart-section">
+                <h3 class="chart-title"><i class="fas fa-chart-area"></i> Ganancias por Período</h3>
+                <div class="chart-container">
+                    <canvas id="periodChart"></canvas>
+                </div>
+            </div>
+
+            <!-- MESEROS EN UNA LISTA YA LUEGO SOLO PONER ESAS MAMADAS-->
+
+            <div class="meseros-container">
+                <h3 class="meseros-title"><i class="fas fa-concierge-bell"></i> Personal Activo</h3>
+                <ul class="meseros-list">
+                    <li>
+                        <div class="mesero-info">
+                            <div class="mesero-avatar">CR</div>
+                            <div>
+                                <div class="mesero-name">Carlos Rodríguez</div>
+                                <div class="mesero-details">Turno: Tarde</div>
+                            </div>
+                        </div>
+                        <span class="mesero-status status-active">Activo</span>
+                    </li>
+                    <li>
+                        <div class="mesero-info">
+                            <div class="mesero-avatar">MG</div>
+                            <div>
+                                <div class="mesero-name">{{Nombreper}}</div>
+                                <div class="mesero-details">Turno:{{turno}}</div>
+                            </div>
+                        </div>
+                        <span class="mesero-status status-active">{{activo}}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Gráficas de productos más vendidos -->
+        <div class="products-container">
+            <div class="chart-section">
+                <h3 class="chart-title"><i class="fas fa-utensils"></i> Platillos Más Populares</h3>
+                <div class="chart-container">
+                   <div id="piechart_3d" style="width: 500px; height: 270px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h3 class="chart-title"><i class="fas fa-fish"></i> Productos del Mar Más Vendidos</h3>
+                <div class="chart-container">
+                    <canvas id="mariscosChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="wave-decoration"></div>
+
+        <footer>
+            <p>Marisquería "El Puerto" &copy; 2023 - Sistema de Gestión de Ganancias</p>
+        </footer>
+    </div>
