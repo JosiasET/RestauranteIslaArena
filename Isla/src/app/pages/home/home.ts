@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 export class Home implements OnInit, OnDestroy {
   images = [
     'img/img1.jpg',
-    'img/img2.jpg', 
+    'img/img2.jpg',
     'img/img3.jpg',
     'img/img4.jpg'
   ];
@@ -29,7 +29,7 @@ export class Home implements OnInit, OnDestroy {
   ngOnInit() {
     // Iniciar el carrusel inmediatamente
     this.startCarousel();
-    
+
     // Asegurar que la primera imagen sea visible al inicio
     setTimeout(() => {
       this.showCurrentImage();
@@ -44,7 +44,7 @@ export class Home implements OnInit, OnDestroy {
     this.stopCarousel();
     this.intervalId = setInterval(() => {
       this.nextSlide();
-    }, 5000);
+    }, 2000);
   }
 
   private stopCarousel() {

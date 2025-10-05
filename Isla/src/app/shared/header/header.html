@@ -3,7 +3,7 @@
   <div class="contenedor_lot">
     <!-- LOGO -->
     <img class="logo1" src="img/logo.png" alt="Logo de Mariscos">
-
+    <!--
     <div class="barra-busqueda">
       <input type="text" placeholder="Buscar mariscos, platillos, bebidas...">
       <button class="btn_buscar">
@@ -11,25 +11,43 @@
       </button>
     </div>
 
+    -->
+
     <nav class="menu-acciones">
-      <a class="whatsapp" href="https://web.whatsapp.com/">
-        <img src="img/whasap.png" alt="WhatsApp">
-        Whatsapp
-      </a>
+
+      <div class="desplegar_menu whatsapp-menu">
+        <div class="menu-trigger">
+          <img src="img/whasap.png" alt="WhatsApp">
+        </div>
+
+        <div class="opciones-menu">
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20mandar%20mi%20comprobante%20de%20pago." target="_blank" class="opcion-menu">
+            📎 Mandar comprobante
+          </a>
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20apartar%20una%20mesa." target="_blank" class="opcion-menu">
+            🍽️ Apartar mesa
+          </a>
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quisiera%20saber%20más%20acerca%20del%20restaurante." target="_blank" class="opcion-menu">
+            ℹ️ Acerca del restaurante
+          </a>
+        </div>
+      </div>
+
       <!-- BOTÓN DEL CARRITO ACTUALIZADO -->
       <a class="carrito" (click)="goToCart()" style="cursor: pointer;">
-        <img src="img/carrito.png" alt="Carrito"> Mi carrito
+        <img src="img/carrito.png" alt="Carrito">
       </a>
 
       <div class="desplegar_menu">
         <div class="menu-trigger">
           <img src="img/icons8-menú-50.png" alt="">
-          <p>Herramientas</p>
+          <p></p>
         </div>
         <div class="opciones-menu">
           <a routerLink="Login" class="opcion-menu">Administrador</a>
         </div>
       </div>
+
     </nav>
   </div>
 </div>

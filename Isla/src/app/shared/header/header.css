@@ -210,3 +210,32 @@
   width: 80%;
 }
 
+/* guasa*/
+
+.whatsapp-menu .menu-trigger {
+  background-color: #25d366;
+  color: white;
+}
+
+.whatsapp-menu .menu-trigger:hover {
+  background-color: #1ebe57;
+}
+
+.whatsapp-menu .menu-trigger img {
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+}
+
+.whatsapp-menu .opciones-menu {
+  right: 0;
+  background-color: #ffffff;
+}
+
+.whatsapp-menu .opcion-menu {
+  color: #333 !important;
+}
+
+.whatsapp-menu .opcion-menu:hover {
+  background-color: #f2f2f2;
+}
