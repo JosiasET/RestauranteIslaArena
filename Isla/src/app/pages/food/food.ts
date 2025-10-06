@@ -16,13 +16,13 @@ export class Food implements OnInit {
   saucer: foodInterface[] = [];
 
   constructor(
-    private foodservice: FoodService,
+    private foodService: FoodService,
     private cartService: CartService
   ) {}
 
   ngOnInit(): void {
-    this.foodservice.saucer$.subscribe((data: foodInterface[]) => {
-      console.log("Platillos recibidos en Alimentos: ", data);
+    this.foodService.saucer$.subscribe((data: foodInterface[]) => {
+      console.log("Platillos recibidos en Food: ", data);
       this.saucer = data;
     });
   }

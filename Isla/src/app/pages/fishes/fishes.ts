@@ -1,28 +1,28 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FishesService } from '../../core/service/FishesService';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { CartService, CartItem } from '../../core/interface/cart.services';
 import { Fish } from '../../core/interface/Fish';
+import { CartService, CartItem } from '../../core/interface/cart.services';
+import { CommonModule, CurrencyPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-fishes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CurrencyPipe],
   templateUrl: './fishes.html',
   styleUrls: ['./fishes.css']
 })
-export class Fishes {
+export class Fishes implements OnInit {
   saucer: Fish[] = [];
 
   constructor(
-    private foodservice: FishesService,
+    private fishesService: FishesService,
     private cartService: CartService
   ) {}
 
   ngOnInit(): void {
-    this.foodservice.saucer$.subscribe(data => {
-      console.log("Platillos recibidos en Alimentos: ", data);
+    this.fishesService.saucer$.subscribe((data: Fish[]) => {
+      console.log("🐟 Mariscos recibidos:", data);
       this.saucer = data;
     });
   }

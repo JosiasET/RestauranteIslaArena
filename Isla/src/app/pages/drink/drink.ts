@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core'; // ✅ importa OnInit
 import { DrinkService } from '../../core/service/DrinkService';
 import { Drinkinterface } from '../../core/interface/drink';
 import { CartService, CartItem } from '../../core/interface/cart.services';
@@ -12,7 +12,7 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
   templateUrl: './drink.html',
   styleUrls: ['./drink.css']
 })
-export class Drink {
+export class Drink implements OnInit { // ✅ implementar OnInit
   saucer: Drinkinterface[] = [];
 
   constructor(
@@ -21,21 +21,21 @@ export class Drink {
   ) {}
 
   ngOnInit(): void {
-    this.drinkService.saucer$.subscribe(data => {
+    this.drinkService.saucer$.subscribe((data: Drinkinterface[]) => {
       console.log("Bebidas recibidas: ", data);
       this.saucer = data;
     });
   }
 
-  agregarAlCarrito(platillo: Drinkinterface) {
+  agregarAlCarrito(bebida: Drinkinterface) {
     const cartItem: CartItem = {
       id: Date.now(),
-      nombre: platillo.nombre,
-      descripcion: platillo.descripcion,
-      precio: platillo.precio,
-      imagen: platillo.imagen
+      nombre: bebida.nombre,
+      descripcion: bebida.descripcion,
+      precio: bebida.precio,
+      imagen: bebida.imagen
     };
     this.cartService.addToCart(cartItem);
-    alert(`${platillo.nombre} agregado al carrito!`);
+    alert(`${bebida.nombre} agregado al carrito!`);
   }
 }
