@@ -27,7 +27,13 @@ export class Home implements OnInit, OnDestroy {
   private intervalId: any;
 
   ngOnInit() {
+    // Iniciar el carrusel inmediatamente
     this.startCarousel();
+    
+    // Asegurar que la primera imagen sea visible al inicio
+    setTimeout(() => {
+      this.showCurrentImage();
+    }, 4000);
   }
 
   ngOnDestroy() {
@@ -35,27 +41,46 @@ export class Home implements OnInit, OnDestroy {
   }
 
   private startCarousel() {
+    this.stopCarousel();
     this.intervalId = setInterval(() => {
       this.nextSlide();
-    }, 5000);
+    }, 2000);
   }
 
   private stopCarousel() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
+      this.intervalId = null;
     }
+  }
+
+  private showCurrentImage() {
+    // Forzar la visualización de la imagen actual
+    const images = document.querySelectorAll('.carousel-image');
+    images.forEach((img, index) => {
+      if (index === this.currentIndex) {
+        img.classList.add('active');
+      } else {
+        img.classList.remove('active');
+      }
+    });
   }
 
   nextSlide() {
     this.currentIndex = (this.currentIndex + 1) % this.images.length;
+    this.showCurrentImage();
+    this.restartCarousel();
   }
 
   prevSlide() {
     this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+    this.showCurrentImage();
+    this.restartCarousel();
   }
 
   goToSlide(index: number) {
     this.currentIndex = index;
+    this.showCurrentImage();
     this.restartCarousel();
   }
 

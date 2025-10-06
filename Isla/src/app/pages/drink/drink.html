@@ -1,16 +1,23 @@
 <h1 class="titulo">BEBIDAS REFRESCANTES</h1>
-<h4 class="subtitulo">¡DESCUBREEEEEgEEEEEE EL SABOR QUE TE HARA VIBRAR!</h4>
-<h1 class="titulo">BEBIDAS</h1>
+<h4 class="subtitulo">¡DISFRUTA UNA EXPERIENCIA ÚNICA EN CADA TRAGO!</h4>
+<h1 class="titulo">NUESTRAS BEBIDAS</h1>
 
 <div class="menu-container">
-  <div *ngFor="let platillo of saucer" class="platillo-card">
-    <img [src]="platillo.imagen" alt="{{platillo.nombre}}">
+  <div *ngFor="let bebida of saucer" class="platillo-card">
+    <!-- Imagen -->
+    <div class="platillo-img">
+      <img [src]="bebida.imagen" alt="{{ bebida.nombre }}">
+    </div>
+
+    <!-- Info -->
     <div class="platillo-info">
-      <h3>{{ platillo.nombre }}</h3>
-      <p>{{ platillo.descripcion }}</p>
-      <strong class="precio">{{ platillo.precio | currency }}</strong>
-      <button class="btn-agregar" (click)="agregarAlCarrito(platillo)">
-        ¡QUIERO ESTA BEBIDA!
+      <h3>{{ bebida.nombre }}</h3>
+      <p>{{ bebida.descripcion }}</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">{{ bebida.precio | currency }}</strong>
+
+      <button class="btn-agregar" (click)="agregarAlCarrito(bebida)">
+        ¡ORDENAR ESTA BEBIDA!
       </button>
     </div>
   </div>

@@ -8,7 +8,7 @@ import { FoodService } from '../../core/service/foodService';
   selector: 'app-up-food-amd',
   imports: [CommonModule, FormsModule],
   templateUrl: './up-food-amd.html',
-  styleUrl: './up-food-amd.css'
+  styleUrl: './up-food-amd.css' 
 })
 export class UpFoodAmd implements OnInit {
   activeSection: String = 'upfood';

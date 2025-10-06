@@ -1,4 +1,6 @@
+// app/core/service/DrinkService.ts
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { Drinkinterface } from '../interface/drink';
 
@@ -6,48 +8,33 @@ import { Drinkinterface } from '../interface/drink';
   providedIn: 'root'
 })
 export class DrinkService {
-  private saucerSource = new BehaviorSubject<Drinkinterface[]>(this.cargarBebidasDesdeStorage());
+  private apiUrl = 'http://localhost:3000/bebidas'; // 👉 Backend
+  private saucerSource = new BehaviorSubject<Drinkinterface[]>([]);
   saucer$ = this.saucerSource.asObservable();
-  private nextId = this.obtenerUltimoId();
 
-  private cargarBebidasDesdeStorage(): Drinkinterface[] {
-    // Si quieres persistencia, puedes usar localStorage
-    return [];
+  constructor(private http: HttpClient) {
+    this.cargarBebidas();
   }
 
-  private obtenerUltimoId(): number {
-    const bebidas = this.saucerSource.value;
-    if (bebidas.length === 0) return 1;
-    return Math.max(...bebidas.map(p => p.id)) + 1;
-  }
-
-  private guardarEnStorage(bebidas: Drinkinterface[]) {
-    // Opcional: guardar en localStorage para persistencia
-    // localStorage.setItem('bebidas', JSON.stringify(bebidas));
+  cargarBebidas() {
+    this.http.get<Drinkinterface[]>(this.apiUrl).subscribe({
+      next: (bebidas) => this.saucerSource.next(bebidas),
+      error: (err) => console.error('❌ Error al cargar bebidas:', err)
+    });
   }
 
   agregarPlatillo(bebida: Drinkinterface) {
-    const actuales = this.saucerSource.value;
-    const bebidaConId: Drinkinterface = {
-      ...bebida,
-      id: this.nextId++
-    };
-    const nuevasBebidas = [...actuales, bebidaConId];
-    this.saucerSource.next(nuevasBebidas);
-    this.guardarEnStorage(nuevasBebidas);
+    this.http.post(this.apiUrl, bebida).subscribe({
+      next: () => this.cargarBebidas(),
+      error: (err) => console.error('❌ Error al subir bebida:', err)
+    });
   }
 
   eliminarPlatillo(bebida: Drinkinterface) {
-    const filtrados = this.saucerSource.value.filter(p => p.id !== bebida.id);
-    this.saucerSource.next(filtrados);
-    this.guardarEnStorage(filtrados);
+    // Luego agregamos DELETE en backend
   }
 
   actualizarPlatillo(bebidaVieja: Drinkinterface, bebidaNueva: Drinkinterface) {
-    const actualizados = this.saucerSource.value.map(p =>
-      p.id === bebidaVieja.id ? { ...bebidaNueva, id: bebidaVieja.id } : p
-    );
-    this.saucerSource.next(actualizados);
-    this.guardarEnStorage(actualizados);
+    // Luego agregamos PUT en backend
   }
 }

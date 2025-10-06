@@ -1,24 +1,43 @@
+/* Títulos */
+.titulo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 1rem 0;
+  color: #2c3e50;
+}
 
+.subtitulo {
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #7f8c8d;
+  letter-spacing: 1.5px;
+}
 
-/* Contenedor de platillos */
+/* Contenedor */
 .menu-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-  padding: 0.8rem;
-  max-width: 1100px; /* Evita que se vea muy extendido en pantallas grandes */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+  max-width: 1100px;
   margin: 0 auto;
+  justify-items: center;
 }
 
 /* Tarjeta */
 .platillo-card {
-  background: #ffffff;
-  border-radius: 0.9rem;
+  width: 100%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 0.8rem;
   overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .platillo-card:hover {
@@ -27,15 +46,26 @@
 }
 
 /* Imagen */
-.platillo-card img {
+.platillo-img {
   width: 100%;
-  height: 150px;
-  object-fit: cover;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.platillo-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 /* Información */
 .platillo-info {
-  padding: 0.8rem;
+  padding: 1rem;
+  text-align: center;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -43,35 +73,55 @@
 }
 
 .platillo-info h3 {
-  font-size: 1.05rem;
-  margin-bottom: 0.3rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
   color: #34495e;
 }
 
 .platillo-info p {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: #7f8c8d;
   margin-bottom: 0.5rem;
 }
 
-/* Responsividad */
+.precio {
+  font-size: 1.1rem;
+  color: #8e44ad; /* color morado para bebidas */
+  font-weight: bold;
+  display: block;
+  margin: 0.5rem 0 1rem 0;
+}
+
+/* Botón */
+.btn-agregar {
+  width: 100%;
+  background-color: #8e44ad;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  padding: 0.7rem 1rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.btn-agregar:hover {
+  background-color: #732d91;
+  transform: scale(1.03);
+}
+
+.btn-agregar:active {
+  transform: scale(0.97);
+}
+
+/* Responsivo */
 @media (max-width: 768px) {
-  .titulo {
-    font-size: 1.5rem;
-  }
-  .subtitulo {
-    font-size: 0.9rem;
-  }
-  .platillo-card img {
-    height: 130px;
-  }
+  .platillo-img { height: 180px; }
 }
 
 @media (max-width: 480px) {
-  .menu-container {
-    grid-template-columns: 1fr;
-  }
-  .platillo-card img {
-    height: 120px;
-  }
+  .menu-container { grid-template-columns: 1fr; }
+  .platillo-img { height: 160px; }
 }

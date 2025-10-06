@@ -1,4 +1,6 @@
+// app/core/service/FishesService.ts
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { Fish } from '../interface/Fish';
 
@@ -6,48 +8,43 @@ import { Fish } from '../interface/Fish';
   providedIn: 'root'
 })
 export class FishesService {
-  private saucerSource = new BehaviorSubject<Fish[]>(this.cargarEspecialidadesDesdeStorage());
+  private apiUrl = 'http://localhost:3000/especialidades'; // 🔹 Apunta al backend
+  private saucerSource = new BehaviorSubject<Fish[]>([]);
   saucer$ = this.saucerSource.asObservable();
-  private nextId = this.obtenerUltimoId();
 
-  private cargarEspecialidadesDesdeStorage(): Fish[] {
-    // Si quieres persistencia, puedes usar localStorage
-    return [];
+  constructor(private http: HttpClient) {
+    this.cargarEspecialidades();
   }
 
-  private obtenerUltimoId(): number {
-    const especialidades = this.saucerSource.value;
-    if (especialidades.length === 0) return 1;
-    return Math.max(...especialidades.map(p => p.id)) + 1;
+  // 📥 Cargar especialidades desde backend
+  cargarEspecialidades() {
+    this.http.get<Fish[]>(this.apiUrl).subscribe({
+      next: (especialidades) => this.saucerSource.next(especialidades),
+      error: (err) => console.error('❌ Error al cargar especialidades:', err)
+    });
   }
 
-  private guardarEnStorage(especialidades: Fish[]) {
-    // Opcional: guardar en localStorage para persistencia
-    // localStorage.setItem('especialidades', JSON.stringify(especialidades));
-  }
-
+  // ➕ Agregar especialidad
   agregarPlatillo(especialidad: Fish) {
-    const actuales = this.saucerSource.value;
-    const especialidadConId: Fish = {
-      ...especialidad,
-      id: this.nextId++
-    };
-    const nuevasEspecialidades = [...actuales, especialidadConId];
-    this.saucerSource.next(nuevasEspecialidades);
-    this.guardarEnStorage(nuevasEspecialidades);
+    this.http.post(this.apiUrl, especialidad).subscribe({
+      next: () => this.cargarEspecialidades(),
+      error: (err) => console.error('❌ Error al subir especialidad:', err)
+    });
   }
 
+  // 🗑️ Eliminar especialidad
   eliminarPlatillo(especialidad: Fish) {
-    const filtrados = this.saucerSource.value.filter(p => p.id !== especialidad.id);
-    this.saucerSource.next(filtrados);
-    this.guardarEnStorage(filtrados);
+    this.http.delete(`${this.apiUrl}/${especialidad.id}`).subscribe({
+      next: () => this.cargarEspecialidades(),
+      error: (err) => console.error('❌ Error al eliminar especialidad:', err)
+    });
   }
 
+  // ✏️ Actualizar especialidad
   actualizarPlatillo(especialidadVieja: Fish, especialidadNueva: Fish) {
-    const actualizados = this.saucerSource.value.map(p =>
-      p.id === especialidadVieja.id ? { ...especialidadNueva, id: especialidadVieja.id } : p
-    );
-    this.saucerSource.next(actualizados);
-    this.guardarEnStorage(actualizados);
+    this.http.put(`${this.apiUrl}/${especialidadVieja.id}`, especialidadNueva).subscribe({
+      next: () => this.cargarEspecialidades(),
+      error: (err) => console.error('❌ Error al actualizar especialidad:', err)
+    });
   }
 }
