@@ -13,7 +13,6 @@ import { CartService, CartItem } from '../../core/interface/cart.services';
 })
 export class Checkoutpage implements OnInit {
   customerData = {
-    email: '',
     phone: '',
     country: 'México',
     firstName: '',
@@ -73,7 +72,6 @@ export class Checkoutpage implements OnInit {
   // Validar formulario
   isFormValid(): boolean {
     const requiredFields = [
-      this.customerData.email,
       this.customerData.firstName,
       this.customerData.lastName,
       this.customerData.address,
