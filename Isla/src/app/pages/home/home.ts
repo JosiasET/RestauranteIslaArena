@@ -29,19 +29,19 @@ export class Home implements OnInit, OnDestroy {
   ngOnInit() {
     // Iniciar el carrusel inmediatamente
     this.startCarousel();
-<<<<<<< HEAD
+
 
     // Asegurar que la primera imagen sea visible al inicio
     setTimeout(() => {
       this.showCurrentImage();
     }, 100);
-=======
+
     
     // Asegurar que la primera imagen sea visible al inicio
     setTimeout(() => {
       this.showCurrentImage();
     }, 4000);
->>>>>>> 1c9e0904ed322a08b83be5fe7f2f322423d65076
+
   }
 
   ngOnDestroy() {

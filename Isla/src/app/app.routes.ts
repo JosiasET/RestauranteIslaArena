@@ -16,6 +16,7 @@ import { UpCreatewaiterAmd } from './pages/up-createwaiter-amd/up-createwaiter-a
 import { UpCelebratesAmd } from './pages/up-celebrates-amd/up-celebrates-amd';
 import { Mycart } from './shared/mycart/mycart'; // ← IMPORTAR Mycart
 import { Fishes } from './pages/fishes/fishes';
+import { Checkoutpage } from './pages/checkoutpage/checkoutpage';
 
 export const routes: Routes = [
   {
@@ -28,7 +29,8 @@ export const routes: Routes = [
       { path: 'Food', component: Food },
       { path: 'celebrate', component: Celebrates },
       { path: 'prmotion', component: Promotions },
-      { path: 'cart', component: Mycart }
+      { path: 'cart', component: Mycart },
+      { path: 'checkout', component: Checkoutpage } 
     ]
   },
 

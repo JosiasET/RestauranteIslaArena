@@ -124,10 +124,15 @@ export class Mycart implements OnInit, OnDestroy {
   }
 
   finalizarPedido() {
+    console.log('Cart items:', this.cartItems); // ← Agregar esto
+    console.log('Cart length:', this.cartItems.length); // ← Agregar esto
+  
     if (this.cartItems.length > 0) {
-      alert('¡Pedido realizado con éxito!');
-      this.cartService.clearCart();
-      this.cartItems = [];
+    console.log('Navegando a checkout...'); // ← Agregar esto
+    this.router.navigate(['/checkout']);
+      } else {
+      console.log('Carrito vacío'); // ← Agregar esto
+      alert('Tu carrito está vacío. Agrega productos antes de finalizar el pedido.');
     }
   }
 

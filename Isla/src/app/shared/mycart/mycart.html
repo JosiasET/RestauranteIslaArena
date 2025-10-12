@@ -49,10 +49,10 @@
           <span class="price">{{ item.precio | currency }}</span>
         </div>
         <div class="col-quantity">
-          <span class="quantity">1</span>
+          <span class="quantity">{{ item.cantidad || 1 }}</span>
         </div>
         <div class="col-total">
-          <span class="total-price">{{ item.precio | currency }}</span>
+          <span class="total-price">{{ (item.precio * (item.cantidad || 1)) | currency }}</span>
         </div>
         <div class="col-actions">
           <button class="btn-eliminar" (click)="eliminarProducto(item.id)">
@@ -92,4 +92,3 @@
     <p>Garantía de compra segura</p>
   </div>
 </div>
-

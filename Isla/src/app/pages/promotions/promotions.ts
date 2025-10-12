@@ -33,7 +33,8 @@ export class Promotions {
       nombre: platillo.nombre,
       descripcion: platillo.descripcion,
       precio: platillo.precio,
-      imagen: platillo.imagen
+      imagen: platillo.imagen,
+      cantidad: 1
     };
 
     this.cartService.addToCart(cartItem);

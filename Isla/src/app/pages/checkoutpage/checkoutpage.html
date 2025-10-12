@@ -1,0 +1,100 @@
+<div class="checkout-container">
+  <div class="contact-section">
+    <h1>Contacto</h1>
+    <button class="login-btn">Iniciar sesión</button>
+  
+  </div>
+
+  <div class="delivery-section">
+    <h2>Entrega</h2>
+
+    <div class="name-fields">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="customerData.firstName" [class.error]="!customerData.firstName && isSubmitting" required>
+        <small class="error-message" *ngIf="!customerData.firstName && isSubmitting">Este campo es obligatorio</small>
+      </div>
+      <div class="form-group">
+        <label>Apellidos *</label>
+        <input type="text" [(ngModel)]="customerData.lastName" [class.error]="!customerData.lastName && isSubmitting" required>
+        <small class="error-message" *ngIf="!customerData.lastName && isSubmitting">Este campo es obligatorio</small>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Dirección *</label>
+      <input type="text" [(ngModel)]="customerData.address" [class.error]="!customerData.address && isSubmitting" required>
+      <small class="error-message" *ngIf="!customerData.address && isSubmitting">Este campo es obligatorio</small>
+    </div>
+
+    <div class="form-group">
+      <label>Colonia *</label>
+      <input type="text" [(ngModel)]="customerData.neighborhood" [class.error]="!customerData.neighborhood && isSubmitting" required>
+      <small class="error-message" *ngIf="!customerData.neighborhood && isSubmitting">Este campo es obligatorio</small>
+    </div>
+
+    <div class="location-fields">
+      <div class="form-group">
+        <label>Código postal *</label>
+        <input type="text" [(ngModel)]="customerData.postalCode" [class.error]="!customerData.postalCode && isSubmitting" required>
+        <small class="error-message" *ngIf="!customerData.postalCode && isSubmitting">Este campo es obligatorio</small>
+      </div>
+      <div class="form-group">
+        <label>Ciudad *</label>
+        <input type="text" [(ngModel)]="customerData.city" [class.error]="!customerData.city && isSubmitting" required>
+        <small class="error-message" *ngIf="!customerData.city && isSubmitting">Este campo es obligatorio</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Estado</label>
+      <input type="text" [(ngModel)]="customerData.state">
+    </div>
+
+    <div class="form-group">
+      <label>Teléfono *</label>
+      <input type="tel" [(ngModel)]="customerData.phoneNumber" [class.error]="!customerData.phoneNumber && isSubmitting" required>
+      <small class="error-message" *ngIf="!customerData.phoneNumber && isSubmitting">Este campo es obligatorio</small>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="save-info" [(ngModel)]="customerData.saveInfo">
+      <label for="save-info">Guardar mi información y consultar más rápidamente la próxima vez</label>
+    </div>
+  </div>
+
+  <div class="order-summary">
+    <!-- Mensaje si no hay productos -->
+    <div class="empty-cart-message" *ngIf="!hasItems()">
+      <h3>No hay productos en el carrito</h3>
+      <p>Agrega productos antes de finalizar el pedido</p>
+    </div>
+
+    <!-- Productos -->
+    <div class="product-item" *ngFor="let item of cartItems">
+      <span>{{item.nombre}}</span>
+      <span>{{item.precio | currency}}</span>
+    </div>
+
+    <div class="price-breakdown" *ngIf="hasItems()">
+      <div class="price-row">
+        <span>Subtotal</span>
+        <span>{{total | currency}}</span>
+      </div>
+      <div class="price-row">
+      <div class="price-row total">
+        <span>Total</span>
+        <span>MXN {{total | currency}}</span>
+      </div>
+    </div>
+
+    <button class="place-order-btn" 
+            (click)="placeOrder()" 
+            [disabled]="isSubmitting || !hasItems()">
+      {{isSubmitting ? 'Procesando...' : 'Finalizar Pedido'}}
+    </button>
+
+    <p class="contact-note">
+      En caso de que tengamos que contactarte sobre tu pedido te haremos una llamada al numero.
+    </p>
+  </div>
+</div>

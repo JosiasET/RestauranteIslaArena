@@ -8,6 +8,7 @@ export interface CartItem {
   descripcion: string;
   precio: number;
   imagen: string;
+  cantidad: number;
 }
 
 @Injectable({
@@ -25,7 +26,15 @@ export class CartService {
 
   // Agregar producto al carrito
   addToCart(product: CartItem) {
-    this.cartItems.push({...product});
+    const existingItem = this.cartItems.find(item => item.id === product.id);
+    
+    if (existingItem) {
+      // Si ya existe, incrementar cantidad
+      existingItem.cantidad += 1;
+    } else {
+      // Si no existe, agregar con cantidad 1
+      this.cartItems.push({...product, cantidad: 1});
+    }
     this.updateCart();
     console.log('Producto agregado al carrito:', product.nombre);
   }
@@ -43,7 +52,7 @@ export class CartService {
 
   // Calcular total
   getTotal(): number {
-    return this.cartItems.reduce((total, item) => total + item.precio, 0);
+    return this.cartItems.reduce((total, item) => total + (item.precio * item.cantidad), 0);
   }
 
   // Persistencia en localStorage
@@ -62,9 +71,8 @@ export class CartService {
   }
 
   removeFromCart(itemId: number) {
-  this.cartItems = this.cartItems.filter(item => item.id !== itemId);
-  this.updateCart();
-  console.log('Producto eliminado del carrito');
+    this.cartItems = this.cartItems.filter(item => item.id !== itemId);
+    this.updateCart();
+    console.log('Producto eliminado del carrito');
   }
-
 }

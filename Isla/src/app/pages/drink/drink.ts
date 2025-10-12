@@ -33,7 +33,8 @@ export class Drink implements OnInit { // ✅ implementar OnInit
       nombre: bebida.nombre,
       descripcion: bebida.descripcion,
       precio: bebida.precio,
-      imagen: bebida.imagen
+      imagen: bebida.imagen,
+      cantidad: 1
     };
     this.cartService.addToCart(cartItem);
     alert(`${bebida.nombre} agregado al carrito!`);
