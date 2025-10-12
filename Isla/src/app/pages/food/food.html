@@ -13,7 +13,6 @@
     <div class="platillo-info">
       <h3>{{ platillo.nombre }}</h3>
       <p>{{ platillo.descripcion }}</p>
-      <p class="texto-persuasivo">✨ Prepara en minutos - ¡Sabor de restaurante en casa!</p>
       <strong class="precio">{{ platillo.precio | currency }}</strong>
 
       <button class="btn-agregar" (click)="agregarAlCarrito(platillo)">

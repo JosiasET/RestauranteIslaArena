@@ -35,6 +35,8 @@ export const routes: Routes = [
   },
 
   { path: 'Login', component: Login, pathMatch: 'full' },
+
+  
   {
     path: 'gestoramd',
     component: Gestoramd,
