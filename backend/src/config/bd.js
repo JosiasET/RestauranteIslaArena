@@ -1,22 +1,9 @@
-const dotenv = require("dotenv");
-const mysql = require("mysql2");
+const { createClient } = require('@supabase/supabase-js');
 
-dotenv.config();
+const supabaseUrl = 'https://sudpjidjsophvgdeyhkc.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1ZHBqaWRqc29waHZnZGV5aGtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg2NTA0ODMsImV4cCI6MjA3NDIyNjQ4M30.wyjwg_ovsjRAeRAT7ZwAdfZi7G5qlNj-26LjN4X4J08';
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-});
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-db.connect((err) => {
-  if (err) {
-    console.error("❌ Error al conectar a MySQL:", err);
-  } else {
-    console.log("✅ Conectado a MySQL");
-  }
-});
-
-module.exports = db;
+console.log("✅ Configurado para Supabase");
+module.exports = supabase;
