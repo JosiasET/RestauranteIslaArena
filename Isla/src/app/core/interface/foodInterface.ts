@@ -1,5 +1,5 @@
 export interface foodInterface {
-  id: number; // Cambiar a obligatorio
+  id?: number;              
   nombre: string;
   descripcion: string;
   precio: number;

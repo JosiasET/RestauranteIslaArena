@@ -1,5 +1,5 @@
 export interface Drinkinterface {
-  id: number; // Cambiar a obligatorio y minúscula
+  id: number; 
   nombre: string;
   descripcion: string;
   precio: number;

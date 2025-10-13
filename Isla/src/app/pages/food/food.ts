@@ -14,6 +14,7 @@ import { foodInterface } from '../../core/interface/foodInterface';
 })
 export class Food implements OnInit {
   saucer: foodInterface[] = [];
+  loading: boolean = true;
 
   constructor(
     private foodService: FoodService,
@@ -21,8 +22,11 @@ export class Food implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.foodService.saucer$.subscribe((data: foodInterface[]) => {
-      console.log("Platillos recibidos en Food: ", data);
+    this.foodService.loading$.subscribe(loading => {
+      this.loading = loading;
+    });
+
+    this.foodService.saucer$.subscribe(data => {
       this.saucer = data;
     });
   }

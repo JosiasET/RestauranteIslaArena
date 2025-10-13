@@ -2,18 +2,37 @@
 <h4 class="subtitulo">¡ESPECIALIDADES QUE TE HARÁN AGUA LA BOCA!</h4>
 <h1 class="titulo">NUESTRAS DELICIAS</h1>
 
-<div class="menu-container">
+<!-- ESTADO DE CARGA -->
+<div *ngIf="loading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Cargando nuestros deliciosos platillos...</p>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div *ngIf="!loading" class="menu-container">
+  
+  <!-- MENSAJE SI NO HAY PLATILLOS -->
+  <div *ngIf="saucer.length === 0" class="no-platillos">
+    <h3>¡Próximamente!</h3>
+    <p>Estamos preparando nuevas delicias para ti</p>
+  </div>
+
+  <!-- LISTA DE PLATILLOS -->
   <div *ngFor="let platillo of saucer" class="platillo-card">
+    
     <!-- Imagen -->
     <div class="platillo-img">
-      <img [src]="platillo.imagen" alt="{{platillo.nombre}}">
+      <img 
+        [src]="platillo.imagen" 
+        alt="{{platillo.nombre}}"
+        (error)="platillo.imagen = 'assets/default-food.jpg'"
+      >
     </div>
 
     <!-- Info -->
     <div class="platillo-info">
       <h3>{{ platillo.nombre }}</h3>
       <p>{{ platillo.descripcion }}</p>
-      <p class="texto-persuasivo">✨ Prepara en minutos - ¡Sabor de restaurante en casa!</p>
       <strong class="precio">{{ platillo.precio | currency }}</strong>
 
       <button class="btn-agregar" (click)="agregarAlCarrito(platillo)">
