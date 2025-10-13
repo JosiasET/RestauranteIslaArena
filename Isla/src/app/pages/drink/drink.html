@@ -1,15 +1,17 @@
+
+
 <h1 class="titulo">BEBIDAS REFRESCANTES</h1>
 <h4 class="subtitulo">¡DISFRUTA UNA EXPERIENCIA ÚNICA EN CADA TRAGO!</h4>
 <h1 class="titulo">NUESTRAS BEBIDAS</h1>
-
+<!--
 <div class="menu-container">
   <div *ngFor="let bebida of saucer" class="platillo-card">
-    <!-- Imagen -->
+   
     <div class="platillo-img">
       <img [src]="bebida.imagen" alt="{{ bebida.nombre }}">
     </div>
 
-    <!-- Info -->
+ 
     <div class="platillo-info">
       <h3>{{ bebida.nombre }}</h3>
       <p>{{ bebida.descripcion }}</p>
@@ -17,6 +19,152 @@
       <strong class="precio">{{ bebida.precio | currency }}</strong>
 
       <button class="btn-agregar" (click)="agregarAlCarrito(bebida)">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+</div>
+
+--><div class="menu-container">
+  <!-- Refresco 1 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/32/29/eb/3229eb066f1c9a51f9437510b334e911.jpg" alt="Coca-Cola Clásica">
+    </div>
+    <div class="platillo-info">
+      <h3>Coca-Cola Clásica</h3>
+      <p>Refresco de cola clásico, burbujeante y refrescante</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$35.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 2 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="" alt="Pepsi">
+    </div>
+    <div class="platillo-info">
+      <h3>Pepsi</h3>
+      <p>Refresco de cola con sabor único y refrescante</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$32.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 3 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/5a/8b/8f/5a8b8f8e8e8e8e8e8e8e8e8e8e8e8e8e.jpg" alt="Sprite">
+    </div>
+    <div class="platillo-info">
+      <h3>Sprite</h3>
+      <p>Refresco de lima-limón, claro y refrescante</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$30.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 4 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/9c/7a/4d/9c7a4d4d4d4d4d4d4d4d4d4d4d4d4d4d.jpg" alt="Fanta Naranja">
+    </div>
+    <div class="platillo-info">
+      <h3>Fanta Naranja</h3>
+      <p>Refresco de naranja con sabor natural y burbujeante</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$30.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 5 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/6d/2a/8c/6d2a8c8c8c8c8c8c8c8c8c8c8c8c8c8c.jpg" alt="7UP">
+    </div>
+    <div class="platillo-info">
+      <h3>7UP</h3>
+      <p>Refresco de lima-limón, claro y sin cafeína</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$28.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 6 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/4a/3b/8f/4a3b8f8f8f8f8f8f8f8f8f8f8f8f8f8f.jpg" alt="Mirinda">
+    </div>
+    <div class="platillo-info">
+      <h3>Mirinda</h3>
+      <p>Refresco de naranja con sabor dulce y refrescante</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$29.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 7 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/7b/1a/9c/7b1a9c9c9c9c9c9c9c9c9c9c9c9c9c9c.jpg" alt="Jarritos">
+    </div>
+    <div class="platillo-info">
+      <h3>Jarritos</h3>
+      <p>Refresco mexicano de mandarina, sabor auténtico</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$25.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 8 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/3f/8a/9c/3f8a9c9c9c9c9c9c9c9c9c9c9c9c9c9c.jpg" alt="Coca-Cola Sin Azúcar">
+    </div>
+    <div class="platillo-info">
+      <h3>Coca-Cola Sin Azúcar</h3>
+      <p>Refresco de cola sin azúcar, mismo sabor clásico</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$35.00</strong>
+      <button class="btn-agregar">
+        ¡ORDENAR ESTA BEBIDA!
+      </button>
+    </div>
+  </div>
+
+  <!-- Refresco 9 -->
+  <div class="platillo-card">
+    <div class="platillo-img">
+      <img src="https://i.pinimg.com/736x/2e/7a/8c/2e7a8c8c8c8c8c8c8c8c8c8c8c8c8c8c.jpg" alt="Sprite Zero">
+    </div>
+    <div class="platillo-info">
+      <h3>Sprite Zero</h3>
+      <p>Refresco de lima-limón sin azúcar, mismo sabor refrescante</p>
+      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
+      <strong class="precio">$30.00</strong>
+      <button class="btn-agregar">
         ¡ORDENAR ESTA BEBIDA!
       </button>
     </div>

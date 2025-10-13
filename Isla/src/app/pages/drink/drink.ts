@@ -3,12 +3,12 @@ import { DrinkService } from '../../core/service/DrinkService';
 import { Drinkinterface } from '../../core/interface/drink';
 import { CartService, CartItem } from '../../core/interface/cart.services';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule, } from '@angular/common';
 
 @Component({
   selector: 'app-drink',
   standalone: true,
-  imports: [FormsModule, CurrencyPipe, CommonModule],
+  imports: [FormsModule,CommonModule],
   templateUrl: './drink.html',
   styleUrls: ['./drink.css']
 })
