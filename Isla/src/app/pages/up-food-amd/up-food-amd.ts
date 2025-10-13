@@ -46,7 +46,8 @@ export class UpFoodAmd implements OnInit {
 
   eliminarPlatillo(platillo: foodInterface) {
     if (confirm('¿Estás seguro de que deseas eliminar este platillo?')) {
-      this.foodService.eliminarPlatillo(platillo);
+     this.foodService.eliminarPlatillo(platillo.id!);
+
     }
   }
 
@@ -89,7 +90,7 @@ export class UpFoodAmd implements OnInit {
         imagen: this.imageBase64
       };
 
-      this.foodService.actualizarPlatillo(this.platilloEditando, platilloActualizado);
+     this.foodService.actualizarPlatillo(platilloActualizado);
       this.esModoEdicion = false;
       alert("Platillo actualizado exitosamente");
       this.limpiarFormulario();

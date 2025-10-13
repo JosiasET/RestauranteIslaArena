@@ -1,4 +1,4 @@
-const db = require("../config/bd");
+const db = require("../config/database");
 
 const especialidadesController = {
   getAll: async (req, res) => {

@@ -43,11 +43,9 @@ export class UpResumeAmd implements AfterViewInit{
   private drawChart() {
     const data = google.visualization.arrayToDataTable([
       ['Task', 'Hours per Day'],
-      ['Work', 11],
-      ['Eat', 15],
-      ['Commute', 2],
-      ['Watch TV', 34],
-      ['Sleep', 7]
+      ['PEZCADOS FRITOS', 11],
+      ['CEVICHE CON CAMARON', 15],
+      ['CASON ASADO', 2],
     ]);
 
     const options = {

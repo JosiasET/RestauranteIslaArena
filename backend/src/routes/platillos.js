@@ -1,15 +1,11 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const {
-  getAllPlatillos,
-  createPlatillo
-} = require("../controllers/platillosController");
+const platillosController = require('../controllers/platillosController');
 
-router.get("/", getAllPlatillos);
-router.post("/", createPlatillo);
-
-// Comenta temporalmente estas rutas hasta que crees las funciones
-// router.put("/:id", updatePlatillo);
-// router.delete("/:id", deletePlatillo);
+// CRUD de platillos
+router.post('/', platillosController.crearPlatillo);
+router.get('/', platillosController.obtenerPlatillos);
+router.put('/:id', platillosController.actualizarPlatillo);
+router.delete('/:id', platillosController.eliminarPlatillo);
 
 module.exports = router;
