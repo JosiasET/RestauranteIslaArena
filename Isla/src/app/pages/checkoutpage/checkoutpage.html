@@ -1,68 +1,159 @@
 <div class="checkout-container">
-  <div class="contact-section">
-    <h1>Contacto</h1>
-    <button class="login-btn">Iniciar sesión</button>
-  
-  </div>
-
-  <div class="delivery-section">
-    <h2>Entrega</h2>
-
-    <div class="name-fields">
+  <!-- Columna izquierda - Información del cliente y entrega -->
+  <div class="contact-delivery-section">
+    <div class="contact-section">
+      <h1>Información de Contacto</h1>
+      
       <div class="form-group">
         <label>Nombre *</label>
         <input type="text" [(ngModel)]="customerData.firstName" [class.error]="!customerData.firstName && isSubmitting" required>
         <small class="error-message" *ngIf="!customerData.firstName && isSubmitting">Este campo es obligatorio</small>
       </div>
+
       <div class="form-group">
         <label>Apellidos *</label>
         <input type="text" [(ngModel)]="customerData.lastName" [class.error]="!customerData.lastName && isSubmitting" required>
         <small class="error-message" *ngIf="!customerData.lastName && isSubmitting">Este campo es obligatorio</small>
       </div>
-    </div>
-    <div class="form-group">
-      <label>Dirección *</label>
-      <input type="text" [(ngModel)]="customerData.address" [class.error]="!customerData.address && isSubmitting" required>
-      <small class="error-message" *ngIf="!customerData.address && isSubmitting">Este campo es obligatorio</small>
-    </div>
 
-    <div class="form-group">
-      <label>Colonia *</label>
-      <input type="text" [(ngModel)]="customerData.neighborhood" [class.error]="!customerData.neighborhood && isSubmitting" required>
-      <small class="error-message" *ngIf="!customerData.neighborhood && isSubmitting">Este campo es obligatorio</small>
-    </div>
-
-    <div class="location-fields">
       <div class="form-group">
-        <label>Código postal *</label>
-        <input type="text" [(ngModel)]="customerData.postalCode" [class.error]="!customerData.postalCode && isSubmitting" required>
-        <small class="error-message" *ngIf="!customerData.postalCode && isSubmitting">Este campo es obligatorio</small>
+        <label>Teléfono *</label>
+        <input type="tel" [(ngModel)]="customerData.phoneNumber" [class.error]="!customerData.phoneNumber && isSubmitting" required>
+        <small class="error-message" *ngIf="!customerData.phoneNumber && isSubmitting">Este campo es obligatorio</small>
       </div>
+
       <div class="form-group">
-        <label>Ciudad *</label>
-        <input type="text" [(ngModel)]="customerData.city" [class.error]="!customerData.city && isSubmitting" required>
-        <small class="error-message" *ngIf="!customerData.city && isSubmitting">Este campo es obligatorio</small>
+        <label>Email (opcional)</label>
+        <input type="email" [(ngModel)]="customerData.email">
       </div>
     </div>
 
-    <div class="form-group">
-      <label>Estado</label>
-      <input type="text" [(ngModel)]="customerData.state">
-    </div>
+    <!-- Información de entrega -->
+    <div class="delivery-section">
+      <h2>Información de Entrega</h2>
+      
+      <div class="form-group">
+        <label>Dirección *</label>
+        <input type="text" [(ngModel)]="customerData.address" [class.error]="!customerData.address && isSubmitting" required placeholder="Calle y número">
+        <small class="error-message" *ngIf="!customerData.address && isSubmitting">Este campo es obligatorio</small>
+      </div>
 
-    <div class="form-group">
-      <label>Teléfono *</label>
-      <input type="tel" [(ngModel)]="customerData.phoneNumber" [class.error]="!customerData.phoneNumber && isSubmitting" required>
-      <small class="error-message" *ngIf="!customerData.phoneNumber && isSubmitting">Este campo es obligatorio</small>
-    </div>
+      <div class="form-group">
+        <label>Colonia *</label>
+        <input type="text" [(ngModel)]="customerData.neighborhood" [class.error]="!customerData.neighborhood && isSubmitting" required>
+        <small class="error-message" *ngIf="!customerData.neighborhood && isSubmitting">Este campo es obligatorio</small>
+      </div>
 
-    <div class="checkbox-group">
-      <input type="checkbox" id="save-info" [(ngModel)]="customerData.saveInfo">
-      <label for="save-info">Guardar mi información y consultar más rápidamente la próxima vez</label>
+      <div class="location-fields">
+        <div class="form-group">
+          <label>Código postal *</label>
+          <input type="text" [(ngModel)]="customerData.postalCode" [class.error]="!customerData.postalCode && isSubmitting" required>
+          <small class="error-message" *ngIf="!customerData.postalCode && isSubmitting">Este campo es obligatorio</small>
+        </div>
+        <div class="form-group">
+          <label>Ciudad *</label>
+          <input type="text" [(ngModel)]="customerData.city" [class.error]="!customerData.city && isSubmitting" required>
+          <small class="error-message" *ngIf="!customerData.city && isSubmitting">Este campo es obligatorio</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Estado</label>
+        <input type="text" [(ngModel)]="customerData.state" value="Campeche">
+      </div>
+
+      <div class="form-group">
+        <label>Referencias adicionales</label>
+        <textarea [(ngModel)]="customerData.references" placeholder="Entre calles, color de casa, etc." rows="3"></textarea>
+      </div>
     </div>
   </div>
 
+  <div class="payment-section">
+    <h2>Método de Pago</h2>
+    
+    <div class="payment-methods">
+      <div class="payment-option" [class.selected]="paymentMethod === 'transferencia'" (click)="selectPaymentMethod('transferencia')">
+        <div class="payment-icon">🏦</div>
+        <div class="payment-info">
+          <strong>Transferencia Bancaria</strong>
+          <small>Paga mediante transferencia interbancaria</small>
+        </div>
+      </div>
+
+      <!-- Información de transferencia -->
+      <div class="payment-details" *ngIf="paymentMethod === 'transferencia'">
+        <div class="bank-info">
+          <h4>Datos para Transferencia</h4>
+          <div class="bank-details">
+            <p><strong>Banco:</strong> Banamex</p>
+            <p><strong>Beneficiario:</strong> Restaurante Isla Arena</p>
+            <p><strong>Número de Cuenta:</strong> 5304 - 1690 - 8502 - 4849</p>
+          </div>
+          
+          <div class="form-group">
+            <label>Detalle de transferencia *</label>
+            <input type="text" [(ngModel)]="transferReference" [class.error]="!transferReference && isSubmitting" required placeholder="Ingresa el folio de tu transferencia">
+            <small class="error-message" *ngIf="!transferReference && isSubmitting">Ingresa el folio de transferencia y concepto</small>
+            <small class="help-text">⚠️ Tu pedido se procesará hasta que confirmemos la transferencia</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-option" [class.selected]="paymentMethod === 'tarjeta'" (click)="selectPaymentMethod('tarjeta')">
+        <div class="payment-icon">💳</div>
+        <div class="payment-info">
+          <strong>Tarjeta Crédito/Débito</strong>
+          <small>Pago seguro con tarjeta</small>
+        </div>
+      </div>
+
+      <!-- Información de tarjeta -->
+      <div class="payment-details" *ngIf="paymentMethod === 'tarjeta'">
+        <div class="card-info">
+          <h4>💡 Pago con Tarjeta</h4>
+          <p><strong>Únicamente disponible en tienda</strong></p>
+          <p>Acude a nuestro restaurante para realizar el pago con tarjeta</p>
+          <div class="store-info">
+            <p>📍 <strong>Restaurante Isla Arena</strong></p>
+            <p>🏠 Dirección: Calle 9 Col. La Fatima</p>
+            <p>📞 Teléfono: 996-205-5604</p>
+            <p>🕒 Horario: 10 am a 4 pm</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-option" [class.selected]="paymentMethod === 'efectivo'" (click)="selectPaymentMethod('efectivo')">
+        <div class="payment-icon">💵</div>
+        <div class="payment-info">
+          <strong>Efectivo</strong>
+          <small>Paga al momento de la entrega</small>
+        </div>
+      </div>
+
+      <!-- Campo para especificar cantidad en efectivo -->
+      <div class="payment-details" *ngIf="paymentMethod === 'efectivo'">
+        <div class="cash-amount">
+          <div class="form-group">
+            <label>¿Con cuánto pagarás? *</label>
+            <input type="number" [(ngModel)]="cashAmount" [class.error]="!cashAmount && isSubmitting" placeholder="Ej: 500.00" min="0">
+            <small class="error-message" *ngIf="!cashAmount && isSubmitting">Especifica la cantidad con la que pagarás</small>
+          </div>
+          
+          <div class="cash-change" *ngIf="cashAmount && total > 0">
+            <p>Total: <strong>{{ total | currency }}</strong></p>
+            <p>Cambio: <strong [class.negative]="(cashAmount - total) < 0">{{ (cashAmount - total) | currency }}</strong></p>
+            <small *ngIf="(cashAmount - total) < 0" class="warning-text">⚠️ La cantidad es menor al total</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna derecha - Resumen del pedido -->
   <div class="order-summary">
+    <h2>Resumen del Pedido</h2>
+    
     <!-- Mensaje si no hay productos -->
     <div class="empty-cart-message" *ngIf="!hasItems()">
       <h3>No hay productos en el carrito</h3>
@@ -70,9 +161,11 @@
     </div>
 
     <!-- Productos -->
-    <div class="product-item" *ngFor="let item of cartItems">
-      <span>{{item.nombre}}</span>
-      <span>{{item.precio | currency}}</span>
+    <div class="products-list" *ngIf="hasItems()">
+      <div class="product-item" *ngFor="let item of cartItems">
+        <span class="product-name">{{item.nombre}} x{{item.cantidad}}</span>
+        <span class="product-price">{{(item.precio * item.cantidad) | currency}}</span>
+      </div>
     </div>
 
     <div class="price-breakdown" *ngIf="hasItems()">
@@ -81,6 +174,9 @@
         <span>{{total | currency}}</span>
       </div>
       <div class="price-row">
+        <span>Envío</span>
+        <span>Gratis</span>
+      </div>
       <div class="price-row total">
         <span>Total</span>
         <span>MXN {{total | currency}}</span>
@@ -89,12 +185,17 @@
 
     <button class="place-order-btn" 
             (click)="placeOrder()" 
-            [disabled]="isSubmitting || !hasItems()">
+            [disabled]="isSubmitting || !hasItems() || !isPaymentValid()">
       {{isSubmitting ? 'Procesando...' : 'Finalizar Pedido'}}
     </button>
 
+    <div class="checkbox-group">
+      <input type="checkbox" id="save-info" [(ngModel)]="customerData.saveInfo">
+      <label for="save-info">Guardar mi información para próximos pedidos</label>
+    </div>
+
     <p class="contact-note">
-      En caso de que tengamos que contactarte sobre tu pedido te haremos una llamada al numero.
+      Te contactaremos al número proporcionado para confirmar tu pedido.
     </p>
   </div>
 </div>

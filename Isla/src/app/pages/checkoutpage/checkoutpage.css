@@ -252,3 +252,172 @@ h2 {
   color: #6c757d;
   margin-bottom: 0.5rem;
 }
+
+/* Layout de 3 columnas */
+.checkout-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 30px;
+  font-family: Arial, sans-serif;
+}
+
+/* Métodos de pago */
+.payment-methods {
+  margin-bottom: 20px;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.payment-option:hover {
+  border-color: #007bff;
+}
+
+.payment-option.selected {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.payment-icon {
+  font-size: 1.5rem;
+  margin-right: 15px;
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-info strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.payment-info small {
+  color: #666;
+}
+
+/* Cantidad en efectivo */
+.cash-amount {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.cash-change {
+  margin-top: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: 4px;
+}
+
+.cash-change p {
+  margin: 5px 0;
+}
+
+.warning-text {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.negative {
+  color: #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .checkout-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .order-summary {
+    order: -1;
+  }
+}
+
+/* Layout de 3 columnas */
+.checkout-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr;
+  gap: 30px;
+  font-family: Arial, sans-serif;
+}
+
+.contact-delivery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Detalles de pago */
+.payment-details {
+  margin-top: 15px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.bank-info, .card-info {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+}
+
+.bank-details {
+  background: #e3f2fd;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.bank-details p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+}
+
+.store-info {
+  background: #fff3cd;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 15px;
+}
+
+.store-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.help-text {
+  color: #856404;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .checkout-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .order-summary {
+    order: -1;
+  }
+}
