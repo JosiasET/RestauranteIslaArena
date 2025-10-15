@@ -1,0 +1,126 @@
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h2>PROCESAR PAGO - CAJERO</h2>
+    <p>Complete la información para finalizar la venta</p>
+  </div>
+
+  <!-- Resumen de la Venta -->
+  <div class="sale-summary">
+    <h3>Resumen de Venta</h3>
+    <div class="summary-details">
+      <div class="summary-row">
+        <span>Mesa:</span>
+        <strong>{{ saleData?.table }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Mesero:</span>
+        <strong>{{ saleData?.waiter }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Total:</span>
+        <strong class="total-amount">{{ saleData?.total | currency }}</strong>
+      </div>
+    </div>
+
+    <!-- Productos -->
+    <div class="products-list">
+      <h4>Productos:</h4>
+      <div *ngFor="let item of saleData?.products" class="product-item">
+        <span class="product-name">{{ item.product.nombre }} x{{ item.quantity }}</span>
+        <span class="product-subtotal">{{ item.product.precio * item.quantity | currency }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información del Cliente -->
+  <div class="customer-info">
+    <h3>Información del Cliente</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre del Cliente (Opcional)</label>
+        <input type="text" [(ngModel)]="customerName" placeholder="Nombre del cliente">
+      </div>
+      
+      <div class="form-group">
+        <label>Teléfono (Opcional)</label>
+        <input type="tel" [(ngModel)]="customerPhone" placeholder="Teléfono">
+      </div>
+    </div>
+  </div>
+
+  <!-- Método de Pago -->
+  <div class="payment-method">
+    <h3>Método de Pago</h3>
+    <div class="payment-options">
+      <div class="payment-option" 
+           [class.selected]="paymentMethod === 'cash'" 
+           (click)="selectPaymentMethod('cash')">
+        <div class="payment-icon">💵</div>
+        <span>Efectivo</span>
+      </div>
+      
+      <div class="payment-option" 
+           [class.selected]="paymentMethod === 'card'" 
+           (click)="selectPaymentMethod('card')">
+        <div class="payment-icon">💳</div>
+        <span>Tarjeta</span>
+      </div>
+      
+      <div class="payment-option" 
+           [class.selected]="paymentMethod === 'transfer'" 
+           (click)="selectPaymentMethod('transfer')">
+        <div class="payment-icon">📱</div>
+        <span>Transferencia</span>
+      </div>
+    </div>
+
+    <!-- Efectivo -->
+    <div *ngIf="paymentMethod === 'cash'" class="cash-payment">
+      <div class="form-group">
+        <label>Monto Recibido</label>
+        <input type="number" [(ngModel)]="amountReceived" placeholder="0.00" min="0">
+      </div>
+      <div *ngIf="amountReceived > 0" class="change-calculation">
+        <div class="change-row">
+          <span>Cambio:</span>
+          <strong [class.negative]="calculateChange() < 0">
+            {{ calculateChange() | currency }}
+          </strong>
+        </div>
+        <div *ngIf="calculateChange() < 0" class="warning-message">
+          El monto recibido es menor al total
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta -->
+    <div *ngIf="paymentMethod === 'card'" class="card-payment">
+      <div class="form-group">
+        <label>Últimos 4 dígitos de la tarjeta</label>
+        <input type="text" [(ngModel)]="cardLastDigits" placeholder="1234" maxlength="4">
+      </div>
+    </div>
+
+    <!-- Transferencia -->
+    <div *ngIf="paymentMethod === 'transfer'" class="transfer-payment">
+      <div class="form-group">
+        <label>Referencia de transferencia</label>
+        <input type="text" [(ngModel)]="transferReference" placeholder="Referencia">
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="checkout-actions">
+    <!-- BOTÓN CORREGIDO: Usando routerLink -->
+    <button routerLink="/gestoramd/uventas" class="btn-secondary">
+      ← Volver a Ventas
+    </button>
+    
+    <button (click)="confirmPayment()" 
+            class="btn-primary"
+            [disabled]="!canConfirmPayment()">
+      ✅ Confirmar Pago
+    </button>
+  </div>
+</div>

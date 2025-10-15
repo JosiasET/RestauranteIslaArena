@@ -1,0 +1,93 @@
+<div class="Subir_p">
+  <h2 class="Subtitulo">VENTAS ACTIVAS</h2>
+
+  <!-- Selector de Mesa y Categoría -->
+  <div class="form-bar">
+    <select [(ngModel)]="selectedTable" class="form-input">
+      <option value="">Seleccionar Mesa</option>
+      <option *ngFor="let table of tables" [value]="table">{{table}}</option>
+    </select>
+    
+    <select [(ngModel)]="selectedWaiter" class="form-input">
+      <option value="">Seleccionar Mesero</option>
+      <option *ngFor="let waiter of waiters" [value]="waiter">{{waiter}}</option>
+    </select>
+
+    <select [(ngModel)]="selectedCategory" class="form-input" (change)="filterProducts()">
+      <option value="food">Platillos</option>
+      <option value="drinks">Bebidas</option>
+      <option value="fish">Especiales del Mar</option>
+      <option value="all">Todas las Categorías</option>
+    </select>
+  </div>
+
+  <!-- Catálogo de Productos -->
+  <div class="catalogo-productos">
+    <h3 class="sub_3">Productos Disponibles</h3>
+    
+    <!-- Productos Filtrados -->
+    <div class="productos-grid">
+      <div *ngFor="let product of filteredProducts" 
+           class="producto-card" 
+           (click)="addToCart(product)">
+        <img [src]="product.imagen" [alt]="product.nombre" class="producto-img">
+        <div class="producto-info">
+          <h5>{{product.nombre}}</h5>
+          <p class="producto-desc">{{product.descripcion}}</p>
+          <p class="producto-precio">{{product.precio | currency}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carrito de Compras -->
+  <div class="carrito-venta" *ngIf="cart.length > 0">
+    <h3 class="sub_3">Carrito de Compras - Mesa: {{selectedTable || 'No seleccionada'}}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Subtotal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of cart; let i = index">
+          <td class="nombre-cell">{{ item.product.nombre }}</td>
+          <td class="cantidad-cell">
+            <button (click)="decreaseQuantity(i)" class="btn-cantidad">-</button>
+            {{ item.quantity }}
+            <button (click)="increaseQuantity(i)" class="btn-cantidad">+</button>
+          </td>
+          <td class="precio-cell">{{ item.product.precio | currency }}</td>
+          <td class="subtotal-cell">{{ item.product.precio * item.quantity | currency }}</td>
+          <td class="acciones-cell">
+            <button (click)="removeFromCart(i)" class="btn-eliminar">🗑</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Total y Botones de Acción -->
+    <div class="total-section">
+      <h4>Total: {{ calculateTotal() | currency }}</h4>
+      <div class="action-buttons">
+        <button (click)="processSale()" class="submit-btn" [disabled]="!selectedTable">
+          💳 Procesar Venta
+        </button>
+        <button (click)="clearCart()" class="cancel-btn">
+          🗑 Limpiar Carrito
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando el carrito está vacío -->
+  <div *ngIf="cart.length === 0" class="empty-state">
+    <div class="empty-icon">🛒</div>
+    <h3>Carrito vacío</h3>
+    <p>Selecciona productos del catálogo para comenzar una venta.</p>
+  </div>
+</div>
