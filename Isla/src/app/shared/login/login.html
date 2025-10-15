@@ -1,24 +1,51 @@
-
 <div class="contenedor">
   <div class="caja">
     <!-- Bloque INICIO DE SESIÓN -->
     <div class="login" *ngIf="!mostrarRecuperar">
-      <h2>Iniciar Sesión</h2>
+      <div class="titulo-superior">
+        <h1>Isla Arena</h1>
+        <p>Iniciar sesión</p>
+      </div>
+      
       <label for="email">Correo electrónico</label>
       <input type="text" placeholder="ejemplo@gmail.com" [(ngModel)]="correo" id="email">
 
       <label for="password">Contraseña</label>
-      <input type="password" placeholder="contraseña" [(ngModel)]="contrasena" id="password">
+      <div class="password-container">
+        <input 
+          type="{{ mostrarPassword ? 'text' : 'password' }}" 
+          placeholder="contraseña" 
+          [(ngModel)]="contrasena" 
+          id="password"
+          class="password-input">
+        <span class="toggle-password" (click)="togglePassword()">
+          {{ mostrarPassword ? '👁️' : '👁️‍🗨️' }}
+        </span>
+      </div>
 
       <div class="botones">
         <button (click)="acept()">Ingresar</button>
-        <button (click)="toggleRecuperar()">Olvidé mi contraseña</button>
+      </div>
+
+      <!-- Botón regresar al home -->
+      <div class="boton-regresar">
+        <button class="btn-regresar" (click)="regresarHome()">
+          Regresar al Inicio
+        </button>
+      </div>
+
+      <!-- Enlace para olvidó contraseña -->
+      <div class="olvido-contrasena">
+        <a href="#" (click)="toggleRecuperar(); $event.preventDefault()">¿Olvidó su contraseña?</a>
       </div>
     </div>
 
     <!-- Bloque RECUPERAR CONTRASEÑA -->
     <div class="recuperar" *ngIf="mostrarRecuperar">
-      <h2>Recuperar contraseña</h2>
+      <div class="titulo-superior">
+        <h1>Isla Arena</h1>
+        <p>Recuperar contraseña</p>
+      </div>
 
       <label for="email-recovery">Correo electrónico</label>
       <input

@@ -4,10 +4,10 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-image: url('/img/fondo3.jpg'); /* Tu imagen */
-  background-size: cover;          /* Cubre todo el espacio */
-  background-position: center;     /* Centra la imagen */
-  background-repeat: no-repeat;    /* No repetir */
+  background-image: url('/img/fondo3.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   padding: 20px;
   font-family: 'Arial', sans-serif;
 }
@@ -33,22 +33,29 @@
   background: linear-gradient(90deg, var(--azul-oscuro), var(--azul-claro), var(--acento));
 }
 
-.login h2, .recuperar h2 {
+/* Estilos para el título superior */
+.titulo-superior {
   text-align: center;
-  color: var(--azul-oscuro);
   margin-bottom: 25px;
-  font-size: 28px;
-  position: relative;
 }
 
-.login h2::after, .recuperar h2::after {
-  content: '';
-  display: block;
-  width: 60px;
-  height: 3px;
-  background: var(--acento);
-  margin: 10px auto;
-  border-radius: 2px;
+.titulo-superior h1 {
+  color: var(--azul-oscuro);
+  font-size: 32px;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.titulo-superior p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+  font-weight: normal;
+}
+
+/* Eliminar los h2 antiguos ya que ahora usamos titulo-superior */
+.login h2, .recuperar h2 {
+  display: none;
 }
 
 label {
@@ -74,6 +81,52 @@ input:focus {
   outline: none;
   border-color: var(--azul-claro);
   box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.2);
+}
+
+/* ===== ESTILOS PARA EL INPUT DE CONTRASEÑA CON OJO ===== */
+.password-container {
+  position: relative;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.password-input {
+  width: 100%;
+  padding: 14px 45px 14px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: var(--azul-claro);
+  box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.2);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  background: none;
+  border: none;
+  padding: 0;
+  user-select: none;
+  z-index: 2;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password:hover {
+  opacity: 0.7;
 }
 
 .botones {
@@ -114,6 +167,52 @@ button:last-child:hover {
   background-color: rgba(0, 116, 183, 0.1);
 }
 
+/* ===== ESTILOS PARA BOTÓN REGRESAR ===== */
+.boton-regresar {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.btn-regresar {
+  background: transparent;
+  color: var(--azul-medio);
+  border: 1px solid var(--azul-medio);
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  width: 100%;
+  display: block;
+}
+
+.btn-regresar:hover {
+  background-color: rgba(0, 116, 183, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== ESTILOS PARA EL ENLACE "OLVIDÓ SU CONTRASEÑA" ===== */
+.olvido-contrasena {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e1e5e9;
+}
+
+.olvido-contrasena a {
+  color: var(--azul-medio);
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.olvido-contrasena a:hover {
+  color: var(--azul-oscuro);
+  text-decoration: underline;
+}
+
 /* Estilos específicos para el formulario de recuperación */
 .recuperar {
   animation: fadeIn 0.5s ease;
@@ -140,15 +239,33 @@ button:last-child:hover {
     padding: 25px 20px;
   }
 
-  .login h2, .recuperar h2 {
-    font-size: 24px;
+  .titulo-superior h1 {
+    font-size: 28px;
+  }
+
+  .titulo-superior p {
+    font-size: 14px;
   }
 
   input {
     padding: 12px 14px;
   }
 
+  .password-input {
+    padding: 12px 40px 12px 14px;
+  }
+
+  .toggle-password {
+    right: 10px;
+    font-size: 16px;
+  }
+
   button {
     padding: 12px;
+  }
+
+  .btn-regresar {
+    padding: 12px;
+    font-size: 16px;
   }
 }
