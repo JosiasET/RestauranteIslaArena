@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router'; // ← Asegúrate de importar Router
 import { SaleDataService } from '../../core/service/SaleDataService';
 
 interface SaleData {
@@ -32,7 +32,7 @@ export class CashierCheckout implements OnInit {
   transferReference: string = '';
 
   constructor(
-    private router: Router,
+    private router: Router, // ← Asegúrate de que esté en el constructor
     private saleDataService: SaleDataService
   ) {}
 
@@ -102,15 +102,19 @@ export class CashierCheckout implements OnInit {
       currency: 'MXN'
     }).format(this.saleData.total);
 
-    // Show success message and redirect
+    // Show success message
     alert(`✅ Pago procesado exitosamente!\nTotal: ${formattedTotal}\nMesa: ${this.saleData.table}`);
     
-    // Limpiar datos y redirigir
+    // LIMPIAR DATOS Y REDIRIGIR
     this.saleDataService.clearSaleData();
-    this.router.navigate(['/gestoramd/uventas']);
+    
+    // Redirigir a ventas
+    setTimeout(() => {
+      this.router.navigate(['/gestoramd/upsales']);
+    }, 500);
   }
 
   goBack() {
-    this.router.navigate(['/gestoramd/uventas']);
+    this.router.navigate(['/gestoramd/upsales']);
   }
 }

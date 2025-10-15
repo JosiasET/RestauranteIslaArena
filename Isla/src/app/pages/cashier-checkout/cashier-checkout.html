@@ -110,17 +110,17 @@
     </div>
   </div>
 
-  <!-- Acciones -->
-  <div class="checkout-actions">
-    <!-- BOTÓN CORREGIDO: Usando routerLink -->
-    <button routerLink="/gestoramd/uventas" class="btn-secondary">
-      ← Volver a Ventas
-    </button>
-    
-    <button (click)="confirmPayment()" 
-            class="btn-primary"
-            [disabled]="!canConfirmPayment()">
-      ✅ Confirmar Pago
-    </button>
-  </div>
+ <!-- Acciones -->
+<div class="checkout-actions">
+  <!-- Botón corregido -->
+  <button routerLink="/gestoramd/upsales" class="btn-secondary">
+    ← Volver a Ventas
+  </button>
+  
+  <button (click)="confirmPayment()" 
+          class="btn-primary"
+          [disabled]="!canConfirmPayment()">
+    ✅ Confirmar Pago
+  </button>
+</div>
 </div>

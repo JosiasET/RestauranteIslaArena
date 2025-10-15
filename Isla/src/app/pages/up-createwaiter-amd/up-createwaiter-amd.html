@@ -1,1 +1,81 @@
-<p>up-createwaiter-amd works!</p>
+<div class="Subir_p">
+  <h2 class="Subtitulo">{{ esModoEdicion ? 'EDITAR USUARIO' : 'CREAR USUARIO' }}</h2>
+
+  <!-- Barra de inputs -->
+  <div class="form-bar">
+    <input type="text" [(ngModel)]="nombre" placeholder="Nombre" class="form-input">
+    <input type="text" [(ngModel)]="apellido" placeholder="Apellido" class="form-input">
+    <input type="text" [(ngModel)]="usuario" placeholder="Nombre de usuario" class="form-input">
+    <input type="password" [(ngModel)]="contrasena" placeholder="Contraseña" class="form-input">
+    
+    <select [(ngModel)]="rol" class="form-input">
+      <option value="">Seleccionar rol</option>
+      <option value="administrador">👑 Administrador</option>
+      <option value="cajero">💳 Cajero</option>
+    </select>
+    
+    <select [(ngModel)]="turno" class="form-input">
+      <option value="">Seleccionar turno</option>
+      <option value="matutino">🌅 Matutino (6:00 - 14:00)</option>
+      <option value="vespertino">🌇 Vespertino (14:00 - 22:00)</option>
+      <option value="completo">🌞 Completo (6:00 - 22:00)</option>
+    </select>
+
+    <div class="action-buttons">
+      <button (click)="crearUsuario()" class="submit-btn">
+        {{ esModoEdicion ? 'Actualizar Usuario' : 'Crear Usuario' }}
+      </button>
+      <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla de usuarios -->
+  <div *ngIf="usuarios.length > 0" class="tabla-platillos">
+    <h3 class="sub_3">Usuarios Registrados</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Usuario</th>
+          <th>Rol</th>
+          <th>Turno</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuarios">
+          <td class="nombre-cell">{{ usuario.nombre }} {{ usuario.apellido }}</td>
+          <td class="usuario-cell">{{ usuario.usuario }}</td>
+          <td class="rol-cell">
+            <span [class]="'badge-' + usuario.rol">{{ getRolText(usuario.rol) }}</span>
+          </td>
+          <td class="turno-cell">
+            <span [class]="'badge-' + usuario.turno">{{ getTurnoText(usuario.turno) }}</span>
+          </td>
+          <td class="estado-cell">
+            <span [class]="'badge-' + (usuario.activo ? 'activo' : 'inactivo')">
+              {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td class="acciones-cell">
+            <button (click)="editarUsuario(usuario)" class="btn-editar">✏ Editar</button>
+            <button (click)="toggleEstado(usuario)" class="btn-estado">
+              {{ usuario.activo ? '🚫 Desactivar' : '✅ Activar' }}
+            </button>
+            <button (click)="eliminarUsuario(usuario)" class="btn-eliminar">🗑 Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mensaje cuando no hay usuarios -->
+  <div *ngIf="usuarios.length === 0" class="empty-state">
+    <div class="empty-icon">👨‍💼</div>
+    <h3>No hay usuarios registrados</h3>
+    <p>Comienza agregando tu primer usuario usando el formulario superior.</p>
+  </div>
+</div>

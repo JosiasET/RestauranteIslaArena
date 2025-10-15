@@ -1,0 +1,478 @@
+/* Estilos específicos para el módulo de cumpleaños */
+
+.Subir_p {
+  max-width: 1400px; /* Más ancho */
+}
+
+.filtros-bar {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.form-input {
+  min-width: 180px; /* Un poco más anchos los inputs */
+}
+
+/* Estadísticas */
+.estadisticas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.estadistica-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border-left: 5px solid #3498db;
+  transition: transform 0.3s ease;
+}
+
+.estadistica-card:hover {
+  transform: translateY(-3px);
+}
+
+.estadistica-icon {
+  font-size: 2.5em;
+  opacity: 0.8;
+}
+
+.estadistica-info h3 {
+  margin: 0 0 8px 0;
+  color: #7f8c8d;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.estadistica-numero {
+  font-size: 2.2em;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+/* TABLA MEJORADA - MÁS ESPACIOSA */
+.tabla-reservaciones {
+  margin-top: 30px;
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.tabla-reservaciones h3 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-size: 1.5em;
+  border-bottom: 3px solid #f0f8ff;
+  padding-bottom: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+th {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  padding: 18px 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95em;
+  border: none;
+}
+
+td {
+  padding: 16px 15px;
+  border-bottom: 1px solid #f8f9fa;
+  vertical-align: middle;
+  font-size: 0.9em;
+}
+
+/* Celdas específicas con mejor espaciado */
+.codigo-cell {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 120px;
+}
+
+.nombre-cell {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 180px;
+}
+
+.telefono-cell {
+  min-width: 120px;
+  color: #7f8c8d;
+}
+
+.fecha-cell, .hora-cell {
+  min-width: 110px;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.estado-cell, .ine-cell {
+  min-width: 130px;
+  text-align: center;
+}
+
+.acciones-cell {
+  min-width: 200px;
+  text-align: center;
+}
+
+/* Badges específicos */
+.badge-pendiente {
+  background: #fff3cd;
+  color: #856404;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid #ffeaa7;
+}
+
+.badge-confirmada {
+  background: #d1ecf1;
+  color: #0c5460;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid #bee5eb;
+}
+
+.badge-cumplida {
+  background: #d4edda;
+  color: #155724;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid #c3e6cb;
+}
+
+.badge-cancelada {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid #f5c6cb;
+}
+
+.badge-verificado {
+  background: #d4edda;
+  color: #155724;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid #c3e6cb;
+}
+
+.badge-pendiente-ine {
+  background: #fff3cd;
+  color: #856404;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.85em;
+  font-weight: 500;
+  border: 1px solid #ffeaa7;
+}
+
+.badge-hoy {
+  background: #e74c3c;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.75em;
+  font-weight: 500;
+  margin-left: 8px;
+  display: inline-block;
+}
+
+/* Tabla con resaltado para hoy */
+tr.hoy {
+  background: #fff9e6 !important;
+  border-left: 4px solid #f39c12;
+}
+
+tr:hover {
+  background-color: #f8f9fa !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Botones específicos - MÁS GRANDES Y SEPARADOS */
+.acciones-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-detalles, .btn-confirmar, .btn-verificar, .btn-entregar, .btn-cancelar {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 80px;
+  text-align: center;
+}
+
+.btn-detalles {
+  background: #3498db;
+  color: white;
+}
+
+.btn-detalles:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.btn-confirmar {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-confirmar:hover {
+  background: #219a52;
+  transform: translateY(-2px);
+}
+
+.btn-verificar {
+  background: #f39c12;
+  color: white;
+}
+
+.btn-verificar:hover {
+  background: #e67e22;
+  transform: translateY(-2px);
+}
+
+.btn-entregar {
+  background: #9b59b6;
+  color: white;
+}
+
+.btn-entregar:hover {
+  background: #8e44ad;
+  transform: translateY(-2px);
+}
+
+.btn-cancelar {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-cancelar:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 0;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  padding: 25px;
+  border-bottom: 1px solid #ecf0f1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: white;
+}
+
+.btn-cerrar {
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  cursor: pointer;
+  color: white;
+  opacity: 0.8;
+}
+
+.btn-cerrar:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.detalle-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.detalle-item label {
+  font-weight: 600;
+  color: #7f8c8d;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+}
+
+.detalle-item span {
+  color: #2c3e50;
+  font-size: 1em;
+}
+
+.historial {
+  border-top: 2px solid #ecf0f1;
+  padding-top: 20px;
+}
+
+.historial h4 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-size: 1.2em;
+}
+
+.evento-historial {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f8f9fa;
+  align-items: center;
+}
+
+.fecha-evento {
+  color: #7f8c8d;
+  font-size: 0.85em;
+  min-width: 120px;
+}
+
+.accion-evento {
+  color: #2c3e50;
+  font-size: 0.9em;
+  flex: 1;
+}
+
+/* Empty state mejorado */
+.empty-state {
+  text-align: center;
+  padding: 80px 40px;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  border-radius: 15px;
+  border: 3px dashed #dee2e6;
+  margin-top: 40px;
+}
+
+.empty-icon {
+  font-size: 100px;
+  margin-bottom: 25px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  margin-bottom: 20px;
+  color: #95a5a6;
+  font-weight: 600;
+  font-size: 1.8em;
+}
+
+.empty-state p {
+  font-size: 1.2em;
+  line-height: 1.6;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .Subir_p {
+    max-width: 100%;
+    margin: 0 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .detalle-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .estadisticas-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filtros-bar {
+    flex-direction: column;
+  }
+  
+  .form-input {
+    min-width: auto;
+  }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .acciones-cell {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .btn-detalles, .btn-confirmar, .btn-verificar, .btn-entregar, .btn-cancelar {
+    min-width: auto;
+    width: 100%;
+  }
+}

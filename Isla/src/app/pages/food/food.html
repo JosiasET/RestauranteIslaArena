@@ -1,42 +1,76 @@
-<h1 class="titulo">PLATILLOS DEL DIA</h1>
+<h1 class="titulo">MENÚ DEL RESTAURANTE</h1>
 <h4 class="subtitulo">¡ESPECIALIDADES QUE TE HARÁN AGUA LA BOCA!</h4>
-<h1 class="titulo">NUESTRAS DELICIAS</h1>
+
+<!-- PESTAÑAS DE CATEGORÍAS (ARRIBA) -->
+<div class="categorias-tabs">
+  <button 
+    *ngFor="let categoria of categorias" 
+    [class.active]="categoriaSeleccionada === categoria.id"
+    (click)="seleccionarCategoria(categoria.id)"
+    class="tab-btn">
+    {{categoria.emoji}} {{categoria.nombre}}
+  </button>
+</div>
+
+<!-- SECCIÓN DE RECOMENDACIONES DEL DÍA (ABAJO DE PESTAÑAS) -->
+<div *ngIf="recomendacionesDelDia.length > 0 && !loading" class="recomendaciones-section">
+  <h2 class="recomendaciones-titulo">🍽️ ¡LES RECOMENDAMOS ESTO!</h2>
+  <div class="recomendaciones-grid">
+    <div *ngFor="let producto of recomendacionesDelDia" class="recomendacion-card">
+      <div class="recomendacion-img">
+        <img 
+          [src]="producto.imagen" 
+          alt="{{producto.nombre}}"
+          (error)="producto.imagen = 'assets/default-food.jpg'"
+        >
+      </div>
+      <div class="recomendacion-info">
+        <h3>{{ producto.nombre }}</h3>
+        <p>{{ producto.descripcion }}</p>
+        <strong class="precio">{{ producto.precio | currency }}</strong>
+        <button class="btn-recomendacion" (click)="agregarAlCarrito(producto)">
+          ¡PROBAR!
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ESTADO DE CARGA -->
 <div *ngIf="loading" class="loading-container">
   <div class="spinner"></div>
-  <p>Cargando nuestros deliciosos platillos...</p>
+  <p>Cargando nuestro delicioso menú...</p>
 </div>
 
-<!-- CONTENIDO PRINCIPAL -->
+<!-- CONTENIDO PRINCIPAL - TODO EL MENÚ (DEBAJO DE LAS CARDS) -->
 <div *ngIf="!loading" class="menu-container">
   
-  <!-- MENSAJE SI NO HAY PLATILLOS -->
-  <div *ngIf="saucer.length === 0" class="no-platillos">
+  <!-- MENSAJE SI NO HAY PRODUCTOS -->
+  <div *ngIf="productosFiltrados.length === 0" class="no-platillos">
     <h3>¡Próximamente!</h3>
-    <p>Estamos preparando nuevas delicias para ti</p>
+    <p>Estamos preparando nuevas delicias para esta categoría</p>
   </div>
 
-  <!-- LISTA DE PLATILLOS -->
-  <div *ngFor="let platillo of saucer" class="platillo-card">
+  <!-- LISTA DE PRODUCTOS FILTRADOS -->
+  <div *ngFor="let producto of productosFiltrados" class="platillo-card">
     
     <!-- Imagen -->
     <div class="platillo-img">
       <img 
-        [src]="platillo.imagen" 
-        alt="{{platillo.nombre}}"
-        (error)="platillo.imagen = 'assets/default-food.jpg'"
+        [src]="producto.imagen" 
+        alt="{{producto.nombre}}"
+        (error)="producto.imagen = 'assets/default-food.jpg'"
       >
     </div>
 
     <!-- Info -->
     <div class="platillo-info">
-      <h3>{{ platillo.nombre }}</h3>
-      <p>{{ platillo.descripcion }}</p>
-      <strong class="precio">{{ platillo.precio | currency }}</strong>
+      <h3>{{ producto.nombre }}</h3>
+      <p>{{ producto.descripcion }}</p>
+      <strong class="precio">{{ producto.precio | currency }}</strong>
 
-      <button class="btn-agregar" (click)="agregarAlCarrito(platillo)">
-        ¡ORDENAR ESTE PLATILLO!
+      <button class="btn-agregar" (click)="agregarAlCarrito(producto)">
+        ¡ORDENAR!
       </button>
     </div>
   </div>

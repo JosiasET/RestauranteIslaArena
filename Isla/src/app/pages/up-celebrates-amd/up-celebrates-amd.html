@@ -1,1 +1,167 @@
-<p>up-celebrates-amd works!</p>
+<div class="Subir_p">
+  <h2 class="Subtitulo">GESTIÓN DE CUMPLEAÑOS - REGALOS</h2>
+
+  <!-- Filtros y búsqueda -->
+  <div class="filtros-bar">
+    <input type="date" [(ngModel)]="fechaFiltro" (change)="filtrarReservaciones()" class="form-input">
+    <select [(ngModel)]="estadoFiltro" (change)="filtrarReservaciones()" class="form-input">
+      <option value="todas">Todas las reservas</option>
+      <option value="pendiente">Pendientes</option>
+      <option value="confirmada">Confirmadas</option>
+      <option value="cumplida">Cumplidas</option>
+      <option value="cancelada">Canceladas</option>
+    </select>
+    <input type="text" [(ngModel)]="busqueda" (input)="filtrarReservaciones()" placeholder="Buscar por nombre o código..." class="form-input">
+  </div>
+
+  <!-- Estadísticas rápidas -->
+  <div class="estadisticas-grid">
+    <div class="estadistica-card">
+      <div class="estadistica-icon">📅</div>
+      <div class="estadistica-info">
+        <h3>Hoy</h3>
+        <span class="estadistica-numero">{{ estadisticas.hoy }}</span>
+      </div>
+    </div>
+    <div class="estadistica-card">
+      <div class="estadistica-icon">⏳</div>
+      <div class="estadistica-info">
+        <h3>Pendientes</h3>
+        <span class="estadistica-numero">{{ estadisticas.pendientes }}</span>
+      </div>
+    </div>
+    <div class="estadistica-card">
+      <div class="estadistica-icon">✅</div>
+      <div class="estadistica-info">
+        <h3>Entregados</h3>
+        <span class="estadistica-numero">{{ estadisticas.entregados }}</span>
+      </div>
+    </div>
+    <div class="estadistica-card">
+      <div class="estadistica-icon">🎁</div>
+      <div class="estadistica-info">
+        <h3>Este Mes</h3>
+        <span class="estadistica-numero">{{ estadisticas.esteMes }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de reservaciones -->
+  <div class="tabla-reservaciones">
+    <h3 class="sub_3">Reservaciones de Cumpleaños</h3>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Cliente</th>
+          <th>Teléfono</th>
+          <th>Fecha Reserva</th>
+          <th>Hora</th>
+          <th>Estado</th>
+          <th>Verificación INE</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let reserva of reservacionesFiltradas" [class.hoy]="esHoy(reserva.fechaReserva)">
+          <td class="codigo-cell">
+            <strong>{{ reserva.codigo }}</strong>
+          </td>
+          <td class="nombre-cell">
+            {{ reserva.nombre }}
+            <small *ngIf="esHoy(reserva.fechaReserva)" class="badge-hoy">HOY</small>
+          </td>
+          <td class="telefono-cell">{{ reserva.telefono }}</td>
+          <td class="fecha-cell">
+            {{ reserva.fechaReserva | date:'dd/MM/yyyy' }}
+          </td>
+          <td class="hora-cell">{{ reserva.horaReserva }}</td>
+          <td class="estado-cell">
+            <span [class]="'badge-' + reserva.estado">{{ getEstadoText(reserva.estado) }}</span>
+          </td>
+          <td class="ine-cell">
+            <span *ngIf="reserva.ineVerificada" class="badge-verificado">✅ Verificada</span>
+            <span *ngIf="!reserva.ineVerificada" class="badge-pendiente">⏳ Pendiente</span>
+          </td>
+          <td class="acciones-cell">
+            <button (click)="verDetalles(reserva)" class="btn-detalles">👁️ Ver</button>
+            <button *ngIf="reserva.estado === 'pendiente'" (click)="confirmarReserva(reserva)" class="btn-confirmar">✅ Confirmar</button>
+            <button *ngIf="reserva.estado === 'confirmada' && !reserva.ineVerificada" 
+                    (click)="marcarINEVerificada(reserva)" class="btn-verificar">
+              📋 Verificar INE
+            </button>
+            <button *ngIf="reserva.estado === 'confirmada' && reserva.ineVerificada" 
+                    (click)="marcarRegaloEntregado(reserva)" class="btn-entregar">
+              🎁 Entregar
+            </button>
+            <button (click)="cancelarReserva(reserva)" class="btn-cancelar">❌ Cancelar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal de detalles -->
+  <div *ngIf="reservaSeleccionada" class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Detalles de Reservación</h3>
+        <button (click)="cerrarModal()" class="btn-cerrar">×</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="detalle-grid">
+          <div class="detalle-item">
+            <label>Código:</label>
+            <strong>{{ reservaSeleccionada.codigo }}</strong>
+          </div>
+          <div class="detalle-item">
+            <label>Cliente:</label>
+            <span>{{ reservaSeleccionada.nombre }}</span>
+          </div>
+          <div class="detalle-item">
+            <label>Teléfono:</label>
+            <span>{{ reservaSeleccionada.telefono }}</span>
+          </div>
+          <div class="detalle-item">
+            <label>Fecha Nacimiento:</label>
+            <span>{{ reservaSeleccionada.fechaNacimiento | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detalle-item">
+            <label>Fecha Reserva:</label>
+            <span>{{ reservaSeleccionada.fechaReserva | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="detalle-item">
+            <label>Hora:</label>
+            <span>{{ reservaSeleccionada.horaReserva }}</span>
+          </div>
+          <div class="detalle-item">
+            <label>Estado:</label>
+            <span [class]="'badge-' + reservaSeleccionada.estado">{{ getEstadoText(reservaSeleccionada.estado) }}</span>
+          </div>
+          <div class="detalle-item">
+            <label>INE Verificada:</label>
+            <span>{{ reservaSeleccionada.ineVerificada ? '✅ Sí' : '❌ No' }}</span>
+          </div>
+        </div>
+
+        <!-- Historial de acciones -->
+        <div class="historial" *ngIf="reservaSeleccionada.historial?.length">
+          <h4>Historial</h4>
+          <div *ngFor="let evento of reservaSeleccionada.historial" class="evento-historial">
+            <span class="fecha-evento">{{ evento.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span class="accion-evento">{{ evento.accion }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay reservaciones -->
+  <div *ngIf="reservacionesFiltradas.length === 0" class="empty-state">
+    <div class="empty-icon">🎂</div>
+    <h3>No hay reservaciones</h3>
+    <p>No se encontraron reservaciones con los filtros aplicados.</p>
+  </div>
+</div>

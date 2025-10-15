@@ -17,6 +17,7 @@ export class SaleDataService {
   }
 
   clearSaleData() {
-    this.saleDataSubject.next(null);
-  }
+  this.saleDataSubject.next(null);
+  console.log('🧹 Datos de venta limpiados');
+  } 
 }
