@@ -37,6 +37,6 @@ export class Fishes implements OnInit {
       cantidad: 1
     };
     this.cartService.addToCart(cartItem);
-    alert(`${platillo.nombre} agregado al carrito!`);
+    //alert(`${platillo.nombre} agregado al carrito!`);
   }
 }

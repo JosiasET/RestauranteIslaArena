@@ -239,3 +239,24 @@
 .whatsapp-menu .opcion-menu:hover {
   background-color: #f2f2f2;
 }
+
+/* Estilos para el badge del carrito */
+.carrito {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}

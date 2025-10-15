@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-// Interface local para el carrito
 export interface CartItem {
   id: number;
   nombre: string;
@@ -17,45 +16,41 @@ export interface CartItem {
 export class CartService {
   private cartItems: CartItem[] = [];
   private cartSubject = new BehaviorSubject<CartItem[]>([]);
+  private cartVisible = new BehaviorSubject<boolean>(false);
   
   cart$ = this.cartSubject.asObservable();
+  cartVisible$ = this.cartVisible.asObservable();
 
   constructor() {
     this.loadCartFromStorage();
   }
 
-  // Agregar producto al carrito
   addToCart(product: CartItem) {
     const existingItem = this.cartItems.find(item => item.id === product.id);
     
     if (existingItem) {
-      // Si ya existe, incrementar cantidad
       existingItem.cantidad += 1;
     } else {
-      // Si no existe, agregar con cantidad 1
       this.cartItems.push({...product, cantidad: 1});
     }
     this.updateCart();
+    this.openCart(); // ← ABRE EL CARRITO AUTOMÁTICAMENTE
     console.log('Producto agregado al carrito:', product.nombre);
   }
 
-  // Obtener items del carrito
   getCartItems(): CartItem[] {
     return [...this.cartItems];
   }
 
-  // Limpiar carrito
   clearCart() {
     this.cartItems = [];
     this.updateCart();
   }
 
-  // Calcular total
   getTotal(): number {
     return this.cartItems.reduce((total, item) => total + (item.precio * item.cantidad), 0);
   }
 
-  // Persistencia en localStorage
   private updateCart() {
     this.cartSubject.next(this.cartItems);
     localStorage.setItem('cartItems', JSON.stringify(this.cartItems));
@@ -74,5 +69,22 @@ export class CartService {
     this.cartItems = this.cartItems.filter(item => item.id !== itemId);
     this.updateCart();
     console.log('Producto eliminado del carrito');
+  }
+
+  // MÉTODOS DEL DRAWER
+  toggleCart(): void {
+    this.cartVisible.next(!this.cartVisible.value);
+  }
+
+  openCart(): void {
+    this.cartVisible.next(true);
+  }
+
+  closeCart(): void {
+    this.cartVisible.next(false);
+  }
+
+  getTotalItems(): number {
+    return this.cartItems.reduce((total, item) => total + item.cantidad, 0);
   }
 }

@@ -105,7 +105,7 @@ export class Celebrates {
   agregarACalendario() {
     // Lógica simple para agregar a calendario
     const fechaReserva = new Date(this.fechaReserva + 'T' + this.horaReserva);
-    alert(`📅 Evento agregado para: ${fechaReserva.toLocaleString()}`);
+    //alert(`📅 Evento agregado para: ${fechaReserva.toLocaleString()}`);
   }
 
   reiniciarFormulario() {

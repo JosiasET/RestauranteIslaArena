@@ -3,15 +3,6 @@
   <div class="contenedor_lot">
     <!-- LOGO -->
     <img class="logo1" src="img/logo.png" alt="Logo de Mariscos">
-    <!--
-    <div class="barra-busqueda">
-      <input type="text" placeholder="Buscar mariscos, platillos, bebidas...">
-      <button class="btn_buscar">
-        <img src="img/busqueda.png" alt="Buscar">
-      </button>
-    </div>
-
-    -->
 
     <nav class="menu-acciones">
 
@@ -67,3 +58,6 @@
   <app-home></app-home>
 </div>
 <router-outlet *ngIf="!homeActive"></router-outlet>
+
+<!-- AGREGAR ESTA ÚNICA LÍNEA AL FINAL -->
+<app-mycart-drawer></app-mycart-drawer>

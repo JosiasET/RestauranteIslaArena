@@ -132,6 +132,6 @@ export class Food implements OnInit {
     };
 
     this.cartService.addToCart(cartItem);
-    alert(`${producto.nombre} agregado al carrito!`);
+    //alert(`${producto.nombre} agregado al carrito!`);
   }
 }

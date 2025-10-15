@@ -37,6 +37,6 @@ export class Drink implements OnInit { // ✅ implementar OnInit
       cantidad: 1
     };
     this.cartService.addToCart(cartItem);
-    alert(`${bebida.nombre} agregado al carrito!`);
+    //alert(`${bebida.nombre} agregado al carrito!`);
   }
 }

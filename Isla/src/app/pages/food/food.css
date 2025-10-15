@@ -125,7 +125,6 @@
   line-height: 1.3;
   flex: 1;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -217,7 +216,6 @@
   line-height: 1.2;
   min-height: 2.2em; /* Altura fija para 2 líneas */
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -228,7 +226,6 @@
   margin-bottom: 0.5rem;
   line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

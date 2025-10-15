@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
-import { Home } from "../../pages/home/home";
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
+import { MycartDrawer } from '../mycart-drawer/mycart-drawer';
+import { Home } from "../../pages/home/home"; 
 @Component({
   standalone: true,
   selector: 'app-header',
-  imports: [RouterLink, CommonModule, RouterOutlet, Home],
+  imports: [RouterLink, CommonModule, RouterOutlet, MycartDrawer, Home], // ← AGREGAR Home aquí
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
