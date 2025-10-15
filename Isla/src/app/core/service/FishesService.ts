@@ -8,7 +8,7 @@ import { Fish } from '../interface/Fish';
   providedIn: 'root'
 })
 export class FishesService {
-  private apiUrl = 'http://localhost:3000/especialidades'; // 🔹 Apunta al backend
+  private apiUrl = 'http://localhost:3000/especialidades';
   private saucerSource = new BehaviorSubject<Fish[]>([]);
   saucer$ = this.saucerSource.asObservable();
 
@@ -16,7 +16,6 @@ export class FishesService {
     this.cargarEspecialidades();
   }
 
-  // 📥 Cargar especialidades desde backend
   cargarEspecialidades() {
     this.http.get<Fish[]>(this.apiUrl).subscribe({
       next: (especialidades) => this.saucerSource.next(especialidades),
@@ -24,26 +23,34 @@ export class FishesService {
     });
   }
 
-  // ➕ Agregar especialidad
   agregarPlatillo(especialidad: Fish) {
-    this.http.post(this.apiUrl, especialidad).subscribe({
-      next: () => this.cargarEspecialidades(),
+    this.http.post<Fish>(this.apiUrl, especialidad).subscribe({
+      next: (nueva) => {
+        const actuales = this.saucerSource.getValue();
+        this.saucerSource.next([nueva, ...actuales]);
+      },
       error: (err) => console.error('❌ Error al subir especialidad:', err)
     });
   }
 
-  // 🗑️ Eliminar especialidad
   eliminarPlatillo(especialidad: Fish) {
     this.http.delete(`${this.apiUrl}/${especialidad.id}`).subscribe({
-      next: () => this.cargarEspecialidades(),
+      next: () => {
+        const nuevas = this.saucerSource.getValue().filter(p => p.id !== especialidad.id);
+        this.saucerSource.next(nuevas);
+      },
       error: (err) => console.error('❌ Error al eliminar especialidad:', err)
     });
   }
 
-  // ✏️ Actualizar especialidad
   actualizarPlatillo(especialidadVieja: Fish, especialidadNueva: Fish) {
-    this.http.put(`${this.apiUrl}/${especialidadVieja.id}`, especialidadNueva).subscribe({
-      next: () => this.cargarEspecialidades(),
+    this.http.put<Fish>(`${this.apiUrl}/${especialidadVieja.id}`, especialidadNueva).subscribe({
+      next: (actualizada) => {
+        const nuevas = this.saucerSource.getValue().map(p =>
+          p.id === actualizada.id ? actualizada : p
+        );
+        this.saucerSource.next(nuevas);
+      },
       error: (err) => console.error('❌ Error al actualizar especialidad:', err)
     });
   }

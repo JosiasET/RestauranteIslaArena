@@ -1,5 +1,6 @@
-import { CommonModule } from '@angular/common';
+// app/components/up-fishes-amd/up-fishes-amd.ts
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FishesService } from '../../core/service/FishesService';
 import { Fish } from '../../core/interface/Fish';
@@ -8,10 +9,10 @@ import { Fish } from '../../core/interface/Fish';
   selector: 'app-up-fishes-amd',
   imports: [CommonModule, FormsModule],
   templateUrl: './up-fishes-amd.html',
-  styleUrl: './up-fishes-amd.css'
+  styleUrls: ['./up-fishes-amd.css']
 })
 export class UpFishesAmd implements OnInit {
-  activeSection: String = 'upfishes';
+  activeSection: string = 'upfishes';
   ultimosPlatillos: Fish[] = [];
   platilloEditando: Fish | null = null;
   esModoEdicion: boolean = false;
@@ -61,26 +62,22 @@ export class UpFishesAmd implements OnInit {
     // Scroll al formulario
     setTimeout(() => {
       const formElement = document.querySelector('.Subir_p');
-      if (formElement) {
-        formElement.scrollIntoView({ behavior: 'smooth' });
-      }
+      if (formElement) formElement.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   }
 
   subirsaucer() {
-    // Validaciones
     if (!this.nombre || !this.descripcion || !this.precio || !this.imageBase64) {
-      alert("Por favor, rellene todos los espacios");
+      alert('Por favor, rellene todos los espacios');
       return;
     }
 
     if (this.precio <= 0) {
-      alert("El precio debe ser mayor a 0");
+      alert('El precio debe ser mayor a 0');
       return;
     }
 
     if (this.esModoEdicion && this.platilloEditando) {
-      // Modo edición
       const especialidadActualizada: Fish = {
         id: this.platilloEditando.id,
         nombre: this.nombre,
@@ -91,12 +88,11 @@ export class UpFishesAmd implements OnInit {
 
       this.fishesService.actualizarPlatillo(this.platilloEditando, especialidadActualizada);
       this.esModoEdicion = false;
-      alert("Especialidad actualizada exitosamente");
+      alert('Especialidad actualizada exitosamente');
       this.limpiarFormulario();
     } else {
-      // Modo creación
       const nuevaEspecialidad: Fish = {
-        id: 0, // Backend asigna el ID
+        id: 0,
         nombre: this.nombre,
         descripcion: this.descripcion,
         precio: this.precio,
@@ -104,7 +100,7 @@ export class UpFishesAmd implements OnInit {
       };
 
       this.fishesService.agregarPlatillo(nuevaEspecialidad);
-      alert("Especialidad subida exitosamente");
+      alert('Especialidad subida exitosamente');
       this.limpiarFormulario();
     }
   }
@@ -123,10 +119,7 @@ export class UpFishesAmd implements OnInit {
     this.platilloEditando = null;
     this.esModoEdicion = false;
 
-    // Limpiar input file
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
+    if (fileInput) fileInput.value = '';
   }
 }

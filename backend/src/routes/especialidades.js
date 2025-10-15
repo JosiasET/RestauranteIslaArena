@@ -1,10 +1,11 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const especialidadesController = require("../controllers/especialidadesController");
+const especialidadesController = require('../controllers/especialidadesController');
 
-router.get("/", especialidadesController.getAll);
-router.post("/", especialidadesController.create);
-router.put("/:id", especialidadesController.update);
-router.delete("/:id", especialidadesController.delete);
+// CRUD Especialidades
+router.post('/', especialidadesController.crearEspecialidad);
+router.get('/', especialidadesController.obtenerEspecialidades);
+router.put('/:id', especialidadesController.actualizarEspecialidad);
+router.delete('/:id', especialidadesController.eliminarEspecialidad);
 
 module.exports = router;

@@ -10,7 +10,7 @@ export class FoodService {
   private apiUrl = 'http://localhost:3000/platillos';
   private saucerSource = new BehaviorSubject<foodInterface[]>([]);
   private loadingSource = new BehaviorSubject<boolean>(true);
-  
+
   saucer$ = this.saucerSource.asObservable();
   loading$ = this.loadingSource.asObservable();
 
@@ -20,7 +20,6 @@ export class FoodService {
 
   cargarPlatillos() {
     this.loadingSource.next(true);
-
     this.http.get<foodInterface[]>(this.apiUrl).subscribe({
       next: (platillos) => {
         this.saucerSource.next(platillos);
@@ -35,18 +34,12 @@ export class FoodService {
   }
 
   agregarPlatillo(platillo: foodInterface) {
-    this.loadingSource.next(true);
-
     this.http.post<foodInterface>(this.apiUrl, platillo).subscribe({
       next: (nuevoPlatillo) => {
         const platillosActuales = this.saucerSource.getValue();
-        this.saucerSource.next([...platillosActuales, nuevoPlatillo]);
-        this.loadingSource.next(false);
+        this.saucerSource.next([nuevoPlatillo, ...platillosActuales]); // añade arriba
       },
-      error: (err) => {
-        console.error('❌ Error al subir platillo:', err);
-        this.loadingSource.next(false);
-      }
+      error: (err) => console.error('❌ Error al subir platillo:', err)
     });
   }
 

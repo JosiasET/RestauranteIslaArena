@@ -8,7 +8,7 @@ import { Drinkinterface } from '../interface/drink';
   providedIn: 'root'
 })
 export class DrinkService {
-  private apiUrl = 'http://localhost:3000/bebidas'; // 👉 Backend
+  private apiUrl = 'http://localhost:3000/bebidas';
   private saucerSource = new BehaviorSubject<Drinkinterface[]>([]);
   saucer$ = this.saucerSource.asObservable();
 
@@ -16,6 +16,7 @@ export class DrinkService {
     this.cargarBebidas();
   }
 
+  /** 🔹 Obtener todas las bebidas */
   cargarBebidas() {
     this.http.get<Drinkinterface[]>(this.apiUrl).subscribe({
       next: (bebidas) => this.saucerSource.next(bebidas),
@@ -23,6 +24,7 @@ export class DrinkService {
     });
   }
 
+  /** 🔹 Crear bebida */
   agregarPlatillo(bebida: Drinkinterface) {
     this.http.post(this.apiUrl, bebida).subscribe({
       next: () => this.cargarBebidas(),
@@ -30,11 +32,25 @@ export class DrinkService {
     });
   }
 
+  /** 🔹 Eliminar bebida */
   eliminarPlatillo(bebida: Drinkinterface) {
-    // Luego agregamos DELETE en backend
+    this.http.delete(`${this.apiUrl}/${bebida.id}`).subscribe({
+      next: () => {
+        console.log('✅ Bebida eliminada');
+        this.cargarBebidas();
+      },
+      error: (err) => console.error('❌ Error al eliminar bebida:', err)
+    });
   }
 
+  /** 🔹 Actualizar bebida */
   actualizarPlatillo(bebidaVieja: Drinkinterface, bebidaNueva: Drinkinterface) {
-    // Luego agregamos PUT en backend
+    this.http.put(`${this.apiUrl}/${bebidaVieja.id}`, bebidaNueva).subscribe({
+      next: () => {
+        console.log('✅ Bebida actualizada');
+        this.cargarBebidas();
+      },
+      error: (err) => console.error('❌ Error al actualizar bebida:', err)
+    });
   }
 }

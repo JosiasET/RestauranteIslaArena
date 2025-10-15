@@ -8,44 +8,26 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 
-// Importar SOLO platillos por ahora para probar
-const platillosRoutes = require('./src/Routes/platillos');
+// ✅ Importar rutas
+const platillosRoutes = require('./src/routes/platillos');
+const bebidasRoutes = require('./src/routes/bebidasRoutes');
+const especialidadesRoutes = require('./src/routes/especialidades');
+
+// ✅ Usar rutas
 app.use('/platillos', platillosRoutes);
+app.use('/bebidas', bebidasRoutes);
+app.use('/especialidades', especialidadesRoutes);
 
-// Comentar temporalmente las demás
-// const bebidasRoutes = require('./src/routes/bebidas');
-// const especialidadesRoutes = require('./src/routes/especialidades');
-// const promocionesRoutes = require('./src/routes/promociones');
-
-// app.use('/bebidas', bebidasRoutes);
-// app.use('/especialidades', especialidadesRoutes);
-// app.use('/promociones', promocionesRoutes);
-
-// ✅ RUTA PRINCIPAL - Agrega esto
+// ✅ Ruta principal
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: '🚀 API Restaurante Isla Arena - Funcionando correctamente',
     status: 'OK',
     endpoints: {
-      health: '/health',
-      platillos: {
-        GET: '/platillos',
-        POST: '/platillos',
-        PUT: '/platillos/:id', 
-        DELETE: '/platillos/:id'
-      },
-      documentacion: 'Visita /health para ver el estado del servidor'
+      platillos: '/platillos',
+      bebidas: '/bebidas',
+      especialidades: '/especialidades'
     },
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Ruta de salud
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Servidor funcionando correctamente',
-    database: 'Conectado a Supabase',
     timestamp: new Date().toISOString()
   });
 });
@@ -53,6 +35,7 @@ app.get('/health', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
   console.log(` Platillos: http://localhost:${PORT}/platillos`);
+  console.log(` Bebidas: http://localhost:${PORT}/bebidas`);
+  console.log(` Especialidades: http://localhost:${PORT}/especialidades`);
 });

@@ -116,6 +116,8 @@ export class UpFoodAmd implements OnInit {
     }
   }
 
+  
+
   private limpiarFormulario() {
     this.nombre = '';
     this.descripcion = '';
