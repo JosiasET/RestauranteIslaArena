@@ -223,6 +223,22 @@ footer {
   background: url("https://svgshare.com/i/uGJ.svg") repeat-x;
   margin: 40px 0 20px;
 }
+/* Estilos específicos para gráficos */
+.chart-container {
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  margin: auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
 
 /* Responsividad */
 @media (max-width: 900px) {

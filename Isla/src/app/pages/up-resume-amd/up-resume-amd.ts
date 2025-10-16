@@ -58,4 +58,6 @@ export class UpResumeAmd implements AfterViewInit{
     chart.draw(data, options);
   }
 
+  //
+
 }
