@@ -15,21 +15,21 @@
   letter-spacing: 1.5px;
 }
 
-/* Contenedor */
+/* Contenedor - MODIFICADO */
 .menu-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr); /* Fuerza 4 columnas */
   gap: 1.5rem;
   padding: 1rem;
-  max-width: 1100px;
+  max-width: 1300px; /* Aumentado para acomodar 4 columnas */
   margin: 0 auto;
   justify-items: center;
 }
 
-/* Tarjeta */
+/* Tarjeta - MODIFICADO */
 .platillo-card {
   width: 100%;
-  max-width: 320px;
+  max-width: 280px; /* Reducido para caber 4 columnas */
   background: #fff;
   border-radius: 0.8rem;
   overflow: hidden;
@@ -116,12 +116,116 @@
   transform: scale(0.97);
 }
 
-/* Responsivo */
-@media (max-width: 768px) {
-  .platillo-img { height: 180px; }
+/* Responsivo - MEJORADO */
+@media (max-width: 1200px) {
+  .menu-container {
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas en pantallas medianas */
+    max-width: 1000px;
+  }
 }
 
+@media (max-width: 900px) {
+  .menu-container {
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
+    max-width: 700px;
+  }
+}
+
+/* NUEVO: Tabletas pequeñas y móviles grandes */
+@media (max-width: 768px) {
+  .menu-container {
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en móviles grandes */
+    max-width: 600px;
+    gap: 1rem;
+    padding: 0.8rem;
+  }
+  
+  .platillo-card {
+    max-width: 100%;
+  }
+  
+  .platillo-img {
+    height: 180px;
+  }
+  
+  .platillo-info {
+    padding: 0.8rem;
+  }
+  
+  .platillo-info h3 {
+    font-size: 1rem;
+  }
+  
+  .platillo-info p {
+    font-size: 0.85rem;
+  }
+  
+  .precio {
+    font-size: 1rem;
+  }
+  
+  .btn-agregar {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Móviles pequeños - ajustes finales */
 @media (max-width: 480px) {
-  .menu-container { grid-template-columns: 1fr; }
-  .platillo-img { height: 160px; }
+  .menu-container {
+    grid-template-columns: repeat(2, 1fr); /* Mantenemos 2 columnas */
+    gap: 0.8rem;
+    padding: 0.6rem;
+  }
+  
+  .platillo-img {
+    height: 150px; /* Un poco más pequeño para móviles */
+  }
+  
+  .platillo-info {
+    padding: 0.6rem;
+  }
+  
+  .platillo-info h3 {
+    font-size: 0.95rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .platillo-info p {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .precio {
+    font-size: 0.95rem;
+    margin: 0.3rem 0 0.8rem 0;
+  }
+  
+  .btn-agregar {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+  }
+  
+  /* Títulos más pequeños en móviles */
+  .titulo {
+    font-size: 1.5rem;
+    margin: 0.8rem 0;
+  }
+  
+  .subtitulo {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Móviles muy pequeños - una columna solo si es necesario */
+@media (max-width: 360px) {
+  .menu-container {
+    grid-template-columns: 1fr; /* 1 columna en móviles muy pequeños */
+    max-width: 300px;
+  }
+  
+  .platillo-img {
+    height: 140px;
+  }
 }
