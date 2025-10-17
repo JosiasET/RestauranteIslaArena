@@ -18,18 +18,18 @@
 /* Contenedor adaptable */
 .menu-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr); /* Fuerza 4 columnas */
   gap: 1.5rem;
   padding: 1rem;
-  max-width: 1100px;
+  max-width: 1300px; /* Aumentado para acomodar 4 columnas */
   margin: 0 auto;
   justify-items: center;
 }
 
-/* Tarjeta */
+/* Tarjeta - MODIFICADO */
 .platillo-card {
   width: 100%;
-  max-width: 320px;
+  max-width: 280px; /* Reducido para caber 4 columnas */
   background: #fff;
   border-radius: 0.8rem;
   overflow: hidden;
@@ -87,7 +87,7 @@
 
 .precio {
   font-size: 1.1rem;
-  color: #2980b9; /* 🔵 azul marino para pescados y mariscos */
+  color: #2980b9; 
   font-weight: bold;
   display: block;
   margin: 0.5rem 0 1rem 0;

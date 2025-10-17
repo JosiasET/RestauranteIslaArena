@@ -26,9 +26,9 @@
 
 .tab-btn {
   padding: 12px 20px;
-  border: 2px solid #e74c3c;
+  border: 2px solid #2980b9;
   background: white;
-  color: #e74c3c;
+  color: #2980b9;
   border-radius: 25px;
   cursor: pointer;
   font-weight: 600;
@@ -42,13 +42,13 @@
 }
 
 .tab-btn.active {
-  background: #e74c3c;
+  background: #2980b9;
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
-/* SECCIÓN DE RECOMENDACIONES - MANTENER COMO ESTABA */
+/* SECCIÓN DE RECOMENDACIONES - ADAPTADO AL TAMAÑO DEL MENÚ */
 .recomendaciones-section {
   margin: 20px 0;
   padding: 20px;
@@ -59,7 +59,7 @@
 }
 
 .recomendaciones-titulo {
-  color: #e74c3c;
+  color: #2c3e50;
   margin-bottom: 20px;
   font-size: 1.5em;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
@@ -67,26 +67,32 @@
 
 .recomendaciones-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
-  margin-top: 15px;
+  grid-template-columns: repeat(4, 1fr); 
+  gap: 1.5rem; 
+  padding: 1rem; 
+  max-width: 1300px; 
+  margin: 0 auto;
+  justify-items: center; 
 }
 
 .recomendacion-card {
+  width: 100%;
+  max-width: 280px; 
   background: white;
-  border-radius: 10px;
+  border-radius: 0.8rem; 
   padding: 15px;
-  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.15);
-  border: 2px solid #e74c3c;
-  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(231, 76, 60, 0.15); 
+  border: 2px solid #2980b9 ;
+  transition: transform 0.25s ease, box-shadow 0.25s ease; 
   text-align: center;
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden; 
 }
 
 .recomendacion-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px); 
   box-shadow: 0 6px 20px rgba(231, 76, 60, 0.25);
 }
 
@@ -96,7 +102,7 @@
   margin: 0 auto 10px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid #e74c3c;
+  border: 2px solid #2980b9;
 }
 
 .recomendacion-img img {
@@ -136,7 +142,7 @@
 }
 
 .btn-recomendacion {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #2980b9, #2980b9);
   color: white;
   border: none;
   padding: 8px 16px;
@@ -153,19 +159,54 @@
   box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
 }
 
+/* RESPONSIVE - MISMOS BREAKPOINTS QUE EL MENÚ */
+@media (max-width: 1200px) {
+  .recomendaciones-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas en tablets grandes */
+    max-width: 1000px;
+  }
+}
+
+@media (max-width: 900px) {
+  .recomendaciones-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas en tablets */
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 600px) {
+  .recomendaciones-grid {
+    grid-template-columns: 1fr; /* 1 columna en móviles */
+    max-width: 400px;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .recomendacion-card {
+    max-width: 100%; /* Ancho completo en móviles */
+  }
+  
+  .recomendaciones-section {
+    padding: 15px;
+    margin: 15px 0;
+  }
+}
+
 /* MENÚ PRINCIPAL - 4 COLUMNAS Y ANCHO COMPLETO */
 .menu-container {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 COLUMNAS FIJAS */
+  grid-template-columns: repeat(4, 1fr); /* Fuerza 4 columnas */
   gap: 1.5rem;
   padding: 1rem;
-  max-width: 100%; /* OCUPAR TODO EL ANCHO */
+  max-width: 1300px; /* Aumentado para acomodar 4 columnas */
   margin: 0 auto;
+  justify-items: center;
 }
 
-/* Tarjeta COMPACTA para 4 columnas */
+/* Tarjeta - MODIFICADO */
 .platillo-card {
   width: 100%;
+  max-width: 280px; /* Reducido para caber 4 columnas */
   background: #fff;
   border-radius: 0.8rem;
   overflow: hidden;

@@ -53,7 +53,7 @@ export class Food implements OnInit {
   if (this.todosProductos.length === 0) return;
 
   // Si hay 3 o menos productos, mostrar todos
-  if (this.todosProductos.length <= 3) {
+  if (this.todosProductos.length <= 4) {
     this.recomendacionesDelDia = [...this.todosProductos];
     return;
   }
@@ -63,7 +63,7 @@ export class Food implements OnInit {
     .sort(() => Math.random() - 0.5);
 
   // Tomar los primeros 3 productos mezclados
-  this.recomendacionesDelDia = productosMezclados.slice(0, 3);
+  this.recomendacionesDelDia = productosMezclados.slice(0, 4);
   
   console.log('🎲 Recomendaciones del día:', this.recomendacionesDelDia.map(p => p.nombre));
 }
