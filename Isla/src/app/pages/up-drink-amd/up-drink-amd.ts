@@ -12,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class UpDrinkAmd implements OnInit {
   activeSection: string = 'upfood';
-  ultimosPlatillos: Drinkinterface[] = [];
+  todosLosPlatillos: Drinkinterface[] = []; // ← CAMBIADO: todos los platillos
   platilloEditando: Drinkinterface | null = null;
   esModoEdicion: boolean = false;
 
@@ -25,7 +25,7 @@ export class UpDrinkAmd implements OnInit {
 
   ngOnInit() {
     this.drinkService.saucer$.subscribe(bebidas => {
-      this.ultimosPlatillos = bebidas.slice(-5).reverse();
+      this.todosLosPlatillos = [...bebidas].reverse(); // ← TODOS los platillos
     });
   }
 
@@ -53,13 +53,6 @@ export class UpDrinkAmd implements OnInit {
     this.precio = platillo.precio;
     this.imageBase64 = platillo.imagen;
     this.esModoEdicion = true;
-
-    setTimeout(() => {
-      const formElement = document.querySelector('.Subir_p');
-      if (formElement) {
-        formElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
   }
 
   subirsaucer() {
@@ -83,6 +76,7 @@ export class UpDrinkAmd implements OnInit {
       };
 
       this.drinkService.actualizarPlatillo(this.platilloEditando, bebidaActualizada);
+      this.esModoEdicion = false;
       alert("Bebida actualizada exitosamente");
       this.limpiarFormulario();
     } else {
@@ -118,5 +112,10 @@ export class UpDrinkAmd implements OnInit {
     if (fileInput) {
       fileInput.value = '';
     }
+  }
+
+  // NUEVO: Método para obtener total de bebidas
+  getTotalPlatillos(): number {
+    return this.todosLosPlatillos.length;
   }
 }

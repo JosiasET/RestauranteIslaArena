@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { foodInterface } from '../../core/interface/foodInterface';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FoodService } from '../../core/service/foodService';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-up-food-amd',
@@ -10,23 +11,62 @@ import { FoodService } from '../../core/service/foodService';
   templateUrl: './up-food-amd.html',
   styleUrl: './up-food-amd.css' 
 })
-export class UpFoodAmd implements OnInit {
+export class UpFoodAmd implements OnInit, OnDestroy {
   activeSection: String = 'upfood';
-  ultimosPlatillos: foodInterface[] = [];
+  todosLosPlatillos: foodInterface[] = [];
   platilloEditando: foodInterface | null = null;
   esModoEdicion: boolean = false;
+  isLoading: boolean = true;
 
   nombre = '';
   descripcion = '';
   precio: number = 0;
   imageBase64: string = '';
 
+  private subscription: Subscription = new Subscription();
+
   constructor(private foodService: FoodService){}
 
   ngOnInit() {
-    this.foodService.saucer$.subscribe((platillos: foodInterface[]) => {
-      this.ultimosPlatillos = platillos.slice(-5).reverse();
-    });
+    console.time('CargaComponente');
+    
+    // Suscribirse al loading state
+    this.subscription.add(
+      this.foodService.loading$.subscribe(loading => {
+        this.isLoading = loading;
+        if (!loading) {
+          console.timeEnd('CargaComponente');
+        }
+      })
+    );
+
+    // Suscribirse a los platillos - OPTIMIZADO: Solo cuando hay cambios
+    this.subscription.add(
+      this.foodService.saucer$.subscribe((platillos: foodInterface[]) => {
+        console.log('🔄 Platillos actualizados:', platillos.length);
+        // OPTIMIZACIÓN: No usar reverse() que es costoso, mejor orden inicial
+        this.todosLosPlatillos = platillos; // Ya vienen ordenados del servidor
+      })
+    );
+
+    // Forzar carga inicial
+    this.cargarPlatillos();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  // MÉTODO OPTIMIZADO PARA CARGAR
+  cargarPlatillos() {
+    console.log('🔄 Solicitando carga de platillos...');
+    this.foodService.cargarPlatillos().subscribe();
+  }
+
+  // MÉTODO PARA FORZAR RECARGA
+  forzarRecarga() {
+    console.log('🔄 Forzando recarga...');
+    this.foodService.forzarRecarga();
   }
 
   setSection(section: string) {
@@ -46,8 +86,10 @@ export class UpFoodAmd implements OnInit {
 
   eliminarPlatillo(platillo: foodInterface) {
     if (confirm('¿Estás seguro de que deseas eliminar este platillo?')) {
-     this.foodService.eliminarPlatillo(platillo.id!);
-
+      this.foodService.eliminarPlatillo(platillo.id!).subscribe({
+        next: () => console.log('✅ Platillo eliminado'),
+        error: (err) => console.error('❌ Error eliminando:', err)
+      });
     }
   }
 
@@ -58,18 +100,9 @@ export class UpFoodAmd implements OnInit {
     this.precio = platillo.precio;
     this.imageBase64 = platillo.imagen;
     this.esModoEdicion = true;
-    
-    // Scroll al formulario para mejor UX
-    setTimeout(() => {
-      const formElement = document.querySelector('.Subir_p');
-      if (formElement) {
-        formElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
   }
 
   subirsaucer() {
-    // Validaciones
     if (!this.nombre || !this.descripcion || !this.precio || !this.imageBase64) {
       alert("Por favor, rellene todos los espacios");
       return;
@@ -81,7 +114,6 @@ export class UpFoodAmd implements OnInit {
     }
 
     if (this.esModoEdicion && this.platilloEditando) {
-      // Modo edición
       const platilloActualizado: foodInterface = {
         id: this.platilloEditando.id,
         nombre: this.nombre,
@@ -90,23 +122,30 @@ export class UpFoodAmd implements OnInit {
         imagen: this.imageBase64
       };
 
-     this.foodService.actualizarPlatillo(platilloActualizado);
-      this.esModoEdicion = false;
-      alert("Platillo actualizado exitosamente");
-      this.limpiarFormulario();
+      this.foodService.actualizarPlatillo(platilloActualizado).subscribe({
+        next: () => {
+          this.esModoEdicion = false;
+          alert("Platillo actualizado exitosamente");
+          this.limpiarFormulario();
+        },
+        error: (err) => console.error('❌ Error actualizando:', err)
+      });
     } else {
-      // Modo creación
       const nuevoPlatillo: foodInterface = {
-        id: 0, // El servicio asignará el ID correcto
+        id: 0,
         nombre: this.nombre,
         descripcion: this.descripcion,
         precio: this.precio,
         imagen: this.imageBase64
       };
 
-      this.foodService.agregarPlatillo(nuevoPlatillo);
-      alert("Platillo subido exitosamente");
-      this.limpiarFormulario();
+      this.foodService.agregarPlatillo(nuevoPlatillo).subscribe({
+        next: () => {
+          alert("Platillo subido exitosamente");
+          this.limpiarFormulario();
+        },
+        error: (err) => console.error('❌ Error subiendo:', err)
+      });
     }
   }
 
@@ -116,20 +155,16 @@ export class UpFoodAmd implements OnInit {
     }
   }
 
-  
-
-  private limpiarFormulario() {
+  limpiarFormulario() {
     this.nombre = '';
     this.descripcion = '';
     this.precio = 0;
     this.imageBase64 = '';
     this.platilloEditando = null;
     this.esModoEdicion = false;
-    
-    // Limpiar input file
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
+  }
+
+  getTotalPlatillos(): number {
+    return this.todosLosPlatillos.length;
   }
 }

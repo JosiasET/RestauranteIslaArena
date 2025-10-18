@@ -1,101 +1,56 @@
 <!-- Overlay de fondo -->
 <div class="cart-overlay" *ngIf="isVisible" (click)="closeCart()">
   
-  <!-- Drawer del carrito -->
+  <!-- VENTANA LARGA EN LADO DERECHO -->
   <div class="cart-drawer" (click)="preventClose($event)">
     
-    <!-- Encabezado del carrito -->
+    <!-- Encabezado -->
     <div class="cart-header">
-      <h1>TU CARRITO</h1>
-      <button class="btn-close" (click)="closeCart()">×</button>
+      <h1>🛒 Mi Carrito</h1>
+      <button class="btn-close" (click)="closeCart()" title="Cerrar carrito">×</button>
     </div>
 
-    <div class="shipping-message" *ngIf="cartItems.length > 0">
-      <p>Todos los envios son gratuitos</p>
-    </div>
-
-    <!-- Alerta de reserva -->
-    <div class="reservation-alert" *ngIf="cartItems.length > 0">
-      <label class="alert-checkbox">
-        <div class="alert-text">
-          <span class="alert-line">¡Apresurate! Otra persona también tiene uno de los productos que te interesan en su carrito. Sin embargo, lo reservaremos</span>
-          <span class="alert-line"> para ti por los siguientes <strong class="timer">{{ formattedTime }}</strong> minutos.</span>
-        </div>
-      </label>
-    </div>
-
-    <!-- Productos en el carrito -->
-    <div class="cart-products">
-      <h2>PRODUCTO</h2>
+    <!-- Contenido principal -->
+    <div class="cart-content">
       
-      <div class="product-table">
-        <div class="table-header">
-          <div class="col-product">PRODUCTO</div>
-          <div class="col-price">PRECIO</div>
-          <div class="col-quantity">CANTIDAD</div>
-          <div class="col-total">TOTAL</div>
-        </div>
+      <!-- Lista de productos -->
+      <div class="cart-products">
+        <h2>📦 Productos en el carrito ({{cartItems.length}})</h2>
         
-        <!-- Mensaje de carrito vacío -->
-        <div class="empty-cart-message" *ngIf="cartItems.length === 0">
-          <div class="empty-icon">🛒</div>
-          <h3>Tu carrito está vacío</h3>
-          <p>Agrega algunos productos deliciosos a tu carrito</p>
-        </div>
-
-        <!-- Productos en el carrito -->
-        <div *ngFor="let item of cartItems" class="table-row">
-          <div class="col-product">
+        <!-- Lista vertical de productos -->
+        <div class="product-list" *ngIf="cartItems.length > 0">
+          <div *ngFor="let item of cartItems" class="product-item">
             <div class="product-info">
-              <h3>{{ item.nombre }}</h3>
-              <p>{{ item.descripcion }}</p>
+              <div class="product-name">{{ item.nombre }}</div>
+              <div class="product-details">
+                <span class="product-price">{{ item.precio | currency }}</span>
+                <span class="product-quantity">Cantidad: {{ item.cantidad || 1 }}</span>
+              </div>
             </div>
-          </div>
-          <div class="col-price">
-            <span class="price">{{ item.precio | currency }}</span>
-          </div>
-          <div class="col-quantity">
-            <span class="quantity">{{ item.cantidad || 1 }}</span>
-          </div>
-          <div class="col-total">
-            <span class="total-price">{{ (item.precio * (item.cantidad || 1)) | currency }}</span>
-          </div>
-          <div class="col-actions">
-            <button class="btn-eliminar" (click)="eliminarProducto(item.id)">
+            <button class="btn-eliminar" (click)="eliminarProducto(item.id)" title="Eliminar producto">
               🗑️ Eliminar
             </button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Resumen del pedido -->
-    <div class="order-summary" *ngIf="cartItems.length > 0">
-      <h2>RESUMEN DEL PEDIDO</h2>
-      
-      <div class="summary-details">
-        <div class="summary-row">
-          <span>Subtotal</span>
-          <span>{{ getTotal() | currency }}</span>
-        </div>
-        <div class="summary-row total">
-          <span>TOTAL:</span>
-          <span>{{ getTotal() | currency }}</span>
+        <!-- Mensaje de carrito vacío -->
+        <div class="empty-cart-message" *ngIf="cartItems.length === 0">
+          <div class="empty-icon">🛒</div>
+          <h3>Tu carrito está vacío</h3>
+          <p>Agrega productos deliciosos desde el menú</p>
         </div>
       </div>
-    </div>
 
-    <!-- Botones de acción -->
-    <div class="cart-actions">
-      <button class="btn-checkout" [disabled]="cartItems.length === 0" (click)="finalizarPedido()">
-        FINALIZAR PEDIDO
-      </button>
-      <button class="btn-continue" (click)="continueShopping()">SEGUIR COMPRANDO</button>
-    </div>
+      <!-- Botones de acción en la parte inferior -->
+      <div class="cart-actions" *ngIf="cartItems.length > 0">
+        <button class="btn-checkout" (click)="finalizarPedido()">
+          ✅ Finalizar Pedido
+        </button>
+        <button class="btn-continue" (click)="continueShopping()">
+          ↩️ Volver a Comprar
+        </button>
+      </div>
 
-    <!-- Garantía -->
-    <div class="security-guarantee">
-      <p>Garantía de compra segura</p>
     </div>
 
   </div>

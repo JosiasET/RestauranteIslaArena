@@ -122,16 +122,15 @@ export class Food implements OnInit {
   }
 
   agregarAlCarrito(producto: any) {
-    const cartItem: CartItem = {
-      id: Date.now(),
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      precio: producto.precio,
-      imagen: producto.imagen,
-      cantidad: 1
-    };
+  const cartItem: CartItem = {
+    id: producto.id, // ← USAR EL ID REAL DEL PRODUCTO, no Date.now()
+    nombre: producto.nombre,
+    descripcion: producto.descripcion,
+    precio: producto.precio,
+    imagen: producto.imagen,
+    cantidad: 1
+  };
 
-    this.cartService.addToCart(cartItem);
-    //alert(`${producto.nombre} agregado al carrito!`);
-  }
+  this.cartService.addToCart(cartItem);
+}
 }

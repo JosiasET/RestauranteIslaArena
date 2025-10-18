@@ -26,16 +26,38 @@ export class CartService {
   }
 
   addToCart(product: CartItem) {
+    console.log('=== 🚨 DEBUG CART SERVICE ===');
+    console.log('📦 Producto recibido:', {
+      id: product.id,
+      nombre: product.nombre,
+      tipoId: typeof product.id
+    });
+    
+    console.log('🛒 Carrito ANTES:', this.cartItems.map(item => ({
+      id: item.id, 
+      nombre: item.nombre, 
+      cantidad: item.cantidad
+    })));
+
     const existingItem = this.cartItems.find(item => item.id === product.id);
     
     if (existingItem) {
       existingItem.cantidad += 1;
+      console.log('✅ EXISTE - Cantidad incrementada:', existingItem.nombre, 'x', existingItem.cantidad);
     } else {
       this.cartItems.push({...product, cantidad: 1});
+      console.log('🆕 NUEVO - Producto agregado:', product.nombre);
     }
+    
     this.updateCart();
-    this.openCart(); // ← ABRE EL CARRITO AUTOMÁTICAMENTE
-    console.log('Producto agregado al carrito:', product.nombre);
+    this.openCart();
+    
+    console.log('🛒 Carrito DESPUÉS:', this.cartItems.map(item => ({
+      id: item.id, 
+      nombre: item.nombre, 
+      cantidad: item.cantidad
+    })));
+    console.log('=== 🚨 FIN DEBUG ===');
   }
 
   getCartItems(): CartItem[] {
@@ -61,14 +83,12 @@ export class CartService {
     if (savedCart) {
       this.cartItems = JSON.parse(savedCart);
       this.cartSubject.next(this.cartItems);
-      console.log('Carrito cargado desde localStorage:', this.cartItems);
     }
   }
 
   removeFromCart(itemId: number) {
     this.cartItems = this.cartItems.filter(item => item.id !== itemId);
     this.updateCart();
-    console.log('Producto eliminado del carrito');
   }
 
   // MÉTODOS DEL DRAWER
@@ -86,5 +106,33 @@ export class CartService {
 
   getTotalItems(): number {
     return this.cartItems.reduce((total, item) => total + item.cantidad, 0);
+  }
+
+  // MÉTODO DE EMERGENCIA: Forzar unificación por nombre
+  forceMergeByName() {
+    console.log('🔄 Forzando unificación por nombre...');
+    
+    const mergedItems: CartItem[] = [];
+    const seenNames = new Map<string, CartItem>();
+    
+    this.cartItems.forEach(item => {
+      const normalizedName = item.nombre.toLowerCase().trim();
+      
+      if (seenNames.has(normalizedName)) {
+        // Producto duplicado - sumar cantidades
+        const existingItem = seenNames.get(normalizedName)!;
+        existingItem.cantidad += item.cantidad;
+        console.log('🔀 Unificado:', existingItem.nombre, 'cantidad:', existingItem.cantidad);
+      } else {
+        // Producto nuevo - agregar
+        const newItem = {...item};
+        mergedItems.push(newItem);
+        seenNames.set(normalizedName, newItem);
+      }
+    });
+    
+    this.cartItems = mergedItems;
+    this.updateCart();
+    console.log('✅ Unificación completada');
   }
 }

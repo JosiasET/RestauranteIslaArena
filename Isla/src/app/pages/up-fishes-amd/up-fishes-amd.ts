@@ -1,4 +1,3 @@
-// app/components/up-fishes-amd/up-fishes-amd.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +12,7 @@ import { Fish } from '../../core/interface/Fish';
 })
 export class UpFishesAmd implements OnInit {
   activeSection: string = 'upfishes';
-  ultimosPlatillos: Fish[] = [];
+  todosLosPlatillos: Fish[] = []; // ← CAMBIADO: todos los platillos
   platilloEditando: Fish | null = null;
   esModoEdicion: boolean = false;
 
@@ -26,7 +25,7 @@ export class UpFishesAmd implements OnInit {
 
   ngOnInit() {
     this.fishesService.saucer$.subscribe((platillos: Fish[]) => {
-      this.ultimosPlatillos = platillos.slice(-5).reverse();
+      this.todosLosPlatillos = [...platillos].reverse(); // ← TODOS los platillos
     });
   }
 
@@ -58,12 +57,6 @@ export class UpFishesAmd implements OnInit {
     this.precio = platillo.precio;
     this.imageBase64 = platillo.imagen;
     this.esModoEdicion = true;
-
-    // Scroll al formulario
-    setTimeout(() => {
-      const formElement = document.querySelector('.Subir_p');
-      if (formElement) formElement.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
   }
 
   subirsaucer() {
@@ -121,5 +114,10 @@ export class UpFishesAmd implements OnInit {
 
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
+  }
+
+  // NUEVO: Método para obtener total de platillos
+  getTotalPlatillos(): number {
+    return this.todosLosPlatillos.length;
   }
 }

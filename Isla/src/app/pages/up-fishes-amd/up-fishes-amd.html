@@ -3,7 +3,7 @@
 
   <!-- Barra de inputs -->
   <div class="form-bar">
-    <input type="text" [(ngModel)]="nombre" placeholder="Nombreeee de la especialidad" class="form-input">
+    <input type="text" [(ngModel)]="nombre" placeholder="Nombre de la especialidad" class="form-input">
     <input type="text" [(ngModel)]="descripcion" placeholder="Descripción de la especialidad" class="form-input">
     <input type="number" [(ngModel)]="precio" placeholder="Precio de la especialidad" class="form-input" min="0">
 
@@ -23,40 +23,42 @@
     </div>
   </div>
 
-  <!-- Tabla de especialidades -->
-  <div *ngIf="ultimosPlatillos.length > 0" class="tabla-platillos">
-    <h3 class="sub_3">Últimas Especialidades</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Precio</th>
-          <th>Imagen</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let platillo of ultimosPlatillos">
-          <td class="nombre-cell">{{ platillo.nombre }}</td>
-          <td class="descripcion-cell">{{ platillo.descripcion }}</td>
-          <td class="precio-cell">{{ platillo.precio | currency }}</td>
-          <td class="imagen-cell">
-            <img [src]="platillo.imagen" alt="{{platillo.nombre}}" class="thumb">
-          </td>
-          <td class="acciones-cell">
-            <button (click)="editarPlatillo(platillo)" class="btn-editar">✏ Editar</button>
-            <button (click)="eliminarPlatillo(platillo)" class="btn-eliminar">🗑 Eliminar</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <!-- NUEVA CUADRÍCULA DE TODAS LAS ESPECIALIDADES -->
+  <div class="lista-platillos">
+    <div class="lista-header">
+      <h2>TODAS LAS ESPECIALIDADES ({{ getTotalPlatillos() }})</h2>
+      <p>Gestiona todas tus especialidades existentes</p>
+    </div>
 
-  <!-- Mensaje cuando no hay especialidades -->
-  <div *ngIf="ultimosPlatillos.length === 0" class="empty-state">
-    <div class="empty-icon">🐟</div>
-    <h3>No hay especialidades aún</h3>
-    <p>Comienza agregando tu primera especialidad usando el formulario superior.</p>
+    <!-- CUADRÍCULA DE ESPECIALIDADES -->
+    <div class="platillos-grid">
+      <div *ngFor="let platillo of todosLosPlatillos" class="platillo-card-admin">
+        <div class="platillo-image">
+          <img [src]="platillo.imagen" [alt]="platillo.nombre">
+        </div>
+        
+        <div class="platillo-info">
+          <h3>{{ platillo.nombre }}</h3>
+          <p class="descripcion">{{ platillo.descripcion }}</p>
+          <p class="precio">${{ platillo.precio }}</p>
+        </div>
+
+        <div class="platillo-actions">
+          <button class="btn-editar" (click)="editarPlatillo(platillo)">
+            ✏️ Editar
+          </button>
+          <button class="btn-eliminar" (click)="eliminarPlatillo(platillo)">
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENSAJE SI NO HAY ESPECIALIDADES -->
+    <div *ngIf="todosLosPlatillos.length === 0" class="no-platillos">
+      <div class="empty-icon">🐟</div>
+      <h3>No hay especialidades aún</h3>
+      <p>Comienza agregando tu primera especialidad usando el formulario superior.</p>
+    </div>
   </div>
 </div>

@@ -27,16 +27,16 @@ export class Fishes implements OnInit {
     });
   }
 
-  agregarAlCarrito(platillo: Fish) {
-    const cartItem: CartItem = {
-      id: Date.now(),
-      nombre: platillo.nombre,
-      descripcion: platillo.descripcion,
-      precio: platillo.precio,
-      imagen: platillo.imagen,
-      cantidad: 1
-    };
-    this.cartService.addToCart(cartItem);
-    //alert(`${platillo.nombre} agregado al carrito!`);
-  }
+  agregarAlCarrito(producto: any) {
+  const cartItem: CartItem = {
+    id: producto.id, // ← USAR EL ID REAL DEL PRODUCTO, no Date.now()
+    nombre: producto.nombre,
+    descripcion: producto.descripcion,
+    precio: producto.precio,
+    imagen: producto.imagen,
+    cantidad: 1
+  };
+
+  this.cartService.addToCart(cartItem);
+}
 }

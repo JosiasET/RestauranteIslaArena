@@ -144,8 +144,10 @@ export class MycartDrawer implements OnInit, OnDestroy {
     }
   }
 
-  continueShopping() {
-    this.closeCart();
-    this.router.navigate(['/Home']);
-  }
+  // En el método continueShopping, cambiamos el comportamiento
+continueShopping() {
+  this.closeCart();
+  // NO navega al Home, simplemente cierra el carrito
+  // El usuario se queda en la página donde estaba
+}
 }

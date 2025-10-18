@@ -27,16 +27,16 @@ export class Drink implements OnInit { // ✅ implementar OnInit
     });
   }
 
-  agregarAlCarrito(bebida: Drinkinterface) {
-    const cartItem: CartItem = {
-      id: Date.now(),
-      nombre: bebida.nombre,
-      descripcion: bebida.descripcion,
-      precio: bebida.precio,
-      imagen: bebida.imagen,
-      cantidad: 1
-    };
-    this.cartService.addToCart(cartItem);
-    //alert(`${bebida.nombre} agregado al carrito!`);
-  }
+  agregarAlCarrito(producto: any) {
+  const cartItem: CartItem = {
+    id: producto.id, // ← USAR EL ID REAL DEL PRODUCTO, no Date.now()
+    nombre: producto.nombre,
+    descripcion: producto.descripcion,
+    precio: producto.precio,
+    imagen: producto.imagen,
+    cantidad: 1
+  };
+
+  this.cartService.addToCart(cartItem);
+}
 }
