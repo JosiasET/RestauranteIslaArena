@@ -1,100 +1,54 @@
-const db = require("../config/bd");
+const db = require("../config/database");
 
-const promocionesController = {
-  getAll: async (req, res) => {
-    try {
-      const { data, error } = await db
-        .from('Promociones')
-        .select('*');
-      
-      if (error) throw error;
-      
-      const promociones = data.map(item => ({
-        ...item,
-        imagen: item.imagen ? `data:image/png;base64,${item.imagen.toString('base64')}` : null
-      }));
-      
-      res.json(promociones);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
+// Normalizar los nombres de los campos
+function normalizarCelebraciones(rows) {
+  return rows.map((c) => ({
+    id: c.id_celebracion,
+    nombre_completo: c.nombre_completo,
+    fecha_nacimiento: c.fecha_nacimiento,
+    telefono: c.telefono,
+    fecha_preferida: c.fecha_preferida,
+    hora_preferida: c.hora_preferida,
+    acepta_verificacion: c.acepta_verificacion
+  }));
+}
 
-  create: async (req, res) => {
+const celebrateController = {
+  // Crear nueva celebración
+  crearCelebracion: async (req, res) => {
     try {
-      const { nombre, descripcion, imagen } = req.body;
-      
-      if (!nombre) {
-        return res.status(400).json({ error: "Nombre es requerido" });
+      const { nombre_completo, fecha_nacimiento, telefono, fecha_preferida, hora_preferida, acepta_verificacion } = req.body;
+
+      if (!nombre_completo || !fecha_nacimiento || !telefono || !fecha_preferida || !hora_preferida) {
+        return res.status(400).json({ error: "Todos los campos son requeridos" });
       }
 
-      let imagenBuffer = null;
-      if (imagen) {
-        imagenBuffer = Buffer.from(imagen.replace(/^data:image\/\w+;base64,/, ""), "base64");
-      }
+      const result = await db.query(
+        `INSERT INTO Celebrate (nombre_completo, fecha_nacimiento, telefono, fecha_preferida, hora_preferida, acepta_verificacion)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [nombre_completo, fecha_nacimiento, telefono, fecha_preferida, hora_preferida, acepta_verificacion]
+      );
 
-      const { data, error } = await db
-        .from('Promociones')
-        .insert([{ nombre, descripcion, imagen: imagenBuffer }])
-        .select();
-
-      if (error) throw error;
-      
-      res.json({ 
-        message: "✅ Promoción guardada", 
-        data: data[0] 
+      res.json({
+        message: "🎉 Registro guardado correctamente",
+        data: normalizarCelebraciones(result.rows)[0],
       });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+      console.error("❌ Error al crear celebración:", err);
+      res.status(500).json({ error: "Error al registrar la celebración" });
     }
   },
 
-  update: async (req, res) => {
+  // Obtener todas las celebraciones
+  obtenerCelebraciones: async (req, res) => {
     try {
-      const { id } = req.params;
-      const { nombre, descripcion, imagen } = req.body;
-
-      let imagenBuffer = null;
-      if (imagen) {
-        imagenBuffer = Buffer.from(imagen.replace(/^data:image\/\w+;base64,/, ""), "base64");
-      }
-
-      const updateData = { nombre, descripcion };
-      if (imagenBuffer !== null) updateData.imagen = imagenBuffer;
-
-      const { data, error } = await db
-        .from('Promociones')
-        .update(updateData)
-        .eq('id_promocion', id)
-        .select();
-
-      if (error) throw error;
-      
-      res.json({ 
-        message: "✅ Promoción actualizada", 
-        data: data[0] 
-      });
+      const result = await db.query("SELECT * FROM Celebrate ORDER BY id_celebracion DESC");
+      res.json(normalizarCelebraciones(result.rows));
     } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-
-  delete: async (req, res) => {
-    try {
-      const { id } = req.params;
-      
-      const { error } = await db
-        .from('Promociones')
-        .delete()
-        .eq('id_promocion', id);
-
-      if (error) throw error;
-      
-      res.json({ message: "✅ Promoción eliminada" });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+      console.error(err);
+      res.status(500).json({ error: "Error al obtener las celebraciones" });
     }
   }
 };
 
-module.exports = promocionesController;
+module.exports = celebrateController;

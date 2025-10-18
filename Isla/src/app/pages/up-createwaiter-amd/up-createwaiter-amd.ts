@@ -1,27 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface Usuario {
-  id: number;
-  nombre: string;
-  apellido: string;
-  usuario: string;
-  contrasena: string;
-  rol: string; // 'administrador' o 'cajero'
-  turno: string;
-  activo: boolean;
-}
+import { MeseroService } from '../../core/service/WaiterService';
+import { MeseroInterface } from '../../core/interface/waiter';
 
 @Component({
   selector: 'app-up-createwaiter-amd',
   imports: [CommonModule, FormsModule],
   templateUrl: './up-createwaiter-amd.html',
-  styleUrl: './up-createwaiter-amd.css'
+  styleUrls: ['./up-createwaiter-amd.css']
 })
 export class UpCreatewaiterAmd implements OnInit {
-  usuarios: Usuario[] = [];
-  usuarioEditando: Usuario | null = null;
+  meseros: MeseroInterface[] = [];
+  meseroEditando: MeseroInterface | null = null;
   esModoEdicion: boolean = false;
 
   // Campos del formulario
@@ -32,145 +23,65 @@ export class UpCreatewaiterAmd implements OnInit {
   rol: string = '';
   turno: string = '';
 
+  constructor(private meseroService: MeseroService) {}
+
   ngOnInit() {
-    // Cargar usuarios existentes
-    this.cargarUsuarios();
+    this.meseroService.meseros$.subscribe(meseros => {
+      this.meseros = [...meseros].reverse();
+    });
   }
 
-  cargarUsuarios() {
-    // Temporal: datos de ejemplo
-    this.usuarios = [
-      {
-        id: 1,
-        nombre: 'Carlos',
-        apellido: 'Rodríguez',
-        usuario: 'carlos.admin',
-        contrasena: '*****',
-        rol: 'administrador',
-        turno: 'completo',
-        activo: true
-      },
-      {
-        id: 2,
-        nombre: 'Ana',
-        apellido: 'García',
-        usuario: 'ana.cajero',
-        contrasena: '*****',
-        rol: 'cajero',
-        turno: 'matutino',
-        activo: true
-      },
-      {
-        id: 3,
-        nombre: 'Luis',
-        apellido: 'Martínez',
-        usuario: 'luis.cajero',
-        contrasena: '*****',
-        rol: 'cajero',
-        turno: 'vespertino',
-        activo: false
-      }
-    ];
-  }
-
-  crearUsuario() {
-    // Validaciones
+  crearMesero() {
     if (!this.nombre || !this.apellido || !this.usuario || !this.contrasena || !this.rol || !this.turno) {
       alert("Por favor, complete todos los campos");
       return;
     }
 
-    if (this.esModoEdicion && this.usuarioEditando) {
-      // Modo edición
-      const usuarioActualizado: Usuario = {
-        ...this.usuarioEditando,
-        nombre: this.nombre,
-        apellido: this.apellido,
-        usuario: this.usuario,
-        contrasena: this.contrasena,
-        rol: this.rol,
-        turno: this.turno
-      };
+    const meseroData: MeseroInterface = {
+      id: this.meseroEditando ? this.meseroEditando.id : 0,
+      nombre: this.nombre,
+      apellido: this.apellido,
+      usuario: this.usuario,
+      contrasena: this.contrasena,
+      rol: this.rol,
+      turno: this.turno,
+      activo: true
+    };
 
-      const index = this.usuarios.findIndex(u => u.id === this.usuarioEditando!.id);
-      if (index !== -1) {
-        this.usuarios[index] = usuarioActualizado;
-      }
-
-      alert("Usuario actualizado exitosamente");
-      this.limpiarFormulario();
+    if (this.esModoEdicion && this.meseroEditando) {
+      this.meseroService.actualizarMesero(this.meseroEditando, meseroData);
+      alert("Mesero actualizado exitosamente");
     } else {
-      // Modo creación
-      const nuevoUsuario: Usuario = {
-        id: Date.now(),
-        nombre: this.nombre,
-        apellido: this.apellido,
-        usuario: this.usuario,
-        contrasena: this.contrasena,
-        rol: this.rol,
-        turno: this.turno,
-        activo: true
-      };
-
-      this.usuarios.push(nuevoUsuario);
-      alert("Usuario creado exitosamente");
-      this.limpiarFormulario();
+      this.meseroService.crearMesero(meseroData);
+      alert("Mesero creado exitosamente");
     }
+
+    this.limpiarFormulario();
   }
 
-  editarUsuario(usuario: Usuario) {
-    this.usuarioEditando = usuario;
-    this.nombre = usuario.nombre;
-    this.apellido = usuario.apellido;
-    this.usuario = usuario.usuario;
-    this.contrasena = usuario.contrasena;
-    this.rol = usuario.rol;
-    this.turno = usuario.turno;
+  editarMesero(mesero: MeseroInterface) {
+    this.meseroEditando = mesero;
+    this.nombre = mesero.nombre;
+    this.apellido = mesero.apellido;
+    this.usuario = mesero.usuario;
+    this.contrasena = mesero.contrasena;
+    this.rol = mesero.rol;
+    this.turno = mesero.turno;
     this.esModoEdicion = true;
-
-    // Scroll al formulario
-    setTimeout(() => {
-      const formElement = document.querySelector('.Subir_p');
-      if (formElement) {
-        formElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
   }
 
-  toggleEstado(usuario: Usuario) {
-    usuario.activo = !usuario.activo;
-    const accion = usuario.activo ? 'activado' : 'desactivado';
-    alert(`Usuario ${accion} exitosamente`);
+  toggleEstado(mesero: MeseroInterface) {
+    this.meseroService.toggleEstado(mesero);
   }
 
-  eliminarUsuario(usuario: Usuario) {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      this.usuarios = this.usuarios.filter(u => u.id !== usuario.id);
-      alert("Usuario eliminado exitosamente");
+  eliminarMesero(mesero: MeseroInterface) {
+    if (confirm("¿Deseas eliminar este mesero?")) {
+      this.meseroService.eliminarMesero(mesero);
     }
   }
 
   cancelarEdicion() {
-    if (confirm('¿Cancelar edición? Los cambios no guardados se perderán.')) {
-      this.limpiarFormulario();
-    }
-  }
-
-  getRolText(rol: string): string {
-    const roles = {
-      'administrador': '👑 Administrador',
-      'cajero': '💳 Cajero'
-    };
-    return roles[rol as keyof typeof roles] || rol;
-  }
-
-  getTurnoText(turno: string): string {
-    const turnos = {
-      'matutino': '🌅 Matutino',
-      'vespertino': '🌇 Vespertino', 
-      'completo': '🌞 Completo'
-    };
-    return turnos[turno as keyof typeof turnos] || turno;
+    this.limpiarFormulario();
   }
 
   private limpiarFormulario() {
@@ -180,7 +91,18 @@ export class UpCreatewaiterAmd implements OnInit {
     this.contrasena = '';
     this.rol = '';
     this.turno = '';
-    this.usuarioEditando = null;
+    this.meseroEditando = null;
     this.esModoEdicion = false;
+  }
+
+  getRolText(rol: string): string {
+    return rol === 'administrador' ? '👑 Administrador' : '💳 Cajero';
+  }
+
+  getTurnoText(turno: string): string {
+    if (turno === 'matutino') return '🌅 Matutino';
+    if (turno === 'vespertino') return '🌇 Vespertino';
+    if (turno === 'completo') return '🌞 Completo';
+    return turno;
   }
 }

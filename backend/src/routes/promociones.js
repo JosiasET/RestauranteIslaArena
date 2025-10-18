@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const promocionesController = require("../controllers/promocionesController");
+const celebrateController = require("../controllers/celebrateController");
 
-router.get("/", promocionesController.getAll);
-router.post("/", promocionesController.create);
-router.put("/:id", promocionesController.update);
-router.delete("/:id", promocionesController.delete);
+// Crear celebración
+router.post("/", celebrateController.crearCelebracion);
+
+// Obtener todas las celebraciones
+router.get("/", celebrateController.obtenerCelebraciones);
 
 module.exports = router;

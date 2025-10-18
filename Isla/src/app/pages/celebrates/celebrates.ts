@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CelebrateService } from '../../core/service/CelebrateService';
+import { CelebrateInterface } from '../../core/interface/celebrate';
 
 @Component({
   selector: 'app-celebrates',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './celebrates.html',
-  styleUrl: './celebrates.css'
+  styleUrls: ['./celebrates.css']
 })
 export class Celebrates {
-  // Información del cliente
   nombre: string = '';
   fechaNacimiento: string = '';
   telefono: string = '';
@@ -18,29 +19,15 @@ export class Celebrates {
   horaReserva: string = '';
   aceptoTerminos: boolean = false;
 
-  // Estado del formulario
   formularioEnviado: boolean = false;
   esSuCumpleanios: boolean = false;
   loading: boolean = false;
   codigoReserva: string = '';
-
-  // Fecha mínima para reservación (hoy)
   minDate: string;
 
-  // Regalo de cumpleaños
-  regalo = {
-    platillo: 'Coctel de Camarón Premium',
-    bebida: 'Margarita Especial de la Casa',
-    postre: 'Postre sorpresa',
-    descripcion: 'Delicioso coctel de camarones con salsa especial acompañado de nuestra bebida signature'
-  };
-
-  constructor() {
-    // Establecer fecha mínima como hoy
+  constructor(private celebrateService: CelebrateService) {
     const hoy = new Date();
     this.minDate = hoy.toISOString().split('T')[0];
-    
-    // Si ya es después de las 8 PM, permitir reservar desde mañana
     if (hoy.getHours() >= 20) {
       const manana = new Date();
       manana.setDate(hoy.getDate() + 1);
@@ -48,64 +35,78 @@ export class Celebrates {
     }
   }
 
-  verificarCumpleanios() {
+  verificarCumpleanios(): boolean {
     if (!this.fechaNacimiento) return false;
-    
     const hoy = new Date();
     const cumpleanios = new Date(this.fechaNacimiento);
-    
-    return hoy.getMonth() === cumpleanios.getMonth() && 
-           hoy.getDate() === cumpleanios.getDate();
+    return hoy.getMonth() === cumpleanios.getMonth() && hoy.getDate() === cumpleanios.getDate();
   }
 
   generarCodigoReserva(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let codigo = '';
-    for (let i = 0; i < 8; i++) {
-      codigo += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return codigo;
+    return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   }
 
-  onSubmit() {
-    this.loading = true;
-    
-    // Simular verificación y reservación
-    setTimeout(() => {
-      this.esSuCumpleanios = this.verificarCumpleanios();
-      this.formularioEnviado = true;
+onSubmit() {
+  this.loading = true;
+  console.log("⏳ Verificando datos...");
+
+  // === VALIDAR EDAD ===
+  const fechaNac = new Date(this.fechaNacimiento);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - fechaNac.getFullYear();
+  const mes = hoy.getMonth() - fechaNac.getMonth();
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+    edad--;
+  }
+
+  console.log("🎂 Edad calculada:", edad);
+
+  if (edad < 18) {
+    alert("🚫 Usted no es mayor de edad. No puede registrar la promoción.");
+    this.loading = false;
+    return;
+  }
+
+  // === VALIDAR TELÉFONO ===
+  const telefonoValido = /^[0-9]{10}$/.test(this.telefono);
+  if (!telefonoValido) {
+    alert("📵 El número telefónico debe contener exactamente 10 dígitos numéricos.");
+    this.loading = false;
+    return;
+  }
+
+  // === SI PASA LAS VALIDACIONES, SE GUARDA ===
+  const reservacion: CelebrateInterface = {
+    nombre_completo: this.nombre,
+    fecha_nacimiento: this.fechaNacimiento,
+    telefono: this.telefono,
+    fecha_preferida: this.fechaReserva,
+    hora_preferida: this.horaReserva,
+    acepta_verificacion: this.aceptoTerminos
+  };
+
+  this.celebrateService.crearCelebracion(reservacion).subscribe({
+    next: (res) => {
+      console.log("✅ Guardado en DB:", res);
+      alert("🎉 Registro guardado correctamente. ¡Feliz cumpleaños!");
       this.loading = false;
-      
-      if (this.esSuCumpleanios) {
-        this.codigoReserva = this.generarCodigoReserva();
-        console.log('🎉 Reservación confirmada. Código:', this.codigoReserva);
-        
-        // Aquí normalmente enviarías los datos a tu backend
-        this.guardarReservacionEnLocalStorage();
-      }
-    }, 2000);
-  }
+      this.formularioEnviado = true;
+      this.esSuCumpleanios = true;
+      this.codigoReserva = this.generarCodigoReserva();
+    },
+    error: (err) => {
+      console.error("❌ Error guardando en DB:", err);
+      alert("⚠️ Error al guardar en la base de datos. Revisa la consola.");
+      this.loading = false;
+    }
+  });
+}
 
-  private guardarReservacionEnLocalStorage() {
-    const reservacion = {
-      codigo: this.codigoReserva,
-      nombre: this.nombre,
-      fechaNacimiento: this.fechaNacimiento,
-      telefono: this.telefono,
-      fechaReserva: this.fechaReserva,
-      horaReserva: this.horaReserva,
-      timestamp: new Date().toISOString()
-    };
-    
-    // Guardar en localStorage
-    localStorage.setItem('reservacionCumpleanos', JSON.stringify(reservacion));
-    console.log('Reservación guardada localmente');
-  }
+
 
   agregarACalendario() {
-    // Lógica simple para agregar a calendario
-    const fechaReserva = new Date(this.fechaReserva + 'T' + this.horaReserva);
-    //alert(`📅 Evento agregado para: ${fechaReserva.toLocaleString()}`);
+    console.log('🗓️ Evento agregado al calendario');
   }
 
   reiniciarFormulario() {

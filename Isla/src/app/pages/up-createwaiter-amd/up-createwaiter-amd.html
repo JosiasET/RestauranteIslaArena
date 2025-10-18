@@ -1,5 +1,5 @@
 <div class="Subir_p">
-  <h2 class="Subtitulo">{{ esModoEdicion ? 'EDITAR USUARIO' : 'CREAR USUARIO' }}</h2>
+  <h2 class="Subtitulo">{{ esModoEdicion ? 'EDITAR MESERO' : 'CREAR MESERO' }}</h2>
 
   <!-- Barra de inputs -->
   <div class="form-bar">
@@ -22,8 +22,8 @@
     </select>
 
     <div class="action-buttons">
-      <button (click)="crearUsuario()" class="submit-btn">
-        {{ esModoEdicion ? 'Actualizar Usuario' : 'Crear Usuario' }}
+      <button (click)="crearMesero()" class="submit-btn">
+        {{ esModoEdicion ? 'Actualizar Mesero' : 'Crear Mesero' }}
       </button>
       <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn">
         Cancelar
@@ -31,9 +31,9 @@
     </div>
   </div>
 
-  <!-- Tabla de usuarios -->
-  <div *ngIf="usuarios.length > 0" class="tabla-platillos">
-    <h3 class="sub_3">Usuarios Registrados</h3>
+  <!-- Tabla de meseros -->
+  <div *ngIf="meseros.length > 0" class="tabla-platillos">
+    <h3 class="sub_3">Meseros Registrados</h3>
     <table>
       <thead>
         <tr>
@@ -46,36 +46,36 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let usuario of usuarios">
-          <td class="nombre-cell">{{ usuario.nombre }} {{ usuario.apellido }}</td>
-          <td class="usuario-cell">{{ usuario.usuario }}</td>
+        <tr *ngFor="let mesero of meseros">
+          <td class="nombre-cell">{{ mesero.nombre }} {{ mesero.apellido }}</td>
+          <td class="usuario-cell">{{ mesero.usuario }}</td>
           <td class="rol-cell">
-            <span [class]="'badge-' + usuario.rol">{{ getRolText(usuario.rol) }}</span>
+            <span [class]="'badge-' + mesero.rol">{{ getRolText(mesero.rol) }}</span>
           </td>
           <td class="turno-cell">
-            <span [class]="'badge-' + usuario.turno">{{ getTurnoText(usuario.turno) }}</span>
+            <span [class]="'badge-' + mesero.turno">{{ getTurnoText(mesero.turno) }}</span>
           </td>
           <td class="estado-cell">
-            <span [class]="'badge-' + (usuario.activo ? 'activo' : 'inactivo')">
-              {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+            <span [class]="'badge-' + (mesero.activo ? 'activo' : 'inactivo')">
+              {{ mesero.activo ? 'Activo' : 'Inactivo' }}
             </span>
           </td>
           <td class="acciones-cell">
-            <button (click)="editarUsuario(usuario)" class="btn-editar">✏ Editar</button>
-            <button (click)="toggleEstado(usuario)" class="btn-estado">
-              {{ usuario.activo ? '🚫 Desactivar' : '✅ Activar' }}
+            <button (click)="editarMesero(mesero)" class="btn-editar">✏ Editar</button>
+            <button (click)="toggleEstado(mesero)" class="btn-estado">
+              {{ mesero.activo ? '🚫 Desactivar' : '✅ Activar' }}
             </button>
-            <button (click)="eliminarUsuario(usuario)" class="btn-eliminar">🗑 Eliminar</button>
+            <button (click)="eliminarMesero(mesero)" class="btn-eliminar">🗑 Eliminar</button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Mensaje cuando no hay usuarios -->
-  <div *ngIf="usuarios.length === 0" class="empty-state">
+  <!-- Mensaje cuando no hay meseros -->
+  <div *ngIf="meseros.length === 0" class="empty-state">
     <div class="empty-icon">👨‍💼</div>
-    <h3>No hay usuarios registrados</h3>
-    <p>Comienza agregando tu primer usuario usando el formulario superior.</p>
+    <h3>No hay meseros registrados</h3>
+    <p>Comienza agregando tu primer mesero usando el formulario superior.</p>
   </div>
 </div>
