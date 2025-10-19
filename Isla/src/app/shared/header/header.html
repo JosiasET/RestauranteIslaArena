@@ -1,84 +1,61 @@
-<div class="contenedor_superior bg-gradient-to-r from-blue-400 to-blue-600 shadow-lg sticky top-0 z-50 py-2">
-  <div class="contenedor_lot max-w-7xl mx-auto flex justify-between items-center px-4">
-    
+
+<!-- BARRA SUPERIOR COMPACTA -->
+<div class="contenedor_superior">
+  <div class="contenedor_lot">
     <!-- LOGO Y NOMBRE -->
-    <div class="logo-section flex items-center gap-4">
-      <img class="logo1 w-14 h-14 rounded-full object-cover cursor-pointer transition-transform hover:scale-105 shadow-md" 
-           (click)="goHome()" src="img/logo.png" alt="Logo Isla Arena">
+    <div class="logo-section">
+      <img class="logo1" (click)="goHome()" src="img/logo.png" alt="Logo Isla Arena">
       <div class="restaurant-info">
-        <h1 class="restaurant-name text-white text-xl font-bold tracking-tight">Restaurante Isla Arena</h1>
-        <p class="restaurant-slogan text-blue-100 text-sm italic">Sabor del mar en cada bocado</p>
+    
       </div>
     </div>
 
     <!-- MENÚ PRINCIPAL COMPACTO -->
-    <nav class="main-menu hidden md:flex items-center gap-6">
-      <a class="menu-item flex items-center gap-2 text-white hover:text-blue-200 transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white/10" 
-         routerLink="Drink" (click)="setHome(false)">
-        <span class="menu-icon text-lg">🥤</span>
-        <span class="font-medium">BEBIDAS</span>
+    <nav class="main-menu">
+      <a class="menu-item" routerLink="Drink" (click)="setHome(false)">
+       
+        BEBIDAS
       </a>
-      <a class="menu-item flex items-center gap-2 text-white hover:text-blue-200 transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white/10" 
-         routerLink="Food" (click)="setHome(false)">
-        <span class="menu-icon text-lg">🍽️</span>
-        <span class="font-medium">PLATILLOS</span>
+      <a class="menu-item" routerLink="Food" (click)="setHome(false)">
+       
+        PLATILLOS
       </a>
-      <a class="menu-item flex items-center gap-2 text-white hover:text-blue-200 transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white/10" 
-         routerLink="fishes" (click)="setHome(false)">
-        <span class="menu-icon text-lg">🐟</span>
-        <span class="font-medium">ESPECIALES</span>
+      <a class="menu-item" routerLink="fishes" (click)="setHome(false)">
+        
+        ESPECIALES
       </a>
-      <a class="menu-item flex items-center gap-2 text-white hover:text-blue-200 transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-white/10" 
-         routerLink="celebrate" (click)="setHome(false)">
-        <span class="menu-icon text-lg">🎉</span>
-        <span class="font-medium">FESTEJOS</span>
+      <a class="menu-item" routerLink="celebrate" (click)="setHome(false)">
+        
+        FESTEJOS
       </a>
     </nav>
 
     <!-- ACCIONES -->
-    <div class="actions-section flex items-center gap-4">
-      
+    <div class="actions-section">
       <!-- WhatsApp -->
-      <div class="action-btn whatsapp-btn relative group">
-        <div class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all duration-200 cursor-pointer">
-          <img src="img/whasap.png" alt="WhatsApp" class="w-6 h-6">
-        </div>
-        <div class="whatsapp-options absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-blue-100">
-          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20mandar%20mi%20comprobante%20de%20pago." 
-             target="_blank" 
-             class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors border-b border-gray-100">
-            <span class="text-lg">📎</span>
-            <span class="font-medium">Mandar comprobante</span>
+      <div class="action-btn whatsapp-btn">
+        <img src="img/whasap.png" alt="WhatsApp">
+        <div class="whatsapp-options">
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20mandar%20mi%20comprobante%20de%20pago." target="_blank">
+            📎 Mandar comprobante
           </a>
-          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20apartar%20una%20mesa." 
-             target="_blank" 
-             class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors border-b border-gray-100">
-            <span class="text-lg">🍽️</span>
-            <span class="font-medium">Apartar mesa</span>
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20apartar%20una%20mesa." target="_blank">
+            🍽️ Apartar mesa
           </a>
-          <a href="https://wa.me/529962054653?text=Hola%2C%20quisiera%20saber%20más%20acerca%20del%20restaurante." 
-             target="_blank" 
-             class="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors">
-            <span class="text-lg">ℹ️</span>
-            <span class="font-medium">Acerca del restaurante</span>
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quisiera%20saber%20más%20acerca%20del%20restaurante." target="_blank">
+            ℹ️ Acerca del restaurante
           </a>
         </div>
       </div>
 
       <!-- Carrito -->
-      <div class="action-btn cart-btn relative cursor-pointer" (click)="goToCart()">
-        <div class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all duration-200">
-          <img src="img/carrito.png" alt="Carrito" class="w-6 h-6">
-        </div>
-        <span class="cart-count absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" 
-              *ngIf="cartItemCount > 0">{{cartItemCount}}</span>
+      <div class="action-btn cart-btn" (click)="goToCart()">
+        <img src="img/carrito.png" alt="Carrito">
+        <span class="cart-count" *ngIf="cartItemCount > 0">{{cartItemCount}}</span>
       </div>
 
-      <!-- Menú móvil -->
-      <div class="action-btn menu-btn md:hidden">
-        <div class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all duration-200 cursor-pointer">
-          <img src="img/icons8-menú-50.png" alt="Menú" class="w-6 h-6">
-        </div>
+      <div class="action-btn menu-btn">
+        <img src="img/icons8-menú-50.png" alt="Menú">
       </div>
     </div>
   </div>
@@ -93,3 +70,4 @@
 </div>
 
 <app-mycart-drawer></app-mycart-drawer>
+
