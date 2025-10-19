@@ -1,36 +1,14 @@
-/* Estilos generales */
-body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  background: #f5faff;
-  color: #333;
-}
-
-/* Contenedor principal */
-.container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
-}
-
-/* Header */
-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-header h1 {
-  font-size: 2rem;
+ h1 {
+  font-size: 2.2rem;
   color: #005f73;
 }
 
 .subtitle {
   font-size: 1.1rem;
   color: #666;
-  margin-top: 5px;
 }
 
-/* Botones de período */
+/* === BOTONES === */
 .period-selector {
   margin-top: 20px;
 }
@@ -53,11 +31,11 @@ header h1 {
 
 .period-btn.active {
   background: #00b4d8;
-  color: white;
+  color: #fff;
   font-weight: 600;
 }
 
-/* Tarjetas */
+/* === TARJETAS === */
 .cards-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -73,50 +51,24 @@ header h1 {
   transition: transform 0.2s;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-}
+.card:hover { transform: translateY(-5px); }
 
 .card-title {
   font-weight: 600;
   margin-bottom: 10px;
   color: #0077b6;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .card-value {
   font-size: 1.6rem;
   font-weight: bold;
-  margin: 10px 0;
   color: #023e8a;
 }
 
-.card-trend {
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+.trend-up { color: #2ecc71; }
+.trend-down { color: #e74c3c; }
 
-.trend-up {
-  color: #2ecc71;
-}
-
-.trend-down {
-  color: #e74c3c;
-}
-
-/* Gráficas */
-.charts-container,
-.products-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 25px;
-  margin: 40px 0;
-}
-
+/* === CHART SECTIONS === */
 .chart-section {
   background: white;
   border-radius: 16px;
@@ -133,21 +85,112 @@ header h1 {
   gap: 8px;
 }
 
-.chart-container {
-  height: 250px;
+.full-width {
+  margin: 30px 0;
 }
 
-/* Lista de meseros */
+/* === GRÁFICA DE BARRAS AGRUPADAS === */
+.chart-bar-grouped {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 220px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.bar-group {
+  text-align: center;
+}
+
+.bar {
+  width: 40px;
+  border-radius: 6px 6px 0 0;
+  margin-bottom: 5px;
+}
+
+.bar.blue { background: linear-gradient(180deg, #48cae4, #0096c7); }
+.bar.teal { background: linear-gradient(180deg, #00b4d8, #0077b6); }
+.bar.green { background: linear-gradient(180deg, #52b788, #2d6a4f); }
+.bar.navy { background: linear-gradient(180deg, #023e8a, #001d3d); }
+
+.bar-group span {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+/* === PASTEL === */
+.chart-pie {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  margin: 20px auto;
+  background: conic-gradient(
+    #00b4d8 0deg 130deg,
+    #48cae4 130deg 250deg,
+    #90e0ef 250deg 360deg
+  );
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.chart-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #0077b6;
+}
+
+.pie-legend {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 0;
+}
+
+.pie-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.pie-legend span {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.color1 { background: #00b4d8; }
+.color2 { background: #48cae4; }
+.color3 { background: #90e0ef; }
+
+/* === MESEROS === */
 .meseros-container {
   background: white;
   border-radius: 16px;
-  padding: 20px;
+  padding: 15px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  max-height: 330px;
+  overflow-y: auto;
 }
 
 .meseros-title {
   font-size: 1.1rem;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   color: #0077b6;
 }
 
@@ -161,19 +204,13 @@ header h1 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 8px;
+  padding: 10px 5px;
   border-bottom: 1px solid #eee;
 }
 
-.mesero-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .mesero-avatar {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   background: #00b4d8;
   color: white;
@@ -185,16 +222,17 @@ header h1 {
 
 .mesero-name {
   font-weight: 600;
+  color: #023e8a;
 }
 
 .mesero-details {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
 }
 
 .mesero-status {
-  font-size: 0.85rem;
-  padding: 5px 12px;
+  font-size: 0.75rem;
+  padding: 4px 10px;
   border-radius: 12px;
 }
 
@@ -208,42 +246,32 @@ header h1 {
   color: #e74c3c;
 }
 
-/* Footer */
+/* === FOOTER === */
 footer {
   text-align: center;
   font-size: 0.85rem;
-  color: #777;
+  color: #555;
   margin: 30px 0 10px;
 }
 
-/* Efecto de ola decorativa */
+/* === OLA === */
 .wave-decoration {
   width: 100%;
   height: 50px;
   background: url("https://svgshare.com/i/uGJ.svg") repeat-x;
   margin: 40px 0 20px;
 }
-/* Estilos específicos para gráficos */
-.chart-container {
-  width: 100%;
-  max-width: 600px;
-  height: 400px;
-  margin: auto;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+/* === LAYOUT === */
+.charts-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
 }
 
-canvas {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Responsividad */
+/* === RESPONSIVO === */
 @media (max-width: 900px) {
-  .charts-container,
-  .products-container {
+  .charts-container {
     grid-template-columns: 1fr;
   }
 }
