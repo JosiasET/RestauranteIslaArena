@@ -130,6 +130,7 @@
 }
 
 .carousel-text {
+  
   position: absolute;
   bottom: 70px;
   left: 50%;
@@ -138,13 +139,12 @@
   text-align: center;
   z-index: 5;
   font-weight: 600;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
-  background: linear-gradient(135deg, rgba(10, 61, 98, 0.9), rgba(240, 138, 93, 0.9));
+  text-shadow: 2px 2px 8px rgb(255, 255, 255);
+  background: linear-gradient(135deg, rgba(36, 147, 226, 0.9), rgba(240, 138, 93, 0.9));
   padding: 15px 25px;
   border-radius: 10px;
   max-width: 85%;
   font-size: 1.2rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .carousel-text p {

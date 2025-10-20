@@ -1,6 +1,65 @@
 <div class="Subir_p">
   <h2 class="Subtitulo">GESTIÓN DE CUMPLEAÑOS - REGALOS</h2>
 
+  <!-- Botón para crear nueva reserva -->
+  <div class="nueva-reserva-bar">
+    <button (click)="toggleFormulario()" class="btn-nueva-reserva">
+      {{ mostrarFormulario ? '❌ Cancelar' : '➕ Nueva Reservación' }}
+    </button>
+  </div>
+
+  <!-- Formulario de nueva reserva -->
+  <div *ngIf="mostrarFormulario" class="formulario-reserva">
+    <h3>Crear Nueva Reservación</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre Completo *</label>
+        <input type="text" [(ngModel)]="nuevaReserva.nombre_completo" class="form-input" placeholder="Ingrese nombre completo">
+      </div>
+      
+      <div class="form-group">
+        <label>Fecha de Nacimiento *</label>
+        <input type="date" [(ngModel)]="nuevaReserva.fecha_nacimiento" class="form-input">
+      </div>
+      
+      <div class="form-group">
+        <label>Teléfono *</label>
+        <input type="tel" [(ngModel)]="nuevaReserva.telefono" class="form-input" placeholder="Ej: 555-1234">
+      </div>
+      
+      <div class="form-group">
+        <label>Fecha Preferida *</label>
+        <input type="date" [(ngModel)]="nuevaReserva.fecha_preferida" class="form-input">
+      </div>
+      
+      <div class="form-group">
+        <label>Hora Preferida *</label>
+        <input type="time" [(ngModel)]="nuevaReserva.hora_preferida" class="form-input">
+      </div>
+      
+      <!-- NUEVO CAMPO - CANTIDAD DE PERSONAS -->
+      <div class="form-group">
+        <label>👥 Cantidad de Personas *</label>
+        <input type="number" [(ngModel)]="nuevaReserva.cant_people" class="form-input" 
+               min="1" max="20" value="1" placeholder="Número de personas">
+      </div>
+      
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="nuevaReserva.acepta_verificacion">
+          Acepta verificación de INE
+        </label>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button (click)="crearReserva()" class="btn-guardar" [disabled]="cargando">
+        {{ cargando ? '⏳ Guardando...' : '💾 Guardar Reservación' }}
+      </button>
+      <button (click)="toggleFormulario()" class="btn-cancelar-form">Cancelar</button>
+    </div>
+  </div>
+
   <!-- Filtros y búsqueda -->
   <div class="filtros-bar">
     <input type="date" [(ngModel)]="fechaFiltro" (change)="filtrarReservaciones()" class="form-input">
@@ -50,7 +109,11 @@
   <div class="tabla-reservaciones">
     <h3 class="sub_3">Reservaciones de Cumpleaños</h3>
     
-    <table>
+    <div *ngIf="cargando" class="cargando">
+      ⏳ Cargando reservaciones...
+    </div>
+    
+    <table *ngIf="!cargando">
       <thead>
         <tr>
           <th>Código</th>
@@ -58,6 +121,7 @@
           <th>Teléfono</th>
           <th>Fecha Reserva</th>
           <th>Hora</th>
+          <th>👥 Personas</th>
           <th>Estado</th>
           <th>Verificación INE</th>
           <th>Acciones</th>
@@ -77,12 +141,19 @@
             {{ reserva.fechaReserva | date:'dd/MM/yyyy' }}
           </td>
           <td class="hora-cell">{{ reserva.horaReserva }}</td>
+          <!-- NUEVA COLUMNA - CANTIDAD DE PERSONAS -->
+          <td class="personas-cell">
+            <span class="badge-personas">
+              👥 {{ reserva.cant_people || 1 }}
+            </span>
+          </td>
           <td class="estado-cell">
             <span [class]="'badge-' + reserva.estado">{{ getEstadoText(reserva.estado) }}</span>
           </td>
           <td class="ine-cell">
-            <span *ngIf="reserva.ineVerificada" class="badge-verificado">✅ Verificada</span>
-            <span *ngIf="!reserva.ineVerificada" class="badge-pendiente">⏳ Pendiente</span>
+            <span [class]="reserva.ineVerificada ? 'badge-verificado' : 'badge-pendiente-ine'">
+              {{ reserva.ineVerificada ? '✅ Verificada' : '⏳ Pendiente' }}
+            </span>
           </td>
           <td class="acciones-cell">
             <button (click)="verDetalles(reserva)" class="btn-detalles">👁️ Ver</button>
@@ -96,6 +167,11 @@
               🎁 Entregar
             </button>
             <button (click)="cancelarReserva(reserva)" class="btn-cancelar">❌ Cancelar</button>
+                   <button (click)="eliminarReserva(reserva)" class="btn-eliminar" 
+                  [disabled]="cargando"
+                title="Eliminar permanentemente">
+              {{ cargando ? '⏳' : '🗑️' }} {{ cargando ? 'Eliminando...' : 'Eliminar' }}
+            </button>
           </td>
         </tr>
       </tbody>
@@ -137,6 +213,12 @@
             <span>{{ reservaSeleccionada.horaReserva }}</span>
           </div>
           <div class="detalle-item">
+            <label>Cantidad de Personas:</label>
+            <span>
+              <strong>👥 {{ reservaSeleccionada.cant_people || 1 }} persona(s)</strong>
+            </span>
+          </div>
+          <div class="detalle-item">
             <label>Estado:</label>
             <span [class]="'badge-' + reservaSeleccionada.estado">{{ getEstadoText(reservaSeleccionada.estado) }}</span>
           </div>
@@ -144,11 +226,15 @@
             <label>INE Verificada:</label>
             <span>{{ reservaSeleccionada.ineVerificada ? '✅ Sí' : '❌ No' }}</span>
           </div>
+          <div class="detalle-item">
+            <label>Acepta Verificación:</label>
+            <span>{{ reservaSeleccionada.acepta_verificacion ? '✅ Sí' : '❌ No' }}</span>
+          </div>
         </div>
 
         <!-- Historial de acciones -->
         <div class="historial" *ngIf="reservaSeleccionada.historial?.length">
-          <h4>Historial</h4>
+          <h4>📋 Historial de la Reservación</h4>
           <div *ngFor="let evento of reservaSeleccionada.historial" class="evento-historial">
             <span class="fecha-evento">{{ evento.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
             <span class="accion-evento">{{ evento.accion }}</span>
@@ -159,7 +245,7 @@
   </div>
 
   <!-- Mensaje cuando no hay reservaciones -->
-  <div *ngIf="reservacionesFiltradas.length === 0" class="empty-state">
+  <div *ngIf="reservacionesFiltradas.length === 0 && !cargando" class="empty-state">
     <div class="empty-icon">🎂</div>
     <h3>No hay reservaciones</h3>
     <p>No se encontraron reservaciones con los filtros aplicados.</p>

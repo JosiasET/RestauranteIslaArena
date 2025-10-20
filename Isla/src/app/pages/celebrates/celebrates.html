@@ -13,7 +13,7 @@
     <!-- Sección de introducción -->
     <div class="intro-section">
       <h2>🎂 ¡Celebra tu cumpleaños con nosotros!</h2>
-      <p>En Isla Arena queremos hacer tu día aún más especial. Regístrate y si hoy es tu cumpleaños, ¡te regalamos un delicioso coctel de camarón con bebida! <strong>Deberás presentar tu INE para verificar.</strong></p>
+      <p>En Isla Arena queremos hacer tu día aún más especial. Regístrate para el día de tu cumpleaños y ¡te regalamos un delicioso coctel de camarón con bebida! <strong>Deberás presentar tu INE para verificar.</strong></p>
     </div>
 
     <!-- Formulario de registro -->
@@ -39,14 +39,17 @@
             <label for="telefono">Teléfono *</label>
             <input type="tel" id="telefono" name="telefono"
                    [(ngModel)]="telefono" required
-                   placeholder="(999) 999-9999">
+                   placeholder="10 dígitos (9999999999)">
           </div>
 
           <div class="form-group">
-            <label for="fechaReserva">Fecha preferida para venir *</label>
+            <label for="fechaReserva">Fecha de tu cumpleaños *</label>
             <input type="date" id="fechaReserva" name="fechaReserva"
                    [(ngModel)]="fechaReserva" required
                    [min]="minDate">
+            <small style="color: #666; font-size: 0.8rem; display: block; margin-top: 5px;">
+              Selecciona el día exacto de tu cumpleaños
+            </small>
           </div>
 
           <div class="form-group">
@@ -65,6 +68,26 @@
             </select>
           </div>
 
+          <!-- NUEVO CAMPO: NÚMERO DE PERSONAS -->
+          <div class="form-group">
+            <label for="personas">Número de personas *</label>
+            <select id="personas" name="personas" [(ngModel)]="personas" required>
+              <option value="1">1 persona (solo el cumpleañero)</option>
+              <option value="2">2 personas</option>
+              <option value="3">3 personas</option>
+              <option value="4">4 personas</option>
+              <option value="5">5 personas</option>
+              <option value="6">6 personas</option>
+              <option value="7">7 personas</option>
+              <option value="8">8 personas</option>
+              <option value="9">9 personas</option>
+              <option value="10">10 personas</option>
+            </select>
+            <small style="color: #666; font-size: 0.8rem; display: block; margin-top: 5px;">
+              El regalo es solo para el cumpleañero. Este número es para la reservación de mesa.
+            </small>
+          </div>
+
           <div class="terms-checkbox">
             <input type="checkbox" id="terms" name="terms" [(ngModel)]="aceptoTerminos" required>
             <label for="terms">Acepto que presentaré mi INE original para verificación al reclamar mi regalo</label>
@@ -72,7 +95,13 @@
 
           <button type="submit" class="btn-submit" 
                   [disabled]="!cumpleForm.form.valid || loading">
-            {{ loading ? 'Verificando...' : '¡Reservar mi regalo!' }}
+            {{ loading ? '⏳ Verificando...' : '🎉 ¡Reservar mi regalo!' }}
+          </button>
+
+          <!-- Botón para forzar actualización si es necesario -->
+          <button type="button" *ngIf="loading" (click)="forzarActualizacion()" 
+                  style="margin-top: 10px; background: #f39c12; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%;">
+            🔄 Forzar Actualización
           </button>
         </form>
       </div>
@@ -84,15 +113,16 @@
         
         <div *ngIf="esSuCumpleanios" class="success-content">
           <div class="celebration-animation">🎉🎂🥳</div>
-          <h2>¡FELICIDADES {{ nombre }}!</h2>
-          <p>¡Hoy es tu día especial! Tu reservación ha sido confirmada.</p>
+          <h2>¡FELICIDADES {{ nombre | uppercase }}!</h2>
+          <p>¡Tu reservación para tu cumpleaños ha sido confirmada!</p>
           
           <div class="reserva-info">
             <div class="reserva-detail">
               <h4>📅 Detalles de tu reservación:</h4>
-              <p><strong>Fecha:</strong> {{ fechaReserva | date:'fullDate' }}</p>
-              <p><strong>Hora:</strong> {{ horaReserva }}</p>
-              <p><strong>Personas:</strong> 2 (incluyéndote)</p>
+              <p><strong>Fecha:</strong> {{ formatearFecha(fechaReserva) }}</p>
+              <p><strong>Hora:</strong> {{ formatearHora(horaReserva) }}</p>
+              <p><strong>Personas:</strong> {{ personas }} persona(s)</p>
+              <p><strong>Regalo:</strong> Coctel de camarón + Bebida especial</p>
             </div>
           </div>
 
@@ -124,19 +154,10 @@
           </div>
 
           <div class="action-buttons">
-            <button class="btn-print" onclick="window.print()">🖨️ Imprimir comprobante</button>
+            <button class="btn-print" (click)="imprimirComprobante()">🖨️ Imprimir comprobante</button>
             <button class="btn-calendar" (click)="agregarACalendario()">📅 Agregar a calendario</button>
+            <button class="btn-retry" (click)="reiniciarFormulario()">🔄 Nueva reservación</button>
           </div>
-        </div>
-
-        <div *ngIf="!esSuCumpleanios" class="error-content">
-          <h2>¡Gracias por registrarte, {{ nombre }}!</h2>
-          <p>Hoy no es tu cumpleaños, pero te esperamos cuando sea tu día especial para celebrar juntos.</p>
-          <p>Visítanos en tu cumpleaños para recibir tu regalo especial.</p>
-          
-          <button class="btn-retry" (click)="reiniciarFormulario()">
-            Intentar con otra fecha
-          </button>
         </div>
 
       </div>
@@ -150,7 +171,7 @@
         <li>✅ Oferta válida solo el día exacto de tu cumpleaños</li>
         <li>✅ Debes respetar la fecha y hora de tu reservación</li>
         <li>✅ Válido para consumo en el restaurante</li>
-        <li>✅ Máximo 2 personas por reservación</li>
+        <li>✅ El regalo es solo para el cumpleañero</li>
         <li>✅ No acumulable con otras promociones</li>
         <li>✅ Máximo un regalo por persona por año</li>
       </ul>

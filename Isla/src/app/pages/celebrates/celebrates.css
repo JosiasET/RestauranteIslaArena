@@ -5,6 +5,7 @@
   font-family: 'Arial', sans-serif;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   min-height: 100vh;
+  color: #2c3e50; /* Color de texto principal agregado */
 }
 
 /* Header con imagen */
@@ -40,16 +41,19 @@
   font-size: 3.5rem;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  color: white; /* Asegurar que sea blanco */
 }
 
 .header-overlay p {
   font-size: 1.3rem;
   opacity: 0.9;
+  color: white; /* Asegurar que sea blanco */
 }
 
 /* Contenido principal */
 .celebrates-content {
   padding: 3rem 2rem;
+  color: #2c3e50; /* Color de texto principal */
 }
 
 .intro-section {
@@ -85,6 +89,7 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   width: 100%;
   max-width: 500px;
+  color: #2c3e50; /* Color de texto */
 }
 
 .form-card h3 {
@@ -105,16 +110,20 @@
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  color: #2c3e50; /* Color de texto en inputs */
+  background: white;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #0a3d62;
 }
@@ -156,6 +165,7 @@
   width: 100%;
   max-width: 600px;
   text-align: center;
+  color: #2c3e50; /* Color de texto principal */
 }
 
 .result-card.success {
@@ -187,6 +197,7 @@
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 10px;
+  color: #2c3e50;
 }
 
 .regalo-image {
@@ -210,6 +221,7 @@
 .regalo-details li {
   margin-bottom: 0.5rem;
   font-size: 1.1rem;
+  color: #2c3e50;
 }
 
 .instructions {
@@ -218,6 +230,7 @@
   border-radius: 10px;
   margin: 2rem 0;
   text-align: left;
+  color: #2c3e50;
 }
 
 .instructions h4 {
@@ -231,9 +244,10 @@
 
 .instructions li {
   margin-bottom: 0.5rem;
+  color: #2c3e50;
 }
 
-.btn-print, .btn-retry {
+.btn-print, .btn-retry, .btn-calendar {
   background: #f08a5d;
   color: white;
   border: none;
@@ -243,9 +257,10 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s ease;
+  margin: 5px;
 }
 
-.btn-print:hover, .btn-retry:hover {
+.btn-print:hover, .btn-retry:hover, .btn-calendar:hover {
   background: #e07a4d;
 }
 
@@ -255,6 +270,7 @@
   padding: 2rem;
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+  color: #2c3e50;
 }
 
 .info-section h3 {
@@ -273,31 +289,14 @@
 .info-section li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
+  color: #2c3e50;
 }
 
 .info-section li:last-child {
   border-bottom: none;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .header-overlay h1 {
-    font-size: 2.5rem;
-  }
-  
-  .celebrates-content {
-    padding: 2rem 1rem;
-  }
-  
-  .regalo-info {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .form-card, .result-card {
-    padding: 1.5rem;
-  }
-  /* Estilos para la verificación de INE */
+/* Estilos para la verificación de INE */
 .verificacion-ine {
   background: #fff3cd;
   border: 2px solid #ffeaa7;
@@ -305,6 +304,7 @@
   padding: 1.5rem;
   margin: 2rem 0;
   text-align: left;
+  color: #856404;
 }
 
 .verificacion-ine h4 {
@@ -319,6 +319,7 @@
 .verificacion-ine li {
   margin-bottom: 0.8rem;
   font-weight: 500;
+  color: #856404;
 }
 
 .verificacion-ine li strong {
@@ -327,13 +328,23 @@
 
 /* Estilos para el código de reservación */
 .codigo-reserva {
-  background: linear-gradient(135deg, #0a3d62 0%, #1a5f8e 100%);
-  color: white;
+  background: linear-gradient(135deg, #16cf44 0%, #1a5f8e 100%);
+  color: white; /* ← ESTE ESTÁ BIEN (blanco sobre azul) */
   padding: 1rem;
   border-radius: 8px;
   margin: 1.5rem 0;
   font-size: 1.2rem;
   text-align: center;
+}
+
+.codigo-reserva p {
+  color: white; /* ← AGREGAR ESTO */
+  margin: 0;
+}
+
+.codigo-reserva strong {
+  color: #f8f9fa; /* ← BLANCO MÁS BRILLANTE */
+  font-size: 1.3rem;
 }
 
 /* Checkbox de términos */
@@ -345,6 +356,7 @@
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 8px;
+  color: #2c3e50;
 }
 
 .terms-checkbox input[type="checkbox"] {
@@ -364,13 +376,23 @@
   border-radius: 10px;
   margin: 1.5rem 0;
   text-align: left;
+  color: #2c3e50; /* ← COLOR DE TEXTO PRINCIPAL */
+}
+
+.reserva-detail h4 {
+  color: #0a3d62; /* ← AZUL OSCURO PARA EL TÍTULO */
+  margin-bottom: 1rem;
 }
 
 .reserva-detail p {
   margin: 0.5rem 0;
   font-size: 1.1rem;
+  color: #2c3e50; /* ← COLOR DE TEXTO NORMAL */
 }
 
+.reserva-detail strong {
+  color: #0a3d62; /* ← AZUL OSCURO PARA ETIQUETAS */
+}
 /* Botones de acción */
 .action-buttons {
   display: flex;
@@ -396,8 +418,39 @@
   background: #218838;
 }
 
+/* Mensajes de éxito y error */
+.success-content h2,
+.error-content h2 {
+  color: #0a3d62;
+  margin-bottom: 1rem;
+}
+
+.success-content p,
+.error-content p {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+  .header-overlay h1 {
+    font-size: 2.5rem;
+  }
+  
+  .celebrates-content {
+    padding: 2rem 1rem;
+  }
+  
+  .regalo-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .form-card, .result-card {
+    padding: 1.5rem;
+  }
+  
   .action-buttons {
     flex-direction: column;
   }
@@ -411,4 +464,69 @@
     gap: 8px;
   }
 }
+
+/* Estilos para impresión */
+@media print {
+  /* Ocultar todo excepto el comprobante */
+  body * {
+    visibility: hidden;
+  }
+  
+  .comprobante-impresion,
+  .comprobante-impresion * {
+    visibility: visible;
+  }
+  
+  .comprobante-impresion {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white;
+    padding: 20px;
+    box-shadow: none;
+  }
+  
+  /* Ocultar elementos no necesarios en impresión */
+  .btn-print, 
+  .btn-calendar, 
+  .btn-retry,
+  .action-buttons,
+  .celebration-animation {
+    display: none !important;
+  }
+  
+  /* Estilos específicos para impresión */
+  .comprobante-header {
+    text-align: center;
+    border-bottom: 2px solid #0a3d62;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .comprobante-header h2 {
+    color: #0a3d62;
+    margin: 0;
+  }
+  
+  .comprobante-qr {
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .comprobante-instructions {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 12px;
+  }
+  
+  /* Asegurar que los colores se impriman */
+  .codigo-reserva {
+    background: #0a3d62 !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }

@@ -87,6 +87,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  display: flex;
+  flex-direction: column;    /* Centrar imagen y texto verticalmente */
+  align-items: center;       /* Centrar horizontalmente */
 }
 
 .producto-card:hover {
@@ -175,13 +178,14 @@
 }
 
 .cantidad-cell {
-  text-align: center;
+  color: rgb(2, 2, 2);
+  text-align: center;   /* Centrado */
   min-width: 120px;
   font-weight: bold;
 }
 
 .precio-cell, .subtotal-cell {
-  text-align: right;
+  text-align: center;   /* Centrado */
   font-weight: 600;
   color: #27ae60;
   min-width: 100px;
@@ -195,7 +199,7 @@
 /* Botones de cantidad */
 .btn-cantidad {
   background: #3498db;
-  color: white;
+  color: rgb(2, 2, 2);
   border: none;
   border-radius: 50%;
   width: 30px;
@@ -204,6 +208,10 @@
   font-weight: bold;
   margin: 0 5px;
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
 .btn-cantidad:hover {

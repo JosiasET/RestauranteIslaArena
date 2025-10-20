@@ -1,24 +1,29 @@
 <div class="Subir_p">
   <h2 class="Subtitulo">{{ esModoEdicion ? 'EDITAR MESERO' : 'CREAR MESERO' }}</h2>
 
-  <!-- Barra de inputs -->
   <div class="form-bar">
     <input type="text" [(ngModel)]="nombre" placeholder="Nombre" class="form-input">
     <input type="text" [(ngModel)]="apellido" placeholder="Apellido" class="form-input">
     <input type="text" [(ngModel)]="usuario" placeholder="Nombre de usuario" class="form-input">
-    <input type="password" [(ngModel)]="contrasena" placeholder="Contraseña" class="form-input">
+    
+    <div class="password-container">
+      <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="contrasena" placeholder="Contraseña" class="form-input">
+      <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()">
+        {{ showPassword ? '🙈' : '👁️' }}
+      </button>
+    </div>
     
     <select [(ngModel)]="rol" class="form-input">
-      <option value="">Seleccionar rol</option>
+      <option value="" disabled>Seleccionar rol</option>
       <option value="administrador">👑 Administrador</option>
       <option value="cajero">💳 Cajero</option>
     </select>
     
     <select [(ngModel)]="turno" class="form-input">
-      <option value="">Seleccionar turno</option>
-      <option value="matutino">🌅 Matutino (6:00 - 14:00)</option>
-      <option value="vespertino">🌇 Vespertino (14:00 - 22:00)</option>
-      <option value="completo">🌞 Completo (6:00 - 22:00)</option>
+      <option value="" disabled>Seleccionar turno</option>
+      <option value="matutino">🌅 Matutino</option>
+      <option value="vespertino">🌇 Vespertino</option>
+      <option value="completo">🌞 Completo</option>
     </select>
 
     <div class="action-buttons">
@@ -31,7 +36,6 @@
     </div>
   </div>
 
-  <!-- Tabla de meseros -->
   <div *ngIf="meseros.length > 0" class="tabla-platillos">
     <h3 class="sub_3">Meseros Registrados</h3>
     <table>
@@ -61,18 +65,17 @@
             </span>
           </td>
           <td class="acciones-cell">
-            <button (click)="editarMesero(mesero)" class="btn-editar">✏ Editar</button>
+            <button (click)="editarMesero(mesero)" class="btn-editar">✏️ Editar</button>
             <button (click)="toggleEstado(mesero)" class="btn-estado">
               {{ mesero.activo ? '🚫 Desactivar' : '✅ Activar' }}
             </button>
-            <button (click)="eliminarMesero(mesero)" class="btn-eliminar">🗑 Eliminar</button>
+            <button (click)="eliminarMesero(mesero)" class="btn-eliminar">🗑️ Eliminar</button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Mensaje cuando no hay meseros -->
   <div *ngIf="meseros.length === 0" class="empty-state">
     <div class="empty-icon">👨‍💼</div>
     <h3>No hay meseros registrados</h3>

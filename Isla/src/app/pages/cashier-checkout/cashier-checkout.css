@@ -5,6 +5,7 @@
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  color: #2c3e50; /* Color de texto principal añadido */
 }
 
 .checkout-header {
@@ -31,6 +32,7 @@
   border-radius: 8px;
   margin-bottom: 25px;
   border: 2px solid #e9ecef;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .sale-summary h3 {
@@ -50,6 +52,11 @@
   align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid #dee2e6;
+  color: #2c3e50; /* Color de texto añadido */
+}
+
+.summary-row span {
+  color: #2c3e50; /* Color específico para spans */
 }
 
 .total-amount {
@@ -72,6 +79,7 @@
   align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid #f1f1f1;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .product-name {
@@ -86,6 +94,7 @@
 /* Customer Info */
 .customer-info {
   margin-bottom: 25px;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .customer-info h3 {
@@ -116,6 +125,11 @@
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.3s ease;
+  color: #2c3e50; /* Color de texto añadido para inputs */
+}
+
+.form-group input::placeholder {
+  color: #95a5a6; /* Color para placeholder */
 }
 
 .form-group input:focus {
@@ -126,6 +140,7 @@
 /* Payment Method */
 .payment-method {
   margin-bottom: 30px;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .payment-method h3 {
@@ -150,6 +165,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .payment-option:hover {
@@ -176,6 +192,7 @@
   padding: 20px;
   border-radius: 8px;
   border: 2px solid #e9ecef;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .change-calculation {
@@ -189,6 +206,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 1.1em;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .change-row .negative {
@@ -209,6 +227,7 @@
   align-items: center;
   padding-top: 20px;
   border-top: 2px solid #f0f8ff;
+  color: #2c3e50; /* Color de texto añadido */
 }
 
 .btn-secondary,

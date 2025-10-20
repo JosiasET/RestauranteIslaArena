@@ -1,24 +1,24 @@
 .checkout-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
-  display: flex;
-  gap: 40px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 0.8fr;
+  gap: 30px;
   font-family: Arial, sans-serif;
+  color: #333; /* Color de texto principal añadido */
 }
 
-.contact-section,
-.delivery-section {
-  flex: 1;
-}
-
-.order-summary {
-  width: 400px;
-  flex-shrink: 0;
+.contact-delivery-section {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
 .contact-section h1,
-.delivery-section h2 {
+.delivery-section h2,
+.payment-section h2,
+.order-summary h2 {
   margin-bottom: 20px;
   color: #333;
   font-size: 1.5rem;
@@ -48,13 +48,20 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   box-sizing: border-box;
   font-size: 1rem;
+  color: #333; /* Color de texto añadido */
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #999; /* Color para placeholder */
 }
 
 .name-fields {
@@ -77,6 +84,7 @@
   align-items: center;
   gap: 10px;
   margin: 15px 0;
+  color: #333; /* Color de texto añadido */
 }
 
 .checkbox-group input[type="checkbox"] {
@@ -90,6 +98,7 @@
   border-radius: 8px;
   background: #f9f9f9;
   height: fit-content;
+  color: #333; /* Color de texto añadido */
 }
 
 .product-item {
@@ -98,6 +107,7 @@
   padding: 10px 0;
   border-bottom: 1px solid #eee;
   font-size: 0.9rem;
+  color: #333; /* Color de texto añadido */
 }
 
 .discount-section {
@@ -121,6 +131,7 @@
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  color: #333; /* Color de texto añadido */
 }
 
 .discount-input button {
@@ -135,6 +146,7 @@
 
 .price-breakdown {
   margin: 20px 0;
+  color: #333; /* Color de texto añadido */
 }
 
 .price-row {
@@ -142,6 +154,7 @@
   justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px solid #eee;
+  color: #333; /* Color de texto añadido */
 }
 
 .price-row.total {
@@ -184,26 +197,131 @@
   margin-top: 10px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .checkout-container {
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .order-summary {
-    width: 100%;
-    order: -1;
-  }
-  
-  .name-fields {
-    flex-direction: column;
-    gap: 0;
-  }
-  
-  .location-fields {
-    grid-template-columns: 1fr;
-  }
+/* Métodos de pago */
+.payment-methods {
+  margin-bottom: 20px;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #333; /* Color de texto añadido */
+}
+
+.payment-option:hover {
+  border-color: #007bff;
+}
+
+.payment-option.selected {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.payment-icon {
+  font-size: 1.5rem;
+  margin-right: 15px;
+}
+
+.payment-info {
+  flex: 1;
+}
+
+.payment-info strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #333; /* Color de texto añadido */
+}
+
+.payment-info small {
+  color: #666;
+}
+
+/* Detalles de pago */
+.payment-details {
+  margin-top: 15px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+  color: #333; /* Color de texto añadido */
+}
+
+.bank-info, .card-info {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+}
+
+.bank-details {
+  background: #e3f2fd;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  color: #333; /* Color de texto añadido */
+}
+
+.bank-details p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  color: #333; /* Color de texto añadido */
+}
+
+.store-info {
+  background: #fff3cd;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 15px;
+  color: #333; /* Color de texto añadido */
+}
+
+.store-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #333; /* Color de texto añadido */
+}
+
+.help-text {
+  color: #856404;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Cantidad en efectivo */
+.cash-amount {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  color: #333; /* Color de texto añadido */
+}
+
+.cash-change {
+  margin-top: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: 4px;
+  color: #333; /* Color de texto añadido */
+}
+
+.cash-change p {
+  margin: 5px 0;
+  color: #333; /* Color de texto añadido */
+}
+
+.warning-text {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.negative {
+  color: #dc3545;
 }
 
 /* Estilos para mejorar la apariencia */
@@ -219,6 +337,11 @@ h2 {
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #f08a5d;
+}
+
+h4 {
+  color: #333;
+  margin-bottom: 15px;
 }
 
 /* Estilos de validación */
@@ -253,86 +376,21 @@ h2 {
   margin-bottom: 0.5rem;
 }
 
-/* Layout de 3 columnas */
-.checkout-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-  display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr;
-  gap: 30px;
-  font-family: Arial, sans-serif;
+/* ESPACIO AUMENTADO PARA LA REFERENCIA DE TRANSFERENCIA */
+.bank-info .form-group {
+  margin-bottom: 20px; /* Más espacio entre campos */
 }
 
-/* Métodos de pago */
-.payment-methods {
-  margin-bottom: 20px;
+.bank-info input[type="text"] {
+  padding: 15px; /* Más padding interno */
+  font-size: 1.1rem; /* Texto más grande */
+  height: 50px; /* Altura fija mayor */
+  margin-top: 8px; /* Espacio arriba del input */
 }
 
-.payment-option {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.payment-option:hover {
-  border-color: #007bff;
-}
-
-.payment-option.selected {
-  border-color: #007bff;
-  background-color: #f0f8ff;
-}
-
-.payment-icon {
-  font-size: 1.5rem;
-  margin-right: 15px;
-}
-
-.payment-info {
-  flex: 1;
-}
-
-.payment-info strong {
-  display: block;
-  margin-bottom: 4px;
-}
-
-.payment-info small {
-  color: #666;
-}
-
-/* Cantidad en efectivo */
-.cash-amount {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-
-.cash-change {
-  margin-top: 10px;
-  padding: 10px;
-  background: white;
-  border-radius: 4px;
-}
-
-.cash-change p {
-  margin: 5px 0;
-}
-
-.warning-text {
-  color: #dc3545;
-  font-weight: bold;
-}
-
-.negative {
-  color: #dc3545;
+.bank-info label {
+  font-size: 1rem; /* Label más grande */
+  margin-bottom: 8px; /* Más espacio debajo del label */
 }
 
 /* Responsive */
@@ -347,77 +405,30 @@ h2 {
   }
 }
 
-/* Layout de 3 columnas */
-.checkout-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr 0.8fr;
-  gap: 30px;
-  font-family: Arial, sans-serif;
-}
-
-.contact-delivery-section {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-/* Detalles de pago */
-.payment-details {
-  margin-top: 15px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #007bff;
-}
-
-.bank-info, .card-info {
-  background: white;
-  padding: 15px;
-  border-radius: 6px;
-}
-
-.bank-details {
-  background: #e3f2fd;
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-}
-
-.bank-details p {
-  margin: 8px 0;
-  font-size: 0.9rem;
-}
-
-.store-info {
-  background: #fff3cd;
-  padding: 15px;
-  border-radius: 6px;
-  margin-top: 15px;
-}
-
-.store-info p {
-  margin: 5px 0;
-  font-size: 0.9rem;
-}
-
-.help-text {
-  color: #856404;
-  font-size: 0.8rem;
-  display: block;
-  margin-top: 5px;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .checkout-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 20px;
   }
   
   .order-summary {
+    width: 100%;
     order: -1;
+  }
+  
+  .name-fields {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .location-fields {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Ajustes responsive para la referencia */
+  .bank-info input[type="text"] {
+    padding: 12px;
+    font-size: 1rem;
+    height: 45px;
   }
 }

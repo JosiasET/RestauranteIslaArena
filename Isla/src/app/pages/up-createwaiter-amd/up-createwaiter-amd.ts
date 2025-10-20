@@ -6,6 +6,7 @@ import { MeseroInterface } from '../../core/interface/waiter';
 
 @Component({
   selector: 'app-up-createwaiter-amd',
+  // standalone: true, // Asegúrate que tu componente sea standalone si usas imports[]
   imports: [CommonModule, FormsModule],
   templateUrl: './up-createwaiter-amd.html',
   styleUrls: ['./up-createwaiter-amd.css']
@@ -23,6 +24,9 @@ export class UpCreatewaiterAmd implements OnInit {
   rol: string = '';
   turno: string = '';
 
+  // NUEVO: Variable para controlar la visibilidad de la contraseña
+  showPassword: boolean = false;
+
   constructor(private meseroService: MeseroService) {}
 
   ngOnInit() {
@@ -32,11 +36,15 @@ export class UpCreatewaiterAmd implements OnInit {
   }
 
   crearMesero() {
-    if (!this.nombre || !this.apellido || !this.usuario || !this.contrasena || !this.rol || !this.turno) {
-      alert("Por favor, complete todos los campos");
+    // ... (tu función crearMesero se queda igual)
+    if (!this.nombre || !this.apellido || !this.usuario || !this.rol || !this.turno) {
+      alert("Por favor, complete todos los campos requeridos.");
       return;
     }
-
+    if (!this.esModoEdicion && !this.contrasena) {
+      alert("La contraseña es obligatoria al crear un nuevo mesero.");
+      return;
+    }
     const meseroData: MeseroInterface = {
       id: this.meseroEditando ? this.meseroEditando.id : 0,
       nombre: this.nombre,
@@ -45,9 +53,8 @@ export class UpCreatewaiterAmd implements OnInit {
       contrasena: this.contrasena,
       rol: this.rol,
       turno: this.turno,
-      activo: true
+      activo: this.meseroEditando ? this.meseroEditando.activo : true
     };
-
     if (this.esModoEdicion && this.meseroEditando) {
       this.meseroService.actualizarMesero(this.meseroEditando, meseroData);
       alert("Mesero actualizado exitosamente");
@@ -55,19 +62,27 @@ export class UpCreatewaiterAmd implements OnInit {
       this.meseroService.crearMesero(meseroData);
       alert("Mesero creado exitosamente");
     }
-
     this.limpiarFormulario();
   }
 
   editarMesero(mesero: MeseroInterface) {
     this.meseroEditando = mesero;
-    this.nombre = mesero.nombre;
-    this.apellido = mesero.apellido;
-    this.usuario = mesero.usuario;
-    this.contrasena = mesero.contrasena;
-    this.rol = mesero.rol;
-    this.turno = mesero.turno;
     this.esModoEdicion = true;
+    
+    // Asignación segura de valores para evitar errores con datos viejos
+    this.nombre = mesero.nombre || '';
+    this.apellido = mesero.apellido || '';
+    this.usuario = mesero.usuario || ''; // <-- Esto evita el error si el usuario no existe
+    this.contrasena = ''; // La contraseña no se carga al editar por seguridad
+    this.rol = mesero.rol || '';
+    this.turno = mesero.turno || '';
+
+    window.scrollTo(0, 0);
+  }
+
+  // NUEVO: Función para cambiar la visibilidad de la contraseña
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   toggleEstado(mesero: MeseroInterface) {
@@ -75,7 +90,7 @@ export class UpCreatewaiterAmd implements OnInit {
   }
 
   eliminarMesero(mesero: MeseroInterface) {
-    if (confirm("¿Deseas eliminar este mesero?")) {
+    if (confirm("¿Estás seguro de que deseas eliminar a este mesero?")) {
       this.meseroService.eliminarMesero(mesero);
     }
   }

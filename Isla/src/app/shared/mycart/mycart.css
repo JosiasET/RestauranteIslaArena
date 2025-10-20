@@ -176,7 +176,7 @@
 .quantity {
   font-weight: 600;
   padding: 0.3rem 0.8rem;
-  background: #f8f9fa;
+  background: #0a3d62;
   border-radius: 4px;
   display: inline-block;
   min-width: 40px;
@@ -221,6 +221,7 @@
 }
 
 .summary-row {
+  color: #0a3d62;
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
@@ -283,7 +284,7 @@
 .security-guarantee {
   text-align: center;
   padding: 1rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #0a3d62;
   color: #666;
   font-style: italic;
 }
