@@ -1,9 +1,10 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CartService, CartItem } from '../../core/interface/cart.services';
 import { FoodService } from '../../core/service/foodService';
 import { foodInterface } from '../../core/interface/foodInterface';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-food',
@@ -12,15 +13,13 @@ import { foodInterface } from '../../core/interface/foodInterface';
   templateUrl: './food.html',
   styleUrl: './food.css'
 })
-export class Food implements OnInit {
-  // Todos los productos combinados
+export class Food implements OnInit, OnDestroy {
   todosProductos: any[] = [];
   productosFiltrados: any[] = [];
   recomendacionesDelDia: any[] = [];
   loading: boolean = true;
   categoriaSeleccionada: string = 'todas';
 
-  // Categorías del menú
   categorias = [
     { id: 'todas', nombre: 'Todo el Menú', emoji: '📦' },
     { id: 'platillos', nombre: 'Platillos', emoji: '🍽️' },
@@ -31,83 +30,68 @@ export class Food implements OnInit {
     { id: 'cocteles', nombre: 'Cocteles', emoji: '🍤' }
   ];
 
+  private subscription: Subscription = new Subscription();
+
   constructor(
     private foodService: FoodService,
-    private cartService: CartService
+    private cartService: CartService,
+    private cdRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    console.log('🔄 Inicializando componente Food...');
     this.cargarProductosComida();
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   cargarProductosComida() {
-    this.foodService.saucer$.subscribe(comidas => {
-      this.todosProductos = comidas; // Solo productos de comida
-      this.generarRecomendacionesDelDia();
-      this.loading = false;
-      this.filtrarProductos();
-    });
+    this.loading = true;
+    this.cdRef.detectChanges();
+
+    // 🔥 FORZAR CARGA INICIAL - ESTO ES LO QUE FALTA
+    this.foodService.cargarPlatillos().subscribe();
+
+    this.subscription.add(
+      this.foodService.saucer$.subscribe(comidas => {
+        console.log('🍽️ Productos cargados:', comidas.length);
+        this.todosProductos = comidas;
+        this.generarRecomendacionesDelDia();
+        this.filtrarProductos();
+        this.loading = false;
+        this.cdRef.detectChanges();
+      })
+    );
   }
 
+  // ... el resto de tus métodos se mantienen igual
   generarRecomendacionesDelDia() {
-  if (this.todosProductos.length === 0) return;
-
-  // Si hay 3 o menos productos, mostrar todos
-  if (this.todosProductos.length <= 4) {
-    this.recomendacionesDelDia = [...this.todosProductos];
-    return;
+    if (this.todosProductos.length === 0) return;
+    if (this.todosProductos.length <= 4) {
+      this.recomendacionesDelDia = [...this.todosProductos];
+      return;
+    }
+    const productosMezclados = [...this.todosProductos].sort(() => Math.random() - 0.5);
+    this.recomendacionesDelDia = productosMezclados.slice(0, 4);
   }
 
-  // Mezclar array de forma verdaderamente aleatoria
-  const productosMezclados = [...this.todosProductos]
-    .sort(() => Math.random() - 0.5);
-
-  // Tomar los primeros 3 productos mezclados
-  this.recomendacionesDelDia = productosMezclados.slice(0, 4);
-  
-  console.log('🎲 Recomendaciones del día:', this.recomendacionesDelDia.map(p => p.nombre));
-}
-
-  // Método para inferir categoría
   inferirCategoria(descripcion: string, nombre: string): string {
     const desc = descripcion.toLowerCase();
     const nom = nombre.toLowerCase();
-    
-    // 🥗 ENSALADA
-    if (desc.includes('ensalada') || nom.includes('ensalada')) {
-      return 'ensalada';
-    }
-    
-    // 🐟 CEVICHE
-    if (desc.includes('ceviche') || nom.includes('ceviche')) {
-      return 'ceviche';
-    }
-    
-    // 🍤 COCTELES
-    if (desc.includes('coctel') || nom.includes('coctel') || 
-        desc.includes('camarón') || desc.includes('marisco')) {
-      return 'cocteles';
-    }
-    
-    // ⚖️ POR KILO
-    if (desc.includes('kilo') || desc.includes('kg') || desc.includes('por kilo') ||
-        nom.includes('kilo') || nom.includes('kg')) {
-      return 'por-kilo';
-    }
-    
-    // 🍲 SOPAS
-    if (desc.includes('sopa') || nom.includes('sopa') || 
-        desc.includes('caldo') || nom.includes('caldo')) {
-      return 'sopas';
-    }
-    
-    // 🍽️ PLATILLOS (todo lo demás)
+    if (desc.includes('ensalada') || nom.includes('ensalada')) return 'ensalada';
+    if (desc.includes('ceviche') || nom.includes('ceviche')) return 'ceviche';
+    if (desc.includes('coctel') || nom.includes('coctel') || desc.includes('camarón') || desc.includes('marisco')) return 'cocteles';
+    if (desc.includes('kilo') || desc.includes('kg') || desc.includes('por kilo') || nom.includes('kilo') || nom.includes('kg')) return 'por-kilo';
+    if (desc.includes('sopa') || nom.includes('sopa') || desc.includes('caldo') || nom.includes('caldo')) return 'sopas';
     return 'platillos';
   }
 
   seleccionarCategoria(categoriaId: string) {
     this.categoriaSeleccionada = categoriaId;
     this.filtrarProductos();
+    this.cdRef.detectChanges();
   }
 
   filtrarProductos() {
@@ -122,15 +106,14 @@ export class Food implements OnInit {
   }
 
   agregarAlCarrito(producto: any) {
-  const cartItem: CartItem = {
-    id: producto.id, // ← USAR EL ID REAL DEL PRODUCTO, no Date.now()
-    nombre: producto.nombre,
-    descripcion: producto.descripcion,
-    precio: producto.precio,
-    imagen: producto.imagen,
-    cantidad: 1
-  };
-
-  this.cartService.addToCart(cartItem);
-}
+    const cartItem: CartItem = {
+      id: producto.id,
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      precio: producto.precio,
+      imagen: producto.imagen,
+      cantidad: 1
+    };
+    this.cartService.addToCart(cartItem);
+  }
 }

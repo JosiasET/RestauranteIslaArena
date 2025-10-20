@@ -14,40 +14,50 @@
     <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
 
     <div class="action-buttons">
-      <button (click)="subirsaucer()" class="submit-btn">
-        {{ esModoEdicion ? 'Actualizar Especialidad' : 'Subir Especialidad' }}
+      <button 
+        (click)="subirEspecialidad()" 
+        class="submit-btn"
+        [disabled]="isSubmitting"
+      >
+        {{ esModoEdicion ? (isSubmitting ? 'Actualizando...' : 'Actualizar Especialidad') : (isSubmitting ? 'Subiendo...' : 'Subir Especialidad') }}
       </button>
-      <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn">
+      <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn" [disabled]="isSubmitting">
         Cancelar
       </button>
     </div>
   </div>
 
-  <!-- NUEVA CUADRÍCULA DE TODAS LAS ESPECIALIDADES -->
+  <!-- CUADRÍCULA DE TODAS LAS ESPECIALIDADES -->
   <div class="lista-platillos">
     <div class="lista-header">
-      <h2>TODAS LAS ESPECIALIDADES ({{ getTotalPlatillos() }})</h2>
+      <h2>TODAS LAS ESPECIALIDADES ({{ getTotalEspecialidades() }})</h2>
       <p>Gestiona todas tus especialidades existentes</p>
     </div>
 
+    <!-- Indicador de carga -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loading-spinner-large"></div>
+      <p>Cargando especialidades...</p>
+    </div>
+
     <!-- CUADRÍCULA DE ESPECIALIDADES -->
-    <div class="platillos-grid">
-      <div *ngFor="let platillo of todosLosPlatillos" class="platillo-card-admin">
+    <div *ngIf="!isLoading" class="platillos-grid">
+      <div *ngFor="let especialidad of todasLasEspecialidades" class="platillo-card-admin">
         <div class="platillo-image">
-          <img [src]="platillo.imagen" [alt]="platillo.nombre">
+          <img [src]="especialidad.imagen" [alt]="especialidad.nombre" loading="lazy">
         </div>
         
         <div class="platillo-info">
-          <h3>{{ platillo.nombre }}</h3>
-          <p class="descripcion">{{ platillo.descripcion }}</p>
-          <p class="precio">${{ platillo.precio }}</p>
+          <h3>{{ especialidad.nombre }}</h3>
+          <p class="descripcion">{{ especialidad.descripcion }}</p>
+          <p class="precio">${{ especialidad.precio }}</p>
         </div>
 
         <div class="platillo-actions">
-          <button class="btn-editar" (click)="editarPlatillo(platillo)">
+          <button class="btn-editar" (click)="editarEspecialidad(especialidad)">
             ✏️ Editar
           </button>
-          <button class="btn-eliminar" (click)="eliminarPlatillo(platillo)">
+          <button class="btn-eliminar" (click)="eliminarEspecialidad(especialidad)">
             🗑️ Eliminar
           </button>
         </div>
@@ -55,7 +65,7 @@
     </div>
 
     <!-- MENSAJE SI NO HAY ESPECIALIDADES -->
-    <div *ngIf="todosLosPlatillos.length === 0" class="no-platillos">
+    <div *ngIf="todasLasEspecialidades.length === 0 && !isLoading" class="no-platillos">
       <div class="empty-icon">🐟</div>
       <h3>No hay especialidades aún</h3>
       <p>Comienza agregando tu primera especialidad usando el formulario superior.</p>

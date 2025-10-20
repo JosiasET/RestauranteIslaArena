@@ -39,6 +39,16 @@ export class Celebrates {
     const fechaReserva = new Date(this.fechaReserva);
     const cumpleanios = new Date(this.fechaNacimiento);
     
+    // Permitir cualquier fecha futura, no solo el día exacto
+    return fechaReserva >= new Date(); // Solo verificar que sea fecha futura
+  }
+
+  esFechaCumpleaniosExacta(): boolean {
+    if (!this.fechaNacimiento || !this.fechaReserva) return false;
+    
+    const fechaReserva = new Date(this.fechaReserva);
+    const cumpleanios = new Date(this.fechaNacimiento);
+    
     return fechaReserva.getMonth() === cumpleanios.getMonth() && 
            fechaReserva.getDate() === cumpleanios.getDate();
   }
@@ -74,10 +84,10 @@ export class Celebrates {
 
     // === VALIDAR EDAD ===
     const fechaNac = new Date(this.fechaNacimiento);
-    const hoy = new Date();
-    let edad = hoy.getFullYear() - fechaNac.getFullYear();
-    const mes = hoy.getMonth() - fechaNac.getMonth();
-    if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+    const hoyEdad = new Date(); // Cambié el nombre para evitar conflicto
+    let edad = hoyEdad.getFullYear() - fechaNac.getFullYear();
+    const mes = hoyEdad.getMonth() - fechaNac.getMonth();
+    if (mes < 0 || (mes === 0 && hoyEdad.getDate() < fechaNac.getDate())) {
       edad--;
     }
 
@@ -97,16 +107,30 @@ export class Celebrates {
       return;
     }
 
-    // === VERIFICAR SI LA FECHA DE RESERVA ES SU CUMPLEAÑOS ===
-    this.esSuCumpleanios = this.verificarCumpleanios();
+    // === VERIFICAR SI LA FECHA DE RESERVA ES FUTURA ===
+    const fechaReserva = new Date(this.fechaReserva);
+    const hoyReserva = new Date(); // Cambié el nombre para evitar conflicto
     
-    if (!this.esSuCumpleanios) {
-      const fechaReserva = new Date(this.fechaReserva);
-      const cumpleanios = new Date(this.fechaNacimiento);
-      
-      alert(`📅 La fecha de reservación (${this.formatearFecha(this.fechaReserva)}) no coincide con tu cumpleaños (${cumpleanios.getDate()}/${cumpleanios.getMonth() + 1}). Solo puedes reclamar tu regalo el día exacto de tu cumpleaños.`);
+    if (fechaReserva < hoyReserva) {
+      alert("📅 La fecha de reservación debe ser una fecha futura.");
       this.loading = false;
       return;
+    }
+
+    // === VERIFICAR SI ES EL DÍA EXACTO DEL CUMPLEAÑOS ===
+    this.esSuCumpleanios = this.esFechaCumpleaniosExacta();
+    
+    if (!this.esSuCumpleanios) {
+      const cumpleanios = new Date(this.fechaNacimiento);
+      const confirmacion = confirm(
+        `📅 La fecha de reservación (${this.formatearFecha(this.fechaReserva)}) no coincide con tu cumpleaños (${cumpleanios.getDate()}/${cumpleanios.getMonth() + 1}).\n\n` +
+        `¿Deseas continuar con la reservación? El regalo de cumpleaños solo se entregará si vienes el día exacto de tu cumpleaños.`
+      );
+      
+      if (!confirmacion) {
+        this.loading = false;
+        return;
+      }
     }
 
     // === GENERAR CÓDIGO DE RESERVACIÓN ===
@@ -134,9 +158,8 @@ export class Celebrates {
         
         // ACTUALIZAR LA VISTA INMEDIATAMENTE
         this.formularioEnviado = true;
-        this.esSuCumpleanios = true;
         
-        // FORZAR ACTUALIZACIÓN DE LA VISTA - MÁS AGRESIVO
+        // FORZAR ACTUALIZACIÓN DE LA VISTA
         setTimeout(() => {
           this.cdRef.detectChanges();
           console.log("🎉 Vista actualizada después del guardado");
@@ -149,7 +172,6 @@ export class Celebrates {
         
         // MOSTRAR RESULTADO AUNQUE FALLE
         this.formularioEnviado = true;
-        this.esSuCumpleanios = true;
         
         // FORZAR ACTUALIZACIÓN
         setTimeout(() => {
@@ -168,10 +190,10 @@ export class Celebrates {
     fechaFin.setHours(fechaFin.getHours() + 2);
     
     const eventoCalendario = {
-      title: `🎂 Mi Cumpleaños en Isla Arena - ${this.codigoReserva}`,
+      title: `🎂 ${this.esSuCumpleanios ? 'Mi Cumpleaños' : 'Reservación'} en Isla Arena - ${this.codigoReserva}`,
       start: fechaEvento.toISOString(),
       end: fechaFin.toISOString(),
-      description: `Reservación para mi regalo de cumpleaños en Isla Arena. Código: ${this.codigoReserva}. No olvides tu INE. Personas: ${this.personas}`,
+      description: `Reservación en Isla Arena. ${this.esSuCumpleanios ? '¡Es mi cumpleaños! Regalo especial incluído.' : 'Reservación regular.'} Código: ${this.codigoReserva}. Personas: ${this.personas}`,
       location: 'Isla Arena Restaurant'
     };
     
@@ -202,6 +224,15 @@ export class Celebrates {
 
   imprimirComprobante() {
     window.print();
+  }
+
+  // Método para obtener mensaje según tipo de reservación
+  getMensajeReservacion(): string {
+    if (this.esSuCumpleanios) {
+      return `🎉 ¡Felicidades! Tu reservación para tu cumpleaños ha sido confirmada. Te esperamos con tu regalo especial.`;
+    } else {
+      return `✅ Tu reservación ha sido confirmada. Recuerda que el regalo de cumpleaños solo aplica si vienes el día exacto de tu cumpleaños.`;
+    }
   }
 
   // Método para forzar actualización manual si es necesario

@@ -1,7 +1,7 @@
 <div class="Subir_p">
   <h2 class="Subtitulo">{{ esModoEdicion ? 'EDITAR PLATILLO' : 'SUBIR PLATILLOS' }}</h2>
 
-  <!-- Barra de inputs ORIGINAL -->
+  <!-- Formulario -->
   <div class="form-bar">
     <input type="text" [(ngModel)]="nombre" placeholder="Nombre del platillo" class="form-input">
     <input type="text" [(ngModel)]="descripcion" placeholder="Descripción del platillo" class="form-input">
@@ -14,27 +14,37 @@
     <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
 
     <div class="action-buttons">
-      <button (click)="subirsaucer()" class="submit-btn">
-        {{ esModoEdicion ? 'Actualizar Platillo' : 'Subir Platillo' }}
+      <button 
+        (click)="subirsaucer()" 
+        class="submit-btn"
+        [disabled]="isSubmitting"
+      >
+        {{ esModoEdicion ? (isSubmitting ? 'Actualizando...' : 'Actualizar Platillo') : (isSubmitting ? 'Subiendo...' : 'Subir Platillo') }}
       </button>
-      <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn">
+      <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn" [disabled]="isSubmitting">
         Cancelar
       </button>
     </div>
   </div>
 
-  <!-- NUEVA CUADRÍCULA DE TODOS LOS PLATILLOS -->
+  <!-- Lista de platillos -->
   <div class="lista-platillos">
     <div class="lista-header">
       <h2>TODOS LOS PLATILLOS ({{ getTotalPlatillos() }})</h2>
       <p>Gestiona todos tus platillos existentes</p>
     </div>
 
-    <!-- CUADRÍCULA DE PLATILLOS -->
-    <div class="platillos-grid">
+    <!-- Indicador de carga -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loading-spinner-large"></div>
+      <p>Cargando platillos...</p>
+    </div>
+
+    <!-- Cuadrícula de platillos -->
+    <div *ngIf="!isLoading" class="platillos-grid">
       <div *ngFor="let platillo of todosLosPlatillos" class="platillo-card-admin">
         <div class="platillo-image">
-          <img [src]="platillo.imagen" [alt]="platillo.nombre">
+          <img [src]="platillo.imagen" [alt]="platillo.nombre" loading="lazy">
         </div>
         
         <div class="platillo-info">
@@ -54,8 +64,8 @@
       </div>
     </div>
 
-    <!-- MENSAJE SI NO HAY PLATILLOS -->
-    <div *ngIf="todosLosPlatillos.length === 0" class="no-platillos">
+    <!-- Mensaje si no hay platillos -->
+    <div *ngIf="todosLosPlatillos.length === 0 && !isLoading" class="no-platillos">
       <div class="empty-icon">🍽️</div>
       <h3>No hay platillos aún</h3>
       <p>Comienza agregando tu primer platillo usando el formulario superior.</p>

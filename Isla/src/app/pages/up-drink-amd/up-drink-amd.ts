@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { DrinkService } from '../../core/service/DrinkService';
 import { Drinkinterface } from '../../core/interface/drink';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-up-drink-amd',
@@ -10,23 +11,49 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './up-drink-amd.html',
   styleUrl: './up-drink-amd.css'
 })
-export class UpDrinkAmd implements OnInit {
+export class UpDrinkAmd implements OnInit, OnDestroy {
   activeSection: string = 'upfood';
-  todosLosPlatillos: Drinkinterface[] = []; // ← CAMBIADO: todos los platillos
-  platilloEditando: Drinkinterface | null = null;
+  todasLasBebidas: Drinkinterface[] = [];
+  bebidaEditando: Drinkinterface | null = null;
   esModoEdicion: boolean = false;
+  isLoading: boolean = true;
+  isSubmitting: boolean = false;
 
   nombre = '';
   descripcion = '';
   precio: number = 0;
   imageBase64: string = '';
 
-  constructor(private drinkService: DrinkService) {}
+  private subscription: Subscription = new Subscription();
+
+  constructor(
+    private drinkService: DrinkService,
+    private cdRef: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
-    this.drinkService.saucer$.subscribe(bebidas => {
-      this.todosLosPlatillos = [...bebidas].reverse(); // ← TODOS los platillos
-    });
+    console.log('🔄 Inicializando componente UpDrinkAmd...');
+    
+    // Suscribirse al loading state
+    this.subscription.add(
+      this.drinkService.loading$.subscribe(loading => {
+        this.isLoading = loading;
+        this.cdRef.detectChanges();
+      })
+    );
+
+    // Suscribirse a las bebidas - ESTO ES LO MÁS IMPORTANTE
+    this.subscription.add(
+      this.drinkService.saucer$.subscribe((bebidas: Drinkinterface[]) => {
+        console.log('🔄 Lista de bebidas actualizada:', bebidas.length);
+        this.todasLasBebidas = bebidas;
+        this.cdRef.detectChanges(); // ESTO HACE EL REFRESH AUTOMÁTICO
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   OnfileSelected(event: any) {
@@ -40,22 +67,31 @@ export class UpDrinkAmd implements OnInit {
     }
   }
 
-  eliminarPlatillo(platillo: Drinkinterface) {
+  eliminarBebida(bebida: Drinkinterface) {
     if (confirm('¿Estás seguro de que deseas eliminar esta bebida?')) {
-      this.drinkService.eliminarPlatillo(platillo);
+      this.drinkService.eliminarBebida(bebida.id!).subscribe({
+        next: () => {
+          console.log('✅ Bebida eliminada');
+          // El refresh automático se hace por la suscripción a saucer$
+        },
+        error: (err) => {
+          console.error('❌ Error eliminando bebida:', err);
+          alert('Error al eliminar la bebida');
+        }
+      });
     }
   }
 
-  editarPlatillo(platillo: Drinkinterface) {
-    this.platilloEditando = platillo;
-    this.nombre = platillo.nombre;
-    this.descripcion = platillo.descripcion;
-    this.precio = platillo.precio;
-    this.imageBase64 = platillo.imagen;
+  editarBebida(bebida: Drinkinterface) {
+    this.bebidaEditando = bebida;
+    this.nombre = bebida.nombre;
+    this.descripcion = bebida.descripcion;
+    this.precio = bebida.precio;
+    this.imageBase64 = bebida.imagen;
     this.esModoEdicion = true;
   }
 
-  subirsaucer() {
+  subirBebida() {
     if (!this.nombre || !this.descripcion || !this.precio || !this.imageBase64) {
       alert("Por favor, rellene todos los espacios");
       return;
@@ -66,31 +102,55 @@ export class UpDrinkAmd implements OnInit {
       return;
     }
 
-    if (this.esModoEdicion && this.platilloEditando) {
+    this.isSubmitting = true;
+
+    if (this.esModoEdicion && this.bebidaEditando) {
+      // MODO EDICIÓN
       const bebidaActualizada: Drinkinterface = {
-        id: this.platilloEditando.id,
+        id: this.bebidaEditando.id,
         nombre: this.nombre,
         descripcion: this.descripcion,
         precio: this.precio,
         imagen: this.imageBase64
       };
 
-      this.drinkService.actualizarPlatillo(this.platilloEditando, bebidaActualizada);
-      this.esModoEdicion = false;
-      alert("Bebida actualizada exitosamente");
-      this.limpiarFormulario();
+      this.drinkService.actualizarBebida(bebidaActualizada).subscribe({
+        next: () => {
+          this.esModoEdicion = false;
+          this.isSubmitting = false;
+          alert("Bebida actualizada exitosamente");
+          this.limpiarFormulario();
+          // El refresh automático se hace por la suscripción a saucer$
+        },
+        error: (err) => {
+          console.error('❌ Error actualizando:', err);
+          this.isSubmitting = false;
+          alert("Error al actualizar la bebida");
+        }
+      });
     } else {
+      // MODO CREACIÓN - AGREGAR ID: 0 TEMPORAL
       const nuevaBebida: Drinkinterface = {
-        id: 0,
+        id: 0, // ID temporal que será reemplazado por el backend
         nombre: this.nombre,
         descripcion: this.descripcion,
         precio: this.precio,
         imagen: this.imageBase64
       };
 
-      this.drinkService.agregarPlatillo(nuevaBebida);
-      alert("Bebida subida exitosamente");
-      this.limpiarFormulario();
+      this.drinkService.agregarBebida(nuevaBebida).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          alert("Bebida subida exitosamente");
+          this.limpiarFormulario();
+          // El refresh automático se hace por la suscripción a saucer$
+        },
+        error: (err) => {
+          console.error('❌ Error subiendo:', err);
+          this.isSubmitting = false;
+          alert("Error al subir la bebida");
+        }
+      });
     }
   }
 
@@ -105,8 +165,9 @@ export class UpDrinkAmd implements OnInit {
     this.descripcion = '';
     this.precio = 0;
     this.imageBase64 = '';
-    this.platilloEditando = null;
+    this.bebidaEditando = null;
     this.esModoEdicion = false;
+    this.isSubmitting = false;
 
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) {
@@ -114,8 +175,7 @@ export class UpDrinkAmd implements OnInit {
     }
   }
 
-  // NUEVO: Método para obtener total de bebidas
-  getTotalPlatillos(): number {
-    return this.todosLosPlatillos.length;
+  getTotalBebidas(): number {
+    return this.todasLasBebidas.length;
   }
 }

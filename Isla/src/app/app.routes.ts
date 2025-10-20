@@ -39,19 +39,20 @@ export const routes: Routes = [
   { path: 'Login', component: Login, pathMatch: 'full' },
 
   {
-    path: 'gestoramd',
-    component: Gestoramd,
-    children: [
-      { path: 'upresumen', component: UpResumeAmd },
-      { path: 'upsales', component: UpSalesAmd },
-      { path: 'updrink', component: UpDrinkAmd },
-      { path: 'upfood', component: UpFoodAmd },
-      { path: 'upfish', component: UpFishesAmd },
-      { path: 'uppromotion', component: UpPromotionAmd },
-      { path: 'celebrae', component: UpCelebratesAmd },
-      { path: 'cwaiter', component: UpCreatewaiterAmd }
-    ]
-  },
+  path: 'gestoramd',
+  component: Gestoramd,
+  children: [
+    // Ruta vacía - el componente Gestoramd maneja el dashboard
+    { path: 'upresumen', component: UpResumeAmd },
+    { path: 'upsales', component: UpSalesAmd },
+    { path: 'updrink', component: UpDrinkAmd },
+    { path: 'upfood', component: UpFoodAmd },
+    { path: 'upfish', component: UpFishesAmd },
+    { path: 'uppromotion', component: UpPromotionAmd },
+    { path: 'celebrae', component: UpCelebratesAmd },
+    { path: 'cwaiter', component: UpCreatewaiterAmd }
+  ]
+},
 
   // Direct route for cashier checkout
   { path: 'cashier-checkout', component: CashierCheckout }

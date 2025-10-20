@@ -1,9 +1,10 @@
 <div class="admin-container">
   <div class="admin-layout">
-    <!-- Panel lateral con tema azul marino -->
+    <!-- Panel lateral -->
     <div class="admin-sidebar">
       <div class="sidebar-header">
-        <div class="logo">
+        <!-- LOGO COMO BOTÓN -->
+        <div class="logo" (click)="irAlGestorPrincipal()" style="cursor: pointer;">
           <i class="waves">🌊</i>
           <h3 class="letra">Gestor</h3>
         </div>
@@ -21,7 +22,6 @@
           <div class="nav-icon">📊</div>
           <span class="nav-text">Resumen</span>
         </a>
-        <!-- NUEVO BOTÓN DE VENTAS -->
         <a routerLink="upsales" routerLinkActive="active">
           <div class="nav-icon">💰</div>
           <span class="nav-text">Ventas Activas</span>
@@ -38,10 +38,6 @@
           <div class="nav-icon">🐟</div>
           <span class="nav-text">Especiales del Mar</span>
         </a>
-        <!--<a routerLink="uppromotion" routerLinkActive="active">
-          <div class="nav-icon">🎯</div>
-          <span class="nav-text">Promociones</span>
-        </a>-->
         <a routerLink="celebrae" routerLinkActive="active">
           <div class="nav-icon">🎉</div>
           <span class="nav-text">Festeja</span>
@@ -80,7 +76,138 @@
       </header>
 
       <main class="content-main">
+        <!-- Router outlet para componentes hijos -->
         <router-outlet></router-outlet>
+        
+        <!-- DASHBOARD PRINCIPAL - Se muestra solo cuando no hay ruta hija activa -->
+        <div *ngIf="mostrarDashboardPrincipal()" class="dashboard-container">
+          
+          <!-- ESTADÍSTICAS PRINCIPALES -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon total-ventas">💰</div>
+              <div class="stat-info">
+                <h3>Total Ventas Hoy</h3>
+                <span class="stat-number">$2,450</span>
+                <span class="stat-trend positive">+12% vs ayer</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon total-pedidos">📦</div>
+              <div class="stat-info">
+                <h3>Pedidos Activos</h3>
+                <span class="stat-number">18</span>
+                <span class="stat-trend positive">+3 nuevos</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon total-productos">🍽️</div>
+              <div class="stat-info">
+                <h3>Productos Activos</h3>
+                <span class="stat-number">45</span>
+                <span class="stat-trend">+2 esta semana</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon total-reservas">🎉</div>
+              <div class="stat-info">
+                <h3>Reservas Hoy</h3>
+                <span class="stat-number">8</span>
+                <span class="stat-trend positive">+2 cumpleaños</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACCESOS RÁPIDOS -->
+          <div class="quick-actions-section">
+            <h2>Accesos Rápidos</h2>
+            <div class="quick-actions-grid">
+              <div class="quick-action-card" (click)="navegarA('upfood')">
+                <div class="action-icon">🍽️</div>
+                <h4>Gestionar Platillos</h4>
+                <p>Agregar, editar o eliminar platillos</p>
+                <span class="action-badge">{{contadores.platillos}} activos</span>
+              </div>
+
+              <div class="quick-action-card" (click)="navegarA('updrink')">
+                <div class="action-icon">🥤</div>
+                <h4>Gestionar Bebidas</h4>
+                <p>Administrar menú de bebidas</p>
+                <span class="action-badge">{{contadores.bebidas}} activas</span>
+              </div>
+
+              <div class="quick-action-card" (click)="navegarA('upfish')">
+                <div class="action-icon">🐟</div>
+                <h4>Especiales del Mar</h4>
+                <p>Gestionar especialidades</p>
+                <span class="action-badge">{{contadores.especialidades}} activas</span>
+              </div>
+
+              <div class="quick-action-card" (click)="navegarA('celebrae')">
+                <div class="action-icon">🎉</div>
+                <h4>Ver Reservas</h4>
+                <p>Gestionar festejos y cumpleaños</p>
+                <span class="action-badge">{{contadores.reservas}} pendientes</span>
+              </div>
+
+              <div class="quick-action-card" (click)="navegarA('cwaiter')">
+                <div class="action-icon">👨‍💼</div>
+                <h4>Personal</h4>
+                <p>Administrar meseros y cajeros</p>
+                <span class="action-badge">{{contadores.meseros}} activos</span>
+              </div>
+
+              <div class="quick-action-card" (click)="navegarA('upsales')">
+                <div class="action-icon">💰</div>
+                <h4>Ventas en Tiempo Real</h4>
+                <p>Monitorear ventas activas</p>
+                <span class="action-badge">{{contadores.ventas}} hoy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ACTIVIDAD RECIENTE -->
+          <div class="recent-activity-section">
+            <h2>Actividad Reciente</h2>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon success">✅</div>
+                <div class="activity-content">
+                  <p><strong>Nuevo platillo agregado</strong> - Ceviche Mixto</p>
+                  <span class="activity-time">Hace 5 minutos</span>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon warning">⚠️</div>
+                <div class="activity-content">
+                  <p><strong>Stock bajo</strong> - Margaritas se están agotando</p>
+                  <span class="activity-time">Hace 15 minutos</span>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon info">🎉</div>
+                <div class="activity-content">
+                  <p><strong>Nueva reserva</strong> - Cumpleaños de María González</p>
+                  <span class="activity-time">Hace 30 minutos</span>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon success">💰</div>
+                <div class="activity-content">
+                  <p><strong>Venta exitosa</strong> - Mesa #4 - $450</p>
+                  <span class="activity-time">Hace 1 hora</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </main>
     </div>
   </div>

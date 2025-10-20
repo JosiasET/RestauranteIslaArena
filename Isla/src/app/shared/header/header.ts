@@ -20,19 +20,34 @@ export class Header {
   constructor(private router: Router) {}
 
   goHome() {
+    console.log('🏠 Navegando a home...');
     if (!this.homeActive) {
       this.homeActive = true;
-      this.router.navigateByUrl('/Home');
+      this.router.navigate(['/']).then(() => {
+        console.log('✅ Navegación a home completada');
+      });
     }
   }
 
   setHome(state: boolean) {
+    console.log('🔄 Cambiando estado home a:', state);
     this.homeActive = state;
+    
+    // Si vamos a una sección específica, forzar navegación
+    if (!state) {
+      setTimeout(() => {
+        // Esto ayuda a que Angular procese la navegación correctamente
+        this.router.navigate([this.router.url]);
+      }, 50);
+    }
   }
 
   goToCart() {
+    console.log('🛒 Navegando al carrito...');
     this.homeActive = false;
-    this.router.navigate(['/cart']); 
+    this.router.navigate(['/cart']).then(() => {
+      console.log('✅ Navegación al carrito completada');
+    });
   }
 
   updateCartCount(count: number) {

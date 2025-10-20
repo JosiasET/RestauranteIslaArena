@@ -14,40 +14,50 @@
     <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
 
     <div class="action-buttons">
-      <button (click)="subirsaucer()" class="submit-btn">
-        {{ esModoEdicion ? 'Actualizar Bebida' : 'Subir Bebida' }}
+      <button 
+        (click)="subirBebida()" 
+        class="submit-btn"
+        [disabled]="isSubmitting"
+      >
+        {{ esModoEdicion ? (isSubmitting ? 'Actualizando...' : 'Actualizar Bebida') : (isSubmitting ? 'Subiendo...' : 'Subir Bebida') }}
       </button>
-      <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn">
+      <button *ngIf="esModoEdicion" (click)="cancelarEdicion()" class="cancel-btn" [disabled]="isSubmitting">
         Cancelar
       </button>
     </div>
   </div>
 
-  <!-- NUEVA CUADRÍCULA DE TODAS LAS BEBIDAS -->
+  <!-- CUADRÍCULA DE TODAS LAS BEBIDAS -->
   <div class="lista-platillos">
     <div class="lista-header">
-      <h2>TODAS LAS BEBIDAS ({{ getTotalPlatillos() }})</h2>
+      <h2>TODAS LAS BEBIDAS ({{ getTotalBebidas() }})</h2>
       <p>Gestiona todas tus bebidas existentes</p>
     </div>
 
+    <!-- Indicador de carga -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loading-spinner-large"></div>
+      <p>Cargando bebidas...</p>
+    </div>
+
     <!-- CUADRÍCULA DE BEBIDAS -->
-    <div class="platillos-grid">
-      <div *ngFor="let platillo of todosLosPlatillos" class="platillo-card-admin">
+    <div *ngIf="!isLoading" class="platillos-grid">
+      <div *ngFor="let bebida of todasLasBebidas" class="platillo-card-admin">
         <div class="platillo-image">
-          <img [src]="platillo.imagen" [alt]="platillo.nombre">
+          <img [src]="bebida.imagen" [alt]="bebida.nombre" loading="lazy">
         </div>
         
         <div class="platillo-info">
-          <h3>{{ platillo.nombre }}</h3>
-          <p class="descripcion">{{ platillo.descripcion }}</p>
-          <p class="precio">${{ platillo.precio }}</p>
+          <h3>{{ bebida.nombre }}</h3>
+          <p class="descripcion">{{ bebida.descripcion }}</p>
+          <p class="precio">${{ bebida.precio }}</p>
         </div>
 
         <div class="platillo-actions">
-          <button class="btn-editar" (click)="editarPlatillo(platillo)">
+          <button class="btn-editar" (click)="editarBebida(bebida)">
             ✏️ Editar
           </button>
-          <button class="btn-eliminar" (click)="eliminarPlatillo(platillo)">
+          <button class="btn-eliminar" (click)="eliminarBebida(bebida)">
             🗑️ Eliminar
           </button>
         </div>
@@ -55,7 +65,7 @@
     </div>
 
     <!-- MENSAJE SI NO HAY BEBIDAS -->
-    <div *ngIf="todosLosPlatillos.length === 0" class="no-platillos">
+    <div *ngIf="todasLasBebidas.length === 0 && !isLoading" class="no-platillos">
       <div class="empty-icon">🥤</div>
       <h3>No hay bebidas aún</h3>
       <p>Comienza agregando tu primera bebida usando el formulario superior.</p>
