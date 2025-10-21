@@ -4,29 +4,52 @@ const { processImage, formatImageResponse } = require('../utils/imageUtils');
 function normalizarIDs(rows) {
   return rows.map(p => ({
     ...p,
-    id: p.id_especialidad, // para compatibilidad con Angular
+    id: p.id_especialidad,
+    // Asegurar que los campos JSON sean arrays válidos
+    tipos: p.tipos ? (typeof p.tipos === 'string' ? JSON.parse(p.tipos) : p.tipos) : [],
+    tamanos: p.tamanos ? (typeof p.tamanos === 'string' ? JSON.parse(p.tamanos) : p.tamanos) : [],
+    tiene_tamanos: p.tiene_tamanos
   }));
 }
 
 const especialidadesController = {
   // Crear especialidad
   crearEspecialidad: async (req, res) => {
-    const { nombre, descripcion, precio, imagen } = req.body;
+    const { 
+      nombre, 
+      descripcion, 
+      descripcion_real,
+      precio, 
+      imagen, 
+      tiene_tamanos,
+      tipos,
+      tamanos
+    } = req.body;
+    
     if (!nombre || !precio) {
       return res.status(400).json({ error: "Nombre y precio son requeridos" });
     }
 
     try {
       const buffer = processImage(imagen);
+      
+      // Convertir a JSON si viene como array
+      const tiposJSON = tipos ? JSON.stringify(tipos) : null;
+      const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
+
       const result = await db.query(
-        "INSERT INTO Especialidades_mar (nombre, descripcion, precio, imagen) VALUES ($1, $2, $3, $4) RETURNING *",
-        [nombre, descripcion, precio, buffer]
+        `INSERT INTO Especialidades_mar 
+         (nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tipos, tamanos) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+         RETURNING *`,
+        [nombre, descripcion, descripcion_real, precio, buffer, tiene_tamanos || false, tiposJSON, tamanosJSON]
       );
+      
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
       res.json(especialidad);
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Error al crear especialidad" });
+      console.error('❌ Error al crear especialidad:', err);
+      res.status(500).json({ error: "Error al crear especialidad: " + err.message });
     }
   },
 
@@ -37,25 +60,47 @@ const especialidadesController = {
       const especialidades = normalizarIDs(formatImageResponse(result.rows));
       res.json(especialidades);
     } catch (err) {
-      res.status(500).json({ error: "Error al obtener especialidades" });
+      console.error('❌ Error al obtener especialidades:', err);
+      res.status(500).json({ error: "Error al obtener especialidades: " + err.message });
     }
   },
 
   // Actualizar especialidad
   actualizarEspecialidad: async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, precio, imagen } = req.body;
+    const { 
+      nombre, 
+      descripcion, 
+      descripcion_real,
+      precio, 
+      imagen, 
+      tiene_tamanos,
+      tipos,
+      tamanos
+    } = req.body;
 
     try {
       const buffer = processImage(imagen);
+      
+      const tiposJSON = tipos ? JSON.stringify(tipos) : null;
+      const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
+
       let sql, values;
 
       if (buffer) {
-        sql = "UPDATE Especialidades_mar SET nombre=$1, descripcion=$2, precio=$3, imagen=$4 WHERE id_especialidad=$5 RETURNING *";
-        values = [nombre, descripcion, precio, buffer, id];
+        sql = `UPDATE Especialidades_mar 
+               SET nombre=$1, descripcion=$2, descripcion_real=$3, precio=$4, imagen=$5, 
+                   tiene_tamanos=$6, tipos=$7, tamanos=$8 
+               WHERE id_especialidad=$9 
+               RETURNING *`;
+        values = [nombre, descripcion, descripcion_real, precio, buffer, tiene_tamanos, tiposJSON, tamanosJSON, id];
       } else {
-        sql = "UPDATE Especialidades_mar SET nombre=$1, descripcion=$2, precio=$3 WHERE id_especialidad=$4 RETURNING *";
-        values = [nombre, descripcion, precio, id];
+        sql = `UPDATE Especialidades_mar 
+               SET nombre=$1, descripcion=$2, descripcion_real=$3, precio=$4, 
+                   tiene_tamanos=$5, tipos=$6, tamanos=$7 
+               WHERE id_especialidad=$8 
+               RETURNING *`;
+        values = [nombre, descripcion, descripcion_real, precio, tiene_tamanos, tiposJSON, tamanosJSON, id];
       }
 
       const result = await db.query(sql, values);
@@ -67,7 +112,8 @@ const especialidadesController = {
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
       res.json(especialidad);
     } catch (err) {
-      res.status(500).json({ error: "Error al actualizar especialidad" });
+      console.error('❌ Error al actualizar especialidad:', err);
+      res.status(500).json({ error: "Error al actualizar especialidad: " + err.message });
     }
   },
 
@@ -82,7 +128,8 @@ const especialidadesController = {
       }
       res.json({ message: "✅ Especialidad eliminada" });
     } catch (err) {
-      res.status(500).json({ error: "Error al eliminar especialidad" });
+      console.error('❌ Error al eliminar especialidad:', err);
+      res.status(500).json({ error: "Error al eliminar especialidad: " + err.message });
     }
   }
 };

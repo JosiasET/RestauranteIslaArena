@@ -30,7 +30,12 @@ export class FishesService {
       nombre: especialidad.nombre,
       descripcion: especialidad.descripcion,
       precio: especialidad.precio,
-      imagen: especialidad.imagen
+      imagen: especialidad.imagen,
+      // INCLUIR LOS CAMPOS NUEVOS
+      descripcion_real: especialidad.descripcion_real || especialidad.descripcion,
+      tiene_tamanos: especialidad.tiene_tamanos || false,
+      tipos: especialidad.tipos || [],
+      tamanos: especialidad.tamanos || []
     };
   }
 
@@ -44,8 +49,8 @@ export class FishesService {
         this.saucerSource.next(especialidades);
         this.loadingSource.next(false);
       }),
-      catchError(err => {
-        console.error('❌ Error al cargar especialidades:', err);
+      catchError((error: HttpErrorResponse) => {
+        console.error('❌ Error al cargar especialidades:', error);
         this.loadingSource.next(false);
         return of([]);
       })

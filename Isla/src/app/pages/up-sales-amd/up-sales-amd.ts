@@ -59,38 +59,38 @@ export class UpSalesAmd implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Load drinks (sin tamaños por ahora)
+    // Load drinks
     this.drinkService.saucer$.subscribe(drinks => {
       console.log('🥤 BEBIDAS DETALLADAS:', drinks.map(d => ({
         id: d.id, 
         nombre: d.nombre,
         precio: d.precio
-        // tiene_tamanos y tamanos comentados por ahora
       })));
       this.drinks = drinks;
       this.updateFilteredProducts();
     });
     
-    // Load foods (CON TAMAÑOS - este sí funciona)
+    // Load foods
     this.foodService.saucer$.subscribe(foods => {
       console.log('🍽️ COMIDAS DETALLADAS:', foods.map(f => ({
         id: f.id, 
         nombre: f.nombre, 
         precio: f.precio,
-        tiene_tamanos: (f as any).tiene_tamanos, // Usamos 'as any' para evitar errores TypeScript
+        tiene_tamanos: (f as any).tiene_tamanos,
         tamanos: (f as any).tamanos
       })));
       this.foods = foods;
       this.updateFilteredProducts();
     });
     
-    // Load fishes (sin tamaños por ahora)
+    // Load fishes
     this.fishesService.saucer$.subscribe(fishes => {
       console.log('🐟 PESCADOS DETALLADOS:', fishes.map(f => ({
         id: f.id, 
         nombre: f.nombre,
-        precio: f.precio
-        // tiene_tamanos y tamanos comentados por ahora
+        precio: f.precio,
+        tiene_tamanos: f.tiene_tamanos,
+        tamanos: f.tamanos
       })));
       this.fishes = fishes;
       this.updateFilteredProducts();
@@ -103,11 +103,13 @@ export class UpSalesAmd implements OnInit {
     this.selectedSize = null;
     this.modalQuantity = 1;
     
-    // Solo aplicar tamaños a food (por ahora)
     const productType = this.getProductType(product);
     
-    if (productType === 'food' && (product as any).tiene_tamanos && (product as any).tamanos && (product as any).tamanos.length > 0) {
-      this.selectedSize = (product as any).tamanos[0];
+    if ((productType === 'food' || productType === 'fish') && 
+        product.tiene_tamanos && 
+        product.tamanos && 
+        product.tamanos.length > 0) {
+      this.selectedSize = product.tamanos[0];
     }
     
     this.showProductModal = true;
@@ -146,7 +148,6 @@ export class UpSalesAmd implements OnInit {
     return Math.min(...tamanos.map((t: any) => t.precio));
   }
 
-  // Método auxiliar para determinar el tipo de producto
   private getProductType(product: any): string {
     if (this.drinks.some(d => d.id === product.id && d.nombre === product.nombre)) {
       return 'drink';
@@ -161,22 +162,22 @@ export class UpSalesAmd implements OnInit {
   addToCartWithOptions() {
     if (!this.selectedProduct) return;
 
-    // Validar tamaños solo para food
     const productType = this.getProductType(this.selectedProduct);
     
-    if (productType === 'food' && (this.selectedProduct as any).tiene_tamanos && !this.selectedSize) {
+    if ((productType === 'food' || productType === 'fish') && 
+        this.selectedProduct.tiene_tamanos && 
+        !this.selectedSize) {
       alert('Por favor selecciona un tamaño');
       return;
     }
 
     const productToAdd = {
       ...this.selectedProduct,
-      // Si tiene tamaño seleccionado, usar ese precio
       precio: this.selectedSize ? this.selectedSize.precio : this.selectedProduct.precio
     };
 
-    // Crear ID único incluyendo el tamaño (solo para food)
-    const sizeId = (productType === 'food' && this.selectedSize) ? `_${this.selectedSize.nombre}` : '';
+    const sizeId = ((productType === 'food' || productType === 'fish') && this.selectedSize) ? 
+                   `_${this.selectedSize.nombre}` : '';
     const uniqueId = `${productType}_${this.selectedProduct.id}_${this.selectedProduct.nombre}${sizeId}`;
     
     console.log('🎯 PRODUCTO CON TAMAÑO:', {
@@ -188,10 +189,10 @@ export class UpSalesAmd implements OnInit {
       idUnico: uniqueId
     });
     
-    // Buscar por ID único
     const existingItem = this.cart.find(item => {
       const itemType = this.getProductType(item.product);
-      const itemSizeId = (itemType === 'food' && item.selectedSize) ? `_${item.selectedSize.nombre}` : '';
+      const itemSizeId = ((itemType === 'food' || itemType === 'fish') && item.selectedSize) ? 
+                         `_${item.selectedSize.nombre}` : '';
       const itemUniqueId = `${itemType}_${item.product.id}_${item.product.nombre}${itemSizeId}`;
       return itemUniqueId === uniqueId;
     });
@@ -202,8 +203,7 @@ export class UpSalesAmd implements OnInit {
       this.cart.push({
         product: productToAdd,
         quantity: this.modalQuantity,
-        // Solo guardar tamaño para food
-        selectedSize: (productType === 'food' && this.selectedSize) ? {
+        selectedSize: ((productType === 'food' || productType === 'fish') && this.selectedSize) ? {
           nombre: this.selectedSize.nombre,
           precio: this.selectedSize.precio
         } : undefined
@@ -213,7 +213,6 @@ export class UpSalesAmd implements OnInit {
     this.closeProductModal();
   }
 
-  // MÉTODOS EXISTENTES
   updateFilteredProducts() {
     switch (this.selectedCategory) {
       case 'food':
@@ -237,7 +236,6 @@ export class UpSalesAmd implements OnInit {
     this.updateFilteredProducts();
   }
 
-  // Este método ya no se usa directamente, se reemplaza por el modal
   addToCart(product: any) {
     this.openProductModal(product);
   }
@@ -282,7 +280,6 @@ export class UpSalesAmd implements OnInit {
       return;
     }
 
-    // Prepare sale data for checkout
     const saleData = {
       table: this.selectedTable,
       waiter: this.selectedWaiter || 'No asignado',
@@ -291,24 +288,21 @@ export class UpSalesAmd implements OnInit {
       date: new Date()
     };
 
-    // Guardar datos en el servicio
     this.saleDataService.setSaleData(saleData);
-
-    // Navigate to cashier checkout
     this.router.navigate(['/cashier-checkout']);
   }
 
-  // Método para verificar si un producto tiene tamaños (solo para food)
   productHasSizes(product: any): boolean {
     const productType = this.getProductType(product);
-    return productType === 'food' && (product as any).tiene_tamanos && (product as any).tamanos;
+    return (productType === 'food' || productType === 'fish') && 
+           product.tiene_tamanos && 
+           product.tamanos;
   }
 
-  // Método para obtener tamaños (solo para food)
   getProductSizes(product: any): any[] {
     const productType = this.getProductType(product);
-    if (productType === 'food' && (product as any).tamanos) {
-      return (product as any).tamanos;
+    if ((productType === 'food' || productType === 'fish') && product.tamanos) {
+      return product.tamanos;
     }
     return [];
   }

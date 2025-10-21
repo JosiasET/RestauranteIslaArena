@@ -1,45 +1,163 @@
+<h1 class="titulo">ESPECIALIDADES DEL MAR</h1>
+<h4 class="subtitulo">¡LOS MÁS FRESCOS Y DELICIOSOS PLATILLOS MARINOS!</h4>
 
-<h1 class="titulo">ESPECIALES DEL MAR</h1>
-<h4 class="subtitulo">¡MARISCOS ULTRAFRESCOS - PREPÁRALOS A TU GUSTO!</h4>
-<h1 class="titulo">MARISCOS PREMIUM</h1>
+<!-- SECCIÓN DE RECOMENDACIONES DEL DÍA -->
+<div *ngIf="recomendacionesDelDia.length > 0 && !loading" class="recomendaciones-section">
+  <h2 class="recomendaciones-titulo">🐟 ¡ESPECIALIDADES RECOMENDADAS!</h2>
+  <div class="recomendaciones-grid">
+    <div *ngFor="let producto of recomendacionesDelDia" class="recomendacion-card">
+      <div class="recomendacion-img">
+        <img 
+          [src]="producto.imagen" 
+          alt="{{producto.nombre}}"
+          (error)="producto.imagen = 'assets/default-food.jpg'"
+        >
+      </div>
+      <div class="recomendacion-info">
+        <h3>{{ producto.nombre }}</h3>
+        
+        <!-- Solo precio base -->
+        <strong class="precio">{{ producto.precio | currency }}</strong>
 
-<div class="menu-container">
-  <div *ngFor="let platillo of saucer" class="platillo-card">
-   
-    <div class="platillo-img">
-      <img [src]="platillo.imagen" alt="{{ platillo.nombre }}">
+        <!-- Badge si tiene opciones -->
+        <div *ngIf="producto.tipos || producto.tamanos" class="tiene-opciones-badge">
+          ⚙️ Opciones disponibles
+        </div>
+
+        <button class="btn-recomendacion" (click)="agregarAlCarrito(producto)">
+          ¡PROBAR!
+        </button>
+      </div>
     </div>
+  </div>
+</div>
 
+<!-- ESTADO DE CARGA -->
+<div *ngIf="loading" class="loading-container">
+  <div class="spinner"></div>
+  <p>Cargando nuestras especialidades del mar...</p>
+</div>
+
+<!-- CONTENIDO PRINCIPAL - TODO EL MENÚ -->
+<div *ngIf="!loading" class="menu-container">
+  
+  <!-- MENSAJE SI NO HAY PRODUCTOS -->
+  <div *ngIf="productosFiltrados.length === 0" class="no-platillos">
+    <h3>¡Próximamente!</h3>
+    <p>Estamos preparando nuevas delicias marinas</p>
+  </div>
+
+  <!-- LISTA DE PRODUCTOS -->
+  <div *ngFor="let producto of productosFiltrados" class="platillo-card">
     
-    <div class="platillo-info">
-      <h3>{{ platillo.nombre }}</h3>
-      <p>{{ platillo.descripcion }}</p>
-      <p class="texto-persuasivo">✨ Capturados hoy mismo - ¡Máxima frescura garantizada!</p>
-      <strong class="precio">{{ platillo.precio | currency }}</strong>
+    <!-- Imagen -->
+    <div class="platillo-img">
+      <img 
+        [src]="producto.imagen" 
+        alt="{{producto.nombre}}"
+        (error)="producto.imagen = 'assets/default-food.jpg'"
+      >
+    </div>
 
-      <button class="btn-agregar" (click)="agregarAlCarrito(platillo)">
-        ¡ORDENAR !
+    <!-- Info -->
+    <div class="platillo-info">
+      <h3>{{ producto.nombre }}</h3>
+      
+      <!-- Solo precio base -->
+      <strong class="precio">{{ producto.precio | currency }}</strong>
+
+      <!-- Badge si tiene tamaños -->
+      <div *ngIf="producto.tiene_tamanos" class="tiene-tamanos-badge">
+        📏 Tamaños disponibles
+      </div>
+
+      <button class="btn-agregar" (click)="agregarAlCarrito(producto)">
+        ¡ORDENAR!
       </button>
     </div>
   </div>
 </div>
 
+<!-- MODAL HORIZONTAL - VENTANA FLOTANTE IDÉNTICA AL COMPONENTE FOOD -->
+<div *ngIf="mostrarModal && productoSeleccionado" class="modal-overlay" (click)="cerrarModal()">
+  <div class="modal-content horizontal" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h3>{{ productoSeleccionado.nombre }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModal()">×</button>
+    </div>
 
+    <div class="modal-body-horizontal">
+      
+      <!-- LAYOUT HORIZONTAL CON SCROLL INTERNO -->
+      <div class="modal-layout-horizontal">
+        
+        <!-- COLUMNA IZQUIERDA - IMAGEN -->
+        <div class="columna-imagen-horizontal">
+          <img [src]="productoSeleccionado.imagen" [alt]="productoSeleccionado.nombre" class="imagen-grande">
+        </div>
 
+        <!-- COLUMNA DERECHA - OPCIONES -->
+        <div class="columna-opciones">
+          
+          <!-- DESCRIPCIÓN (SOLO EN EL MODAL) -->
+          <div class="descripcion-horizontal">
+            <p>{{ productoSeleccionado.descripcion_real || productoSeleccionado.descripcion }}</p>
+          </div>
 
-<!--
-<div class="menu-container">
-  <div *ngFor="let platillo of saucer" class="platillo-card">
-    <img [src]="platillo.imagen" alt="{{platillo.nombre}}">
-    <div class="platillo-info">
-      <h3>{{ platillo.nombre }}</h3>
-      <p>{{ platillo.descripcion }}</p>
-      <p class="texto-persuasivo">✨ Capturados hoy mismo - ¡Máxima frescura garantizada!</p>
-      <strong class="precio">{{ platillo.precio | currency }}</strong>
-      <button class="btn-agregar" (click)="agregarAlCarrito(platillo)">
-        ¡SÍ, QUIERO COCINARLOS COMO ME GUSTAN!
+          <!-- SELECCIÓN DE TAMAÑOS (SOLO EN EL MODAL) -->
+          <div *ngIf="productoSeleccionado.tiene_tamanos && productoSeleccionado.tamanos" class="tamanos-horizontal">
+            <h4>Tamaño:</h4>
+            <div class="tamanos-grid-horizontal">
+              <button *ngFor="let tamano of productoSeleccionado.tamanos" 
+                      class="btn-tamano-horizontal"
+                      [class.selected]="tamanoSeleccionado?.nombre === tamano.nombre"
+                      (click)="seleccionarTamano(tamano)">
+                <span class="tamano-nombre-horizontal">{{ tamano.nombre }}</span>
+                <span class="tamano-precio-horizontal">{{ tamano.precio | currency }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- CONTADOR DE CANTIDAD -->
+          <div class="cantidad-horizontal">
+            <h4>Cantidad:</h4>
+            <div class="cantidad-controls-horizontal">
+              <button class="btn-cantidad-horizontal" (click)="decrementarCantidad()">-</button>
+              <span class="cantidad-value-horizontal">{{ cantidad }}</span>
+              <button class="btn-cantidad-horizontal" (click)="incrementarCantidad()">+</button>
+            </div>
+          </div>
+
+          <!-- RESUMEN DEL PEDIDO -->
+          <div class="resumen-horizontal">
+            <h4>Resumen:</h4>
+            <div class="resumen-detalle">
+              <div class="resumen-linea-horizontal">
+                <span>{{ productoSeleccionado.nombre }}</span>
+                <span>{{ cantidad }} x {{ getPrecioFinal() | currency }}</span>
+              </div>
+              <div class="resumen-linea-horizontal" *ngIf="tamanoSeleccionado && tamanoSeleccionado.nombre !== 'Único'">
+                <span class="opcion-detalle-horizontal">{{ tamanoSeleccionado.nombre }}</span>
+              </div>
+              <div class="resumen-total-horizontal">
+                <span>Total:</span>
+                <span>{{ (getPrecioFinal() * cantidad) | currency }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal-footer-horizontal">
+      <button class="btn-cancelar-horizontal" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-confirmar-horizontal" (click)="agregarConOpciones()">
+        Agregar - {{ (getPrecioFinal() * cantidad) | currency }}
       </button>
     </div>
   </div>
 </div>
--->

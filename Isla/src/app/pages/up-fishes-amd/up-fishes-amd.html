@@ -1,19 +1,70 @@
 <div class="Subir_p">
   <h2 class="Subtitulo">{{ esModoEdicion ? 'EDITAR ESPECIALIDAD' : 'SUBIR ESPECIALIDADES' }}</h2>
 
-  <!-- Barra de inputs -->
+  <!-- Formulario -->
   <div class="form-bar">
     <input type="text" [(ngModel)]="nombre" placeholder="Nombre de la especialidad" class="form-input">
-    <input type="text" [(ngModel)]="descripcion" placeholder="Descripción de la especialidad" class="form-input">
-    <input type="number" [(ngModel)]="precio" placeholder="Precio de la especialidad" class="form-input" min="0">
+    <input type="text" [(ngModel)]="descripcion" placeholder="Categoría (Pescado, Marisco, Ceviche, etc.)" class="form-input">
+    <textarea [(ngModel)]="descripcion_real" placeholder="Descripción real de la especialidad (ingredientes, preparación)" class="form-input textarea-descripcion"></textarea>
+    <input type="number" [(ngModel)]="precio" placeholder="Precio base de la especialidad" class="form-input" min="0">
 
-    <label for="fileInput" class="file-upload-label">
-      <span class="upload-icon">📁</span>
-      <span class="upload-text">{{ imageBase64 ? 'Imagen Seleccionada' : 'Seleccionar Imagen' }}</span>
-    </label>
-    <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
+    <!-- CONTENEDOR PARA TAMAÑOS E IMAGEN (EN LA MISMA FILA) -->
+    <div class="tamanos-imagen-container">
+      
+      <!-- Sección de tamaños (IZQUIERDA) -->
+      <div class="tamanos-column">
+        <!-- Opción para habilitar tamaños -->
+        <div class="tamanos-toggle">
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="tiene_tamanos">
+            <span class="toggle-text">¿Esta especialidad tiene diferentes tamaños?</span>
+          </label>
+        </div>
 
-    <div class="action-buttons">
+        <!-- Gestión de tamaños -->
+        <div *ngIf="tiene_tamanos" class="tamanos-section">
+          <h4>Configurar Tamaños</h4>
+          
+          <div class="nuevo-tamano-form">
+            <input type="text" [(ngModel)]="nuevoTamano.nombre" placeholder="Nombre (ej: Chico, Grande, 1kg)" class="form-input-small">
+            <input type="number" [(ngModel)]="nuevoTamano.precio" placeholder="Precio" class="form-input-small" min="0">
+            <button (click)="agregarTamano()" class="btn-agregar">+ Agregar</button>
+          </div>
+
+          <div class="tamanos-lista" *ngIf="tamanos.length > 0">
+            <h5>Tamaños configurados:</h5>
+            <div *ngFor="let tamano of tamanos; let i = index" class="tamano-item">
+              <span class="tamano-nombre">{{ tamano.nombre }}</span>
+              <span class="tamano-precio">${{ tamano.precio }}</span>
+              <button (click)="eliminarTamano(i)" class="btn-eliminar-tamano">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de imagen (DERECHA) -->
+      <div class="imagen-column">
+        <!-- SELECTOR DE IMAGEN CON PREVIEW COMPACTO -->
+        <div class="imagen-section">
+          <!-- PREVIEW DE LA IMAGEN -->
+          <div *ngIf="imageBase64" class="image-preview">
+            <img [src]="imageBase64" alt="Vista previa de la imagen" class="preview-img">
+            <button type="button" (click)="eliminarImagen()" class="btn-eliminar-imagen">✕</button>
+          </div>
+          
+          <!-- BOTÓN COMPACTO DE SELECCIÓN -->
+          <label for="fileInput" class="file-upload-label-compact">
+            <span class="upload-icon">📁</span>
+            <span class="upload-text">{{ imageBase64 ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}</span>
+          </label>
+          <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTONES DE ACCIÓN CENTRADOS -->
+    <div class="action-buttons-centered">
       <button 
         (click)="subirEspecialidad()" 
         class="submit-btn"
@@ -27,7 +78,7 @@
     </div>
   </div>
 
-  <!-- CUADRÍCULA DE TODAS LAS ESPECIALIDADES -->
+  <!-- Lista de especialidades -->
   <div class="lista-platillos">
     <div class="lista-header">
       <h2>TODAS LAS ESPECIALIDADES ({{ getTotalEspecialidades() }})</h2>
@@ -40,7 +91,7 @@
       <p>Cargando especialidades...</p>
     </div>
 
-    <!-- CUADRÍCULA DE ESPECIALIDADES -->
+    <!-- Cuadrícula de especialidades -->
     <div *ngIf="!isLoading" class="platillos-grid">
       <div *ngFor="let especialidad of todasLasEspecialidades" class="platillo-card-admin">
         <div class="platillo-image">
@@ -49,8 +100,21 @@
         
         <div class="platillo-info">
           <h3>{{ especialidad.nombre }}</h3>
-          <p class="descripcion">{{ especialidad.descripcion }}</p>
-          <p class="precio">${{ especialidad.precio }}</p>
+          <p class="descripcion-categoria">{{ especialidad.descripcion }}</p>
+          
+          <!-- Información básica del precio -->
+          <div class="precio-info-basica">
+            <div *ngIf="especialidad.tiene_tamanos" class="precio-con-tamanos">
+              <span class="precio-texto">Con tamaños</span>
+              <div class="tiene-tamanos-badge">
+                📏 {{ especialidad.tamanos?.length || 0 }} tamaños
+              </div>
+            </div>
+            <div *ngIf="!especialidad.tiene_tamanos" class="precio-sin-tamanos">
+              <span class="precio-texto">Precio único:</span>
+              <span class="precio-valor">${{ especialidad.precio }}</span>
+            </div>
+          </div>
         </div>
 
         <div class="platillo-actions">
@@ -64,7 +128,7 @@
       </div>
     </div>
 
-    <!-- MENSAJE SI NO HAY ESPECIALIDADES -->
+    <!-- Mensaje si no hay especialidades -->
     <div *ngIf="todasLasEspecialidades.length === 0 && !isLoading" class="no-platillos">
       <div class="empty-icon">🐟</div>
       <h3>No hay especialidades aún</h3>
