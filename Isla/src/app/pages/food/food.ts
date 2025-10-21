@@ -27,6 +27,9 @@ export class Food implements OnInit, OnDestroy {
   tamanoSeleccionado: any = null;
   cantidad: number = 1;
 
+  // NUEVA VARIABLE AGREGADA AQUÍ
+  currentScrollPosition: number = 0;
+
   categorias = [
     { id: 'todas', nombre: 'Todo el Menú', emoji: '📦' },
     { id: 'platillos', nombre: 'Platillos', emoji: '🍽️' },
@@ -72,27 +75,52 @@ export class Food implements OnInit, OnDestroy {
     );
   }
 
-  // MÉTODOS PARA EL MODAL DE TAMAÑOS
+  // MÉTODO MODIFICADO - abrirModalProducto
   abrirModalProducto(producto: any) {
-  this.productoSeleccionado = producto;
-  
-  console.log('📦 Producto seleccionado:', producto); // Debug
-  
-  // Si el producto tiene tamaños, seleccionar el primero
-  if (producto.tiene_tamanos && producto.tamanos && producto.tamanos.length > 0) {
-    this.tamanoSeleccionado = producto.tamanos[0];
-  } else {
-    // Si no tiene tamaños, usar el precio base
-    this.tamanoSeleccionado = {
-      nombre: 'Único',
-      precio: producto.precio
-    };
+    // Calcular posición actual del viewport
+    this.currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    
+    this.productoSeleccionado = producto;
+    
+    console.log('📦 Producto seleccionado:', producto);
+    
+    if (producto.tiene_tamanos && producto.tamanos && producto.tamanos.length > 0) {
+      this.tamanoSeleccionado = producto.tamanos[0];
+    } else {
+      this.tamanoSeleccionado = {
+        nombre: 'Único',
+        precio: producto.precio
+      };
+    }
+    
+    this.cantidad = 1;
+    this.mostrarModal = true;
+    
+    // Aplicar la posición calculada después de que el modal se renderice
+    setTimeout(() => {
+      this.aplicarPosicionModal();
+    }, 0);
+    
+    this.cdRef.detectChanges();
   }
-  
-  this.cantidad = 1;
-  this.mostrarModal = true;
-  this.cdRef.detectChanges();
-}
+
+  // NUEVO MÉTODO AGREGADO - aplicarPosicionModal
+  aplicarPosicionModal() {
+    const modalElement = document.querySelector('.modal-content.horizontal') as HTMLElement;
+    if (modalElement) {
+      const viewportHeight = window.innerHeight;
+      const modalHeight = modalElement.offsetHeight;
+      const scrollTop = this.currentScrollPosition;
+      
+      // Calcular posición para que el modal esté centrado verticalmente en el viewport
+      const idealPosition = scrollTop + (viewportHeight / 2) - (modalHeight / 2);
+      
+      // Asegurar que no se salga de la pantalla
+      const safePosition = Math.max(20, Math.min(idealPosition, scrollTop + (viewportHeight - modalHeight - 20)));
+      
+      modalElement.style.marginTop = safePosition + 'px';
+    }
+  }
 
   seleccionarTipo(tipo: any) {
     this.tipoSeleccionado = tipo;
@@ -119,46 +147,7 @@ export class Food implements OnInit, OnDestroy {
     }
   }
 
-  // En tu componente del modal, modifica la función agregarConOpciones
-agregarConOpciones() {
-  if (!this.productoSeleccionado) return;
-
-  // Calcular el precio final (del tamaño seleccionado o precio base)
-  const precioFinal = this.getPrecioFinal();
-
-  const item: CartItem = {
-    id: this.productoSeleccionado.id,
-    nombre: this.productoSeleccionado.nombre,
-    descripcion: this.productoSeleccionado.descripcion_real || this.productoSeleccionado.descripcion,
-    precio: precioFinal, // Precio del tamaño seleccionado
-    imagen: this.productoSeleccionado.imagen,
-    cantidad: this.cantidad,
-    // INFORMACIÓN DEL TAMAÑO SELECCIONADO
-    tamanoSeleccionado: this.tamanoSeleccionado ? {
-      nombre: this.tamanoSeleccionado.nombre,
-      precio: this.tamanoSeleccionado.precio
-    } : undefined,
-    tieneTamanos: this.productoSeleccionado.tiene_tamanos
-  };
-
-  console.log('🛒 Agregando al carrito:', {
-    nombre: item.nombre,
-    precio: item.precio,
-    tamano: item.tamanoSeleccionado,
-    cantidad: item.cantidad
-  });
-
-  this.cartService.addToCart(item);
-  this.cerrarModal();
-}
-
-getPrecioFinal(): number {
-  if (this.tamanoSeleccionado) {
-    return this.tamanoSeleccionado.precio;
-  }
-  return this.productoSeleccionado?.precio || 0;
-}
-
+  // MÉTODO MODIFICADO - cerrarModal
   cerrarModal() {
     this.mostrarModal = false;
     this.productoSeleccionado = null;
@@ -168,7 +157,44 @@ getPrecioFinal(): number {
     this.cdRef.detectChanges();
   }
 
-  // MÉTODOS EXISTENTES (se mantienen igual)
+  // El resto de tus métodos se mantienen igual...
+  agregarConOpciones() {
+    if (!this.productoSeleccionado) return;
+
+    const precioFinal = this.getPrecioFinal();
+
+    const item: CartItem = {
+      id: this.productoSeleccionado.id,
+      nombre: this.productoSeleccionado.nombre,
+      descripcion: this.productoSeleccionado.descripcion_real || this.productoSeleccionado.descripcion,
+      precio: precioFinal,
+      imagen: this.productoSeleccionado.imagen,
+      cantidad: this.cantidad,
+      tamanoSeleccionado: this.tamanoSeleccionado ? {
+        nombre: this.tamanoSeleccionado.nombre,
+        precio: this.tamanoSeleccionado.precio
+      } : undefined,
+      tieneTamanos: this.productoSeleccionado.tiene_tamanos
+    };
+
+    console.log('🛒 Agregando al carrito:', {
+      nombre: item.nombre,
+      precio: item.precio,
+      tamano: item.tamanoSeleccionado,
+      cantidad: item.cantidad
+    });
+
+    this.cartService.addToCart(item);
+    this.cerrarModal();
+  }
+
+  getPrecioFinal(): number {
+    if (this.tamanoSeleccionado) {
+      return this.tamanoSeleccionado.precio;
+    }
+    return this.productoSeleccionado?.precio || 0;
+  }
+
   generarRecomendacionesDelDia() {
     if (this.todosProductos.length === 0) return;
     if (this.todosProductos.length <= 4) {
@@ -208,9 +234,6 @@ getPrecioFinal(): number {
   }
 
   agregarAlCarrito(producto: any) {
-    // Siempre abrir modal para selección de opciones
     this.abrirModalProducto(producto);
   }
-
- 
 }
