@@ -13,11 +13,15 @@ import { Fish } from '../../core/interface/Fish';
 interface CartItem {
   product: any;
   quantity: number;
+  selectedSize?: {
+    nombre: string;
+    precio: number;
+  };
 }
 
 @Component({
   selector: 'app-up-sales-amd',
-  imports: [CommonModule, FormsModule], // ← Quité CurrencyPipe y RouterLink
+  imports: [CommonModule, FormsModule],
   templateUrl: './up-sales-amd.html',
   styleUrl: './up-sales-amd.css'
 })
@@ -36,6 +40,12 @@ export class UpSalesAmd implements OnInit {
   // Cart
   cart: CartItem[] = [];
   
+  // Modal variables
+  showProductModal: boolean = false;
+  selectedProduct: any = null;
+  selectedSize: any = null;
+  modalQuantity: number = 1;
+  
   // Static lists
   tables: string[] = ['Mesa 1', 'Mesa 2', 'Mesa 3', 'Mesa 4', 'Mesa 5', 'Mesa 6'];
   waiters: string[] = ['Mesero 1', 'Mesero 2'];
@@ -49,40 +59,161 @@ export class UpSalesAmd implements OnInit {
   ) {}
 
   ngOnInit() {
-  // Load drinks
-  this.drinkService.saucer$.subscribe(drinks => {
-    console.log('🥤 BEBIDAS DETALLADAS:', drinks.map(d => ({
-      id: d.id, 
-      nombre: d.nombre,
-      precio: d.precio
-    })));
-    this.drinks = drinks;
-    this.updateFilteredProducts();
-  });
-  
-  // Load foods
-  this.foodService.saucer$.subscribe(foods => {
-    console.log('🍽️ COMIDAS DETALLADAS:', foods.map(f => ({
-      id: f.id, 
-      nombre: f.nombre, 
-      precio: f.precio
-    })));
-    this.foods = foods;
-    this.updateFilteredProducts();
-  });
-  
-  // Load fishes
-  this.fishesService.saucer$.subscribe(fishes => {
-    console.log('🐟 PESCADOS DETALLADOS:', fishes.map(f => ({
-      id: f.id, 
-      nombre: f.nombre,
-      precio: f.precio
-    })));
-    this.fishes = fishes;
-    this.updateFilteredProducts();
-  });
-}
+    // Load drinks (sin tamaños por ahora)
+    this.drinkService.saucer$.subscribe(drinks => {
+      console.log('🥤 BEBIDAS DETALLADAS:', drinks.map(d => ({
+        id: d.id, 
+        nombre: d.nombre,
+        precio: d.precio
+        // tiene_tamanos y tamanos comentados por ahora
+      })));
+      this.drinks = drinks;
+      this.updateFilteredProducts();
+    });
+    
+    // Load foods (CON TAMAÑOS - este sí funciona)
+    this.foodService.saucer$.subscribe(foods => {
+      console.log('🍽️ COMIDAS DETALLADAS:', foods.map(f => ({
+        id: f.id, 
+        nombre: f.nombre, 
+        precio: f.precio,
+        tiene_tamanos: (f as any).tiene_tamanos, // Usamos 'as any' para evitar errores TypeScript
+        tamanos: (f as any).tamanos
+      })));
+      this.foods = foods;
+      this.updateFilteredProducts();
+    });
+    
+    // Load fishes (sin tamaños por ahora)
+    this.fishesService.saucer$.subscribe(fishes => {
+      console.log('🐟 PESCADOS DETALLADOS:', fishes.map(f => ({
+        id: f.id, 
+        nombre: f.nombre,
+        precio: f.precio
+        // tiene_tamanos y tamanos comentados por ahora
+      })));
+      this.fishes = fishes;
+      this.updateFilteredProducts();
+    });
+  }
 
+  // MÉTODOS DEL MODAL
+  openProductModal(product: any) {
+    this.selectedProduct = product;
+    this.selectedSize = null;
+    this.modalQuantity = 1;
+    
+    // Solo aplicar tamaños a food (por ahora)
+    const productType = this.getProductType(product);
+    
+    if (productType === 'food' && (product as any).tiene_tamanos && (product as any).tamanos && (product as any).tamanos.length > 0) {
+      this.selectedSize = (product as any).tamanos[0];
+    }
+    
+    this.showProductModal = true;
+  }
+
+  closeProductModal() {
+    this.showProductModal = false;
+    this.selectedProduct = null;
+    this.selectedSize = null;
+    this.modalQuantity = 1;
+  }
+
+  selectSize(tamano: any) {
+    this.selectedSize = tamano;
+  }
+
+  incrementModalQuantity() {
+    this.modalQuantity++;
+  }
+
+  decrementModalQuantity() {
+    if (this.modalQuantity > 1) {
+      this.modalQuantity--;
+    }
+  }
+
+  getCurrentPrice(): number {
+    if (this.selectedSize) {
+      return this.selectedSize.precio;
+    }
+    return this.selectedProduct?.precio || 0;
+  }
+
+  getMinPrice(tamanos: any[]): number {
+    if (!tamanos || tamanos.length === 0) return 0;
+    return Math.min(...tamanos.map((t: any) => t.precio));
+  }
+
+  // Método auxiliar para determinar el tipo de producto
+  private getProductType(product: any): string {
+    if (this.drinks.some(d => d.id === product.id && d.nombre === product.nombre)) {
+      return 'drink';
+    } else if (this.foods.some(f => f.id === product.id && f.nombre === product.nombre)) {
+      return 'food';
+    } else if (this.fishes.some(f => f.id === product.id && f.nombre === product.nombre)) {
+      return 'fish';
+    }
+    return 'unknown';
+  }
+
+  addToCartWithOptions() {
+    if (!this.selectedProduct) return;
+
+    // Validar tamaños solo para food
+    const productType = this.getProductType(this.selectedProduct);
+    
+    if (productType === 'food' && (this.selectedProduct as any).tiene_tamanos && !this.selectedSize) {
+      alert('Por favor selecciona un tamaño');
+      return;
+    }
+
+    const productToAdd = {
+      ...this.selectedProduct,
+      // Si tiene tamaño seleccionado, usar ese precio
+      precio: this.selectedSize ? this.selectedSize.precio : this.selectedProduct.precio
+    };
+
+    // Crear ID único incluyendo el tamaño (solo para food)
+    const sizeId = (productType === 'food' && this.selectedSize) ? `_${this.selectedSize.nombre}` : '';
+    const uniqueId = `${productType}_${this.selectedProduct.id}_${this.selectedProduct.nombre}${sizeId}`;
+    
+    console.log('🎯 PRODUCTO CON TAMAÑO:', {
+      nombre: this.selectedProduct.nombre,
+      tipo: productType,
+      tamaño: this.selectedSize?.nombre,
+      precio: this.getCurrentPrice(),
+      cantidad: this.modalQuantity,
+      idUnico: uniqueId
+    });
+    
+    // Buscar por ID único
+    const existingItem = this.cart.find(item => {
+      const itemType = this.getProductType(item.product);
+      const itemSizeId = (itemType === 'food' && item.selectedSize) ? `_${item.selectedSize.nombre}` : '';
+      const itemUniqueId = `${itemType}_${item.product.id}_${item.product.nombre}${itemSizeId}`;
+      return itemUniqueId === uniqueId;
+    });
+    
+    if (existingItem) {
+      existingItem.quantity += this.modalQuantity;
+    } else {
+      this.cart.push({
+        product: productToAdd,
+        quantity: this.modalQuantity,
+        // Solo guardar tamaño para food
+        selectedSize: (productType === 'food' && this.selectedSize) ? {
+          nombre: this.selectedSize.nombre,
+          precio: this.selectedSize.precio
+        } : undefined
+      });
+    }
+    
+    this.closeProductModal();
+  }
+
+  // MÉTODOS EXISTENTES
   updateFilteredProducts() {
     switch (this.selectedCategory) {
       case 'food':
@@ -106,44 +237,10 @@ export class UpSalesAmd implements OnInit {
     this.updateFilteredProducts();
   }
 
+  // Este método ya no se usa directamente, se reemplaza por el modal
   addToCart(product: any) {
-  // Determinar de qué array viene el producto
-  let productType = 'unknown';
-  
-  if (this.drinks.some(d => d.id === product.id && d.nombre === product.nombre)) {
-    productType = 'drink';
-  } else if (this.foods.some(f => f.id === product.id && f.nombre === product.nombre)) {
-    productType = 'food';
-  } else if (this.fishes.some(f => f.id === product.id && f.nombre === product.nombre)) {
-    productType = 'fish';
+    this.openProductModal(product);
   }
-  
-  // Crear ID único
-  const uniqueId = `${productType}_${product.id}_${product.nombre}`;
-  
-  console.log('🎯 PRODUCTO CLICKEADO:', product.nombre, 'ID Único:', uniqueId);
-  
-  // Buscar por ID único
-  const existingItem = this.cart.find(item => {
-    const itemType = this.drinks.some(d => d.id === item.product.id && d.nombre === item.product.nombre) ? 'drink' :
-                    this.foods.some(f => f.id === item.product.id && f.nombre === item.product.nombre) ? 'food' :
-                    this.fishes.some(f => f.id === item.product.id && f.nombre === item.product.nombre) ? 'fish' : 'unknown';
-    
-    const itemUniqueId = `${itemType}_${item.product.id}_${item.product.nombre}`;
-    return itemUniqueId === uniqueId;
-  });
-  
-  if (existingItem) {
-    console.log('❌ YA EXISTE - Sumando cantidad');
-    existingItem.quantity++;
-  } else {
-    console.log('✅ NUEVO PRODUCTO');
-    this.cart.push({
-      product: product,
-      quantity: 1
-    });
-  }
-}
 
   increaseQuantity(index: number) {
     this.cart[index].quantity++;
@@ -163,7 +260,8 @@ export class UpSalesAmd implements OnInit {
 
   calculateTotal(): number {
     return this.cart.reduce((total, item) => {
-      return total + (item.product.precio * item.quantity);
+      const price = item.selectedSize?.precio || item.product.precio;
+      return total + (price * item.quantity);
     }, 0);
   }
 
@@ -198,5 +296,20 @@ export class UpSalesAmd implements OnInit {
 
     // Navigate to cashier checkout
     this.router.navigate(['/cashier-checkout']);
+  }
+
+  // Método para verificar si un producto tiene tamaños (solo para food)
+  productHasSizes(product: any): boolean {
+    const productType = this.getProductType(product);
+    return productType === 'food' && (product as any).tiene_tamanos && (product as any).tamanos;
+  }
+
+  // Método para obtener tamaños (solo para food)
+  getProductSizes(product: any): any[] {
+    const productType = this.getProductType(product);
+    if (productType === 'food' && (product as any).tamanos) {
+      return (product as any).tamanos;
+    }
+    return [];
   }
 }

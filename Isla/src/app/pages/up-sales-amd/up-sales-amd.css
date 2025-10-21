@@ -399,3 +399,298 @@
   outline: none;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
 }
+/* ESTILOS DEL MODAL AMD */
+/* ESTILOS DEL MODAL AMD - SIN IMAGEN */
+.modal-overlay-amd {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.modal-content-amd {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px; /* Más compacto sin imagen */
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideDown 0.3s ease-out;
+}
+
+.modal-header-amd {
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-amd h3 {
+  margin: 0;
+  color: #2c3e50;
+  flex: 1;
+  font-size: 18px;
+}
+
+.btn-cerrar-amd {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #7f8c8d;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cerrar-amd:hover {
+  color: #e74c3c;
+}
+
+.modal-body-amd {
+  padding: 20px;
+}
+
+/* Eliminamos la sección de imagen */
+.modal-imagen-amd {
+  display: none;
+}
+
+.tamanos-section-amd h4,
+.precio-unico-amd h4,
+.cantidad-section-amd h4,
+.resumen-section-amd h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.tamanos-grid-amd {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn-tamano-amd {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.btn-tamano-amd:hover {
+  border-color: #3498db;
+  transform: translateY(-2px);
+}
+
+.btn-tamano-amd.selected {
+  border-color: #27ae60;
+  background: #f0fff4;
+  transform: translateY(-2px);
+}
+
+.tamano-nombre-amd {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.tamano-precio-amd {
+  color: #27ae60;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.precio-unico-amd {
+  margin-bottom: 20px;
+}
+
+.precio-unico-value {
+  font-size: 18px;
+  color: #27ae60;
+  font-weight: bold;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.cantidad-controls-amd {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.btn-cantidad-amd {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.btn-cantidad-amd:hover {
+  background: #2980b9;
+  transform: scale(1.1);
+}
+
+.cantidad-value-amd {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2c3e50;
+  min-width: 30px;
+  text-align: center;
+}
+
+.resumen-detalle-amd {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.resumen-linea-amd {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+  color: #000000; /* Negro para el texto principal */
+  font-weight: 500;
+}
+
+
+.resumen-linea-amd:last-child {
+  border-bottom: none;
+}
+
+.opcion-detalle-amd {
+  color: #000000 !important; /* Negro para el texto de opciones */
+  font-size: 14px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.resumen-total-amd {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  color: #2c3e50;
+  border-top: 2px solid #dee2e6;
+  padding-top: 8px;
+  margin-top: 8px;
+  font-size: 16px;
+}
+
+.modal-footer-amd {
+  padding: 20px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cancelar-amd,
+.btn-confirmar-amd {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.btn-cancelar-amd {
+  background: #95a5a6;
+  color: white;
+}
+
+.btn-cancelar-amd:hover {
+  background: #7f8c8d;
+  transform: translateY(-1px);
+}
+
+.btn-confirmar-amd {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-confirmar-amd:hover:not(:disabled) {
+  background: #219a52;
+  transform: translateY(-1px);
+}
+
+.btn-confirmar-amd:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Badge para productos con tamaños */
+.tamanos-badge {
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin: 5px 0;
+  display: inline-block;
+}
+
+.producto-precio-rango {
+  color: #27ae60;
+  font-weight: bold;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Columna adicional para tamaño en la tabla */
+.tamano-cell {
+  text-align: center;
+  min-width: 100px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

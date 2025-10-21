@@ -27,9 +27,9 @@ export class UpFoodAmd implements OnInit, OnDestroy {
   imageBase64: string = '';
   tiene_tamanos: boolean = false;
 
-  // Gestión de tamaños
+  // Gestión de tamaños (SIMPLIFICADO - sin descripción)
   tamanos: any[] = [];
-  nuevoTamano: any = { nombre: '', precio: 0, descripcion: '' };
+  nuevoTamano: any = { nombre: '', precio: 0 }; // Solo nombre y precio
 
   private subscription: Subscription = new Subscription();
 
@@ -77,11 +77,24 @@ export class UpFoodAmd implements OnInit, OnDestroy {
     });
   }
 
-  // Métodos para gestionar tamaños
+  // Método para eliminar la imagen seleccionada
+eliminarImagen() {
+  if (confirm('¿Estás seguro de que deseas eliminar la imagen seleccionada?')) {
+    this.imageBase64 = '';
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+    this.cdRef.detectChanges();
+  }
+}
+
+  // Métodos para gestionar tamaños (SIMPLIFICADO)
   agregarTamano() {
     if (this.nuevoTamano.nombre && this.nuevoTamano.precio > 0) {
       this.tamanos.push({...this.nuevoTamano});
-      this.nuevoTamano = { nombre: '', precio: 0, descripcion: '' };
+      console.log('✅ Tamaño agregado:', this.tamanos[this.tamanos.length - 1]);
+      this.nuevoTamano = { nombre: '', precio: 0 }; // Solo nombre y precio
       this.cdRef.detectChanges();
     } else {
       alert('Por favor, complete el nombre y precio del tamaño');
@@ -153,6 +166,8 @@ export class UpFoodAmd implements OnInit, OnDestroy {
     this.tamanos = platillo.tamanos || [];
     this.esModoEdicion = true;
     
+    console.log('📋 Tamaños cargados para edición:', this.tamanos);
+    
     this.cdRef.detectChanges();
     
     setTimeout(() => {
@@ -185,14 +200,14 @@ export class UpFoodAmd implements OnInit, OnDestroy {
     this.cdRef.detectChanges();
 
     const platilloData: foodInterface = {
-  nombre: this.nombre,
-  descripcion: this.descripcion,
-  descripcion_real: this.descripcion_real,
-  precio: Number(this.precio), // 👈 Convertir a número
-  imagen: this.imageBase64,
-  tiene_tamanos: this.tiene_tamanos,
-  tamanos: this.tiene_tamanos ? this.tamanos : undefined
-};
+      nombre: this.nombre,
+      descripcion: this.descripcion,
+      descripcion_real: this.descripcion_real,
+      precio: Number(this.precio),
+      imagen: this.imageBase64,
+      tiene_tamanos: this.tiene_tamanos,
+      tamanos: this.tiene_tamanos ? this.tamanos : undefined
+    };
 
     if (this.esModoEdicion && this.platilloEditando) {
       // MODO EDICIÓN
@@ -260,7 +275,7 @@ export class UpFoodAmd implements OnInit, OnDestroy {
     this.imageBase64 = '';
     this.tiene_tamanos = false;
     this.tamanos = [];
-    this.nuevoTamano = { nombre: '', precio: 0, descripcion: '' };
+    this.nuevoTamano = { nombre: '', precio: 0 }; // Solo nombre y precio
     this.platilloEditando = null;
     this.esModoEdicion = false;
     this.isSubmitting = false;
