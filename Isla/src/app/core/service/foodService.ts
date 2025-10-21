@@ -34,11 +34,15 @@ export class FoodService {
   // Función para normalizar los datos del backend
   private normalizarPlatillo(platillo: any): foodInterface {
     return {
-      id: platillo.id_platillo || platillo.id, // Usa id_platillo si existe, sino id
+      id: platillo.id_platillo || platillo.id,
       nombre: platillo.nombre,
       descripcion: platillo.descripcion,
+      descripcion_real: platillo.descripcion_real, // 👈 Nuevo campo
       precio: platillo.precio,
-      imagen: platillo.imagen
+      imagen: platillo.imagen,
+      tiene_tamanos: platillo.tiene_tamanos, // 👈 Nuevo campo
+      tipos: platillo.tipos, // 👈 Nuevo campo
+      tamanos: platillo.tamanos // 👈 Nuevo campo
     };
   }
 
@@ -65,7 +69,16 @@ export class FoodService {
   }
 
   agregarPlatillo(platillo: foodInterface): Observable<foodInterface> {
-    return this.http.post<any>(this.apiUrl, platillo).pipe(
+    // 👈 Asegurar que enviamos todos los campos
+    const platilloCompleto = {
+      ...platillo,
+      descripcion_real: platillo.descripcion_real || '',
+      tiene_tamanos: platillo.tiene_tamanos || false,
+      tipos: platillo.tipos || [],
+      tamanos: platillo.tamanos || []
+    };
+
+    return this.http.post<any>(this.apiUrl, platilloCompleto).pipe(
       map(platilloRespuesta => this.normalizarPlatillo(platilloRespuesta)),
       tap(nuevoPlatillo => {
         console.log('✅ Platillo agregado - Normalizado:', nuevoPlatillo);
@@ -89,7 +102,16 @@ export class FoodService {
   }
 
   actualizarPlatillo(platillo: foodInterface): Observable<foodInterface> {
-    return this.http.put<any>(`${this.apiUrl}/${platillo.id}`, platillo).pipe(
+    // 👈 Asegurar que enviamos todos los campos
+    const platilloCompleto = {
+      ...platillo,
+      descripcion_real: platillo.descripcion_real || '',
+      tiene_tamanos: platillo.tiene_tamanos || false,
+      tipos: platillo.tipos || [],
+      tamanos: platillo.tamanos || []
+    };
+
+    return this.http.put<any>(`${this.apiUrl}/${platillo.id}`, platilloCompleto).pipe(
       map(platilloRespuesta => this.normalizarPlatillo(platilloRespuesta)),
       tap(actualizado => {
         console.log('✅ Platillo actualizado - Normalizado:', actualizado);
@@ -107,7 +129,6 @@ export class FoodService {
     return this.saucerSource.getValue();
   }
 
-  // Método para forzar recarga si es necesario
   forzarRecarga(): void {
     console.log('🔄 Forzando recarga manual...');
     this.cargarPlatillos().subscribe();

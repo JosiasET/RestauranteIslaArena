@@ -4,15 +4,45 @@
   <!-- Formulario -->
   <div class="form-bar">
     <input type="text" [(ngModel)]="nombre" placeholder="Nombre del platillo" class="form-input">
-    <input type="text" [(ngModel)]="descripcion" placeholder="Descripción del platillo" class="form-input">
-    <input type="number" [(ngModel)]="precio" placeholder="Precio del platillo" class="form-input" min="0">
+    <input type="text" [(ngModel)]="descripcion" placeholder="Categoría (Platillo, Ceviche, Coctel, etc.)" class="form-input">
+    <textarea [(ngModel)]="descripcion_real" placeholder="Descripción real del platillo (ingredientes, preparación)" class="form-input textarea-descripcion"></textarea>
+    <input type="number" [(ngModel)]="precio" placeholder="Precio base del platillo" class="form-input" min="0">
+
+    <!-- Opción para habilitar tamaños -->
+    <div class="tamanos-toggle">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="tiene_tamanos">
+        <span class="toggle-text">¿Este platillo tiene diferentes tamaños?</span>
+      </label>
+    </div>
+
+    <!-- Gestión de tamaños -->
+    <div *ngIf="tiene_tamanos" class="tamanos-section">
+      <h4>Configurar Tamaños</h4>
+      
+      <div class="nuevo-tamano-form">
+        <input type="text" [(ngModel)]="nuevoTamano.nombre" placeholder="Nombre (ej: Chico, 1kg)" class="form-input-small">
+        <input type="number" [(ngModel)]="nuevoTamano.precio" placeholder="Precio" class="form-input-small" min="0">
+        <input type="text" [(ngModel)]="nuevoTamano.descripcion" placeholder="Descripción (ej: Para 1 persona)" class="form-input-small">
+        <button (click)="agregarTamano()" class="btn-agregar">+ Agregar</button>
+      </div>
+
+      <div class="tamanos-lista" *ngIf="tamanos.length > 0">
+        <h5>Tamaños configurados:</h5>
+        <div *ngFor="let tamano of tamanos; let i = index" class="tamano-item">
+          <span class="tamano-nombre">{{ tamano.nombre }}</span>
+          <span class="tamano-precio">${{ tamano.precio }}</span>
+          <span class="tamano-desc">{{ tamano.descripcion }}</span>
+          <button (click)="eliminarTamano(i)" class="btn-eliminar-tamano">✕</button>
+        </div>
+      </div>
+    </div>
 
     <label for="fileInput" class="file-upload-label">
       <span class="upload-icon">📁</span>
       <span class="upload-text">{{ imageBase64 ? 'Imagen Seleccionada' : 'Seleccionar Imagen' }}</span>
     </label>
-    <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
-
+      <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
     <div class="action-buttons">
       <button 
         (click)="subirsaucer()" 
@@ -49,8 +79,24 @@
         
         <div class="platillo-info">
           <h3>{{ platillo.nombre }}</h3>
-          <p class="descripcion">{{ platillo.descripcion }}</p>
-          <p class="precio">${{ platillo.precio }}</p>
+          <p class="descripcion-categoria">{{ platillo.descripcion }}</p>
+          <p class="descripcion-real" *ngIf="platillo.descripcion_real">{{ platillo.descripcion_real }}</p>
+          
+          <!-- Mostrar tamaños si los tiene -->
+          <div *ngIf="platillo.tiene_tamanos && platillo.tamanos" class="precios-tamanos">
+            <p class="precio-label">Precios por tamaño:</p>
+            <div *ngFor="let tamano of platillo.tamanos" class="precio-tamano">
+              <span class="tamano-nombre">{{ tamano.nombre }}:</span>
+              <span class="tamano-precio">${{ tamano.precio }}</span>
+            </div>
+          </div>
+          <div *ngIf="!platillo.tiene_tamanos">
+            <p class="precio">${{ platillo.precio }}</p>
+          </div>
+
+          <div *ngIf="platillo.tiene_tamanos" class="tiene-tamanos-badge">
+            📏 Tamaños disponibles
+          </div>
         </div>
 
         <div class="platillo-actions">

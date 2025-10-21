@@ -20,6 +20,13 @@ export class Food implements OnInit, OnDestroy {
   loading: boolean = true;
   categoriaSeleccionada: string = 'todas';
 
+  // Variables para el modal de tamaños
+  mostrarModal: boolean = false;
+  productoSeleccionado: any = null;
+  tipoSeleccionado: any = null;
+  tamanoSeleccionado: any = null;
+  cantidad: number = 1;
+
   categorias = [
     { id: 'todas', nombre: 'Todo el Menú', emoji: '📦' },
     { id: 'platillos', nombre: 'Platillos', emoji: '🍽️' },
@@ -51,7 +58,6 @@ export class Food implements OnInit, OnDestroy {
     this.loading = true;
     this.cdRef.detectChanges();
 
-    // 🔥 FORZAR CARGA INICIAL - ESTO ES LO QUE FALTA
     this.foodService.cargarPlatillos().subscribe();
 
     this.subscription.add(
@@ -66,7 +72,103 @@ export class Food implements OnInit, OnDestroy {
     );
   }
 
-  // ... el resto de tus métodos se mantienen igual
+  // MÉTODOS PARA EL MODAL DE TAMAÑOS
+  abrirModalProducto(producto: any) {
+  this.productoSeleccionado = producto;
+  
+  console.log('📦 Producto seleccionado:', producto); // Debug
+  
+  // Si el producto tiene tamaños, seleccionar el primero
+  if (producto.tiene_tamanos && producto.tamanos && producto.tamanos.length > 0) {
+    this.tamanoSeleccionado = producto.tamanos[0];
+  } else {
+    // Si no tiene tamaños, usar el precio base
+    this.tamanoSeleccionado = {
+      nombre: 'Único',
+      precio: producto.precio
+    };
+  }
+  
+  this.cantidad = 1;
+  this.mostrarModal = true;
+  this.cdRef.detectChanges();
+}
+
+  seleccionarTipo(tipo: any) {
+    this.tipoSeleccionado = tipo;
+    if (tipo.tamanos && tipo.tamanos.length > 0) {
+      this.tamanoSeleccionado = tipo.tamanos[0];
+    }
+    this.cdRef.detectChanges();
+  }
+
+  seleccionarTamano(tamano: any) {
+    this.tamanoSeleccionado = tamano;
+    this.cdRef.detectChanges();
+  }
+
+  incrementarCantidad() {
+    this.cantidad++;
+    this.cdRef.detectChanges();
+  }
+
+  decrementarCantidad() {
+    if (this.cantidad > 1) {
+      this.cantidad--;
+      this.cdRef.detectChanges();
+    }
+  }
+
+  // En tu componente del modal, modifica la función agregarConOpciones
+agregarConOpciones() {
+  if (!this.productoSeleccionado) return;
+
+  // Calcular el precio final (del tamaño seleccionado o precio base)
+  const precioFinal = this.getPrecioFinal();
+
+  const item: CartItem = {
+    id: this.productoSeleccionado.id,
+    nombre: this.productoSeleccionado.nombre,
+    descripcion: this.productoSeleccionado.descripcion_real || this.productoSeleccionado.descripcion,
+    precio: precioFinal, // Precio del tamaño seleccionado
+    imagen: this.productoSeleccionado.imagen,
+    cantidad: this.cantidad,
+    // INFORMACIÓN DEL TAMAÑO SELECCIONADO
+    tamanoSeleccionado: this.tamanoSeleccionado ? {
+      nombre: this.tamanoSeleccionado.nombre,
+      precio: this.tamanoSeleccionado.precio
+    } : undefined,
+    tieneTamanos: this.productoSeleccionado.tiene_tamanos
+  };
+
+  console.log('🛒 Agregando al carrito:', {
+    nombre: item.nombre,
+    precio: item.precio,
+    tamano: item.tamanoSeleccionado,
+    cantidad: item.cantidad
+  });
+
+  this.cartService.addToCart(item);
+  this.cerrarModal();
+}
+
+getPrecioFinal(): number {
+  if (this.tamanoSeleccionado) {
+    return this.tamanoSeleccionado.precio;
+  }
+  return this.productoSeleccionado?.precio || 0;
+}
+
+  cerrarModal() {
+    this.mostrarModal = false;
+    this.productoSeleccionado = null;
+    this.tipoSeleccionado = null;
+    this.tamanoSeleccionado = null;
+    this.cantidad = 1;
+    this.cdRef.detectChanges();
+  }
+
+  // MÉTODOS EXISTENTES (se mantienen igual)
   generarRecomendacionesDelDia() {
     if (this.todosProductos.length === 0) return;
     if (this.todosProductos.length <= 4) {
@@ -106,14 +208,9 @@ export class Food implements OnInit, OnDestroy {
   }
 
   agregarAlCarrito(producto: any) {
-    const cartItem: CartItem = {
-      id: producto.id,
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      precio: producto.precio,
-      imagen: producto.imagen,
-      cantidad: 1
-    };
-    this.cartService.addToCart(cartItem);
+    // Siempre abrir modal para selección de opciones
+    this.abrirModalProducto(producto);
   }
+
+ 
 }

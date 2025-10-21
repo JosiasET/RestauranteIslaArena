@@ -8,6 +8,12 @@ export interface CartItem {
   precio: number;
   imagen: string;
   cantidad: number;
+  // NUEVO: Campos para tamaños
+  tamanoSeleccionado?: {
+    nombre: string;
+    precio: number;
+  };
+  tieneTamanos?: boolean;
 }
 
 @Injectable({
@@ -25,27 +31,36 @@ export class CartService {
     this.loadCartFromStorage();
   }
 
+  // MÉTODO ACTUALIZADO PARA AGREGAR CON TAMAÑOS
   addToCart(product: CartItem) {
     console.log('=== 🚨 DEBUG CART SERVICE ===');
     console.log('📦 Producto recibido:', {
       id: product.id,
       nombre: product.nombre,
-      tipoId: typeof product.id
+      precio: product.precio,
+      tamano: product.tamanoSeleccionado,
+      cantidad: product.cantidad
     });
     
     console.log('🛒 Carrito ANTES:', this.cartItems.map(item => ({
       id: item.id, 
       nombre: item.nombre, 
+      precio: item.precio,
+      tamano: item.tamanoSeleccionado,
       cantidad: item.cantidad
     })));
 
-    const existingItem = this.cartItems.find(item => item.id === product.id);
+    // Buscar item con mismo ID Y mismo tamaño
+    const existingItem = this.cartItems.find(item => 
+      item.id === product.id && 
+      this.compararTamanos(item.tamanoSeleccionado, product.tamanoSeleccionado)
+    );
     
     if (existingItem) {
-      existingItem.cantidad += 1;
+      existingItem.cantidad += product.cantidad;
       console.log('✅ EXISTE - Cantidad incrementada:', existingItem.nombre, 'x', existingItem.cantidad);
     } else {
-      this.cartItems.push({...product, cantidad: 1});
+      this.cartItems.push({...product});
       console.log('🆕 NUEVO - Producto agregado:', product.nombre);
     }
     
@@ -55,9 +70,18 @@ export class CartService {
     console.log('🛒 Carrito DESPUÉS:', this.cartItems.map(item => ({
       id: item.id, 
       nombre: item.nombre, 
+      precio: item.precio,
+      tamano: item.tamanoSeleccionado,
       cantidad: item.cantidad
     })));
     console.log('=== 🚨 FIN DEBUG ===');
+  }
+
+  // Método auxiliar para comparar tamaños
+  private compararTamanos(tamano1: any, tamano2: any): boolean {
+    if (!tamano1 && !tamano2) return true; // Ambos sin tamaño
+    if (!tamano1 || !tamano2) return false; // Uno tiene tamaño y otro no
+    return tamano1.nombre === tamano2.nombre; // Mismo nombre de tamaño
   }
 
   getCartItems(): CartItem[] {

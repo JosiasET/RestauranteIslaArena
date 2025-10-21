@@ -19,41 +19,43 @@ export class UpFoodAmd implements OnInit, OnDestroy {
   isLoading: boolean = true;
   isSubmitting: boolean = false;
 
+  // Campos del formulario
   nombre = '';
   descripcion = '';
+  descripcion_real = '';
   precio: number = 0;
   imageBase64: string = '';
+  tiene_tamanos: boolean = false;
+
+  // Gestión de tamaños
+  tamanos: any[] = [];
+  nuevoTamano: any = { nombre: '', precio: 0, descripcion: '' };
 
   private subscription: Subscription = new Subscription();
 
   constructor(
     private foodService: FoodService,
-    private cdRef: ChangeDetectorRef // Añadido ChangeDetectorRef
+    private cdRef: ChangeDetectorRef
   ){}
 
   ngOnInit() {
     console.log('🔄 Inicializando componente UpFoodAmd...');
     
-    // Suscribirse al loading state
     this.subscription.add(
       this.foodService.loading$.subscribe(loading => {
         this.isLoading = loading;
-        console.log('📊 Estado de carga:', loading);
-        this.cdRef.detectChanges(); // Forzar detección de cambios
+        this.cdRef.detectChanges();
       })
     );
 
-    // Suscribirse a los platillos
     this.subscription.add(
       this.foodService.saucer$.subscribe((platillos: foodInterface[]) => {
         console.log('🔄 Lista de platillos actualizada:', platillos.length);
-        console.log('📝 IDs en la lista:', platillos.map(p => p.id));
         this.todosLosPlatillos = platillos;
-        this.cdRef.detectChanges(); // Forzar detección de cambios después de actualizar
+        this.cdRef.detectChanges();
       })
     );
 
-    // Cargar platillos inicialmente
     this.cargarPlatillos();
   }
 
@@ -66,18 +68,34 @@ export class UpFoodAmd implements OnInit, OnDestroy {
     this.foodService.cargarPlatillos().subscribe({
       next: (platillos) => {
         console.log('✅ Platillos cargados exitosamente:', platillos.length);
-        this.cdRef.detectChanges(); // Forzar detección de cambios
+        this.cdRef.detectChanges();
       },
       error: (err) => {
         console.error('❌ Error cargando platillos:', err);
-        this.cdRef.detectChanges(); // Forzar detección de cambios incluso en error
+        this.cdRef.detectChanges();
       }
     });
   }
 
+  // Métodos para gestionar tamaños
+  agregarTamano() {
+    if (this.nuevoTamano.nombre && this.nuevoTamano.precio > 0) {
+      this.tamanos.push({...this.nuevoTamano});
+      this.nuevoTamano = { nombre: '', precio: 0, descripcion: '' };
+      this.cdRef.detectChanges();
+    } else {
+      alert('Por favor, complete el nombre y precio del tamaño');
+    }
+  }
+
+  eliminarTamano(index: number) {
+    this.tamanos.splice(index, 1);
+    this.cdRef.detectChanges();
+  }
+
   setSection(section: string) {
     this.activeSection = section;
-    this.cdRef.detectChanges(); // Forzar detección de cambios al cambiar sección
+    this.cdRef.detectChanges();
   }
 
   OnfileSelected(event: any){
@@ -87,7 +105,7 @@ export class UpFoodAmd implements OnInit, OnDestroy {
       reader.onload = () =>{
         this.imageBase64 = reader.result as string;
         console.log('📸 Imagen seleccionada');
-        this.cdRef.detectChanges(); // Forzar detección de cambios
+        this.cdRef.detectChanges();
       };
       reader.readAsDataURL(file);
     }
@@ -106,12 +124,12 @@ export class UpFoodAmd implements OnInit, OnDestroy {
       this.foodService.eliminarPlatillo(platillo.id).subscribe({
         next: () => {
           console.log('✅ Eliminación completada');
-          this.cdRef.detectChanges(); // Forzar detección de cambios después de eliminar
+          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error eliminando platillo:', err);
           alert('Error al eliminar el platillo');
-          this.cdRef.detectChanges(); // Forzar detección de cambios en error
+          this.cdRef.detectChanges();
         }
       });
     }
@@ -128,14 +146,15 @@ export class UpFoodAmd implements OnInit, OnDestroy {
     this.platilloEditando = platillo;
     this.nombre = platillo.nombre;
     this.descripcion = platillo.descripcion;
+    this.descripcion_real = platillo.descripcion_real || '';
     this.precio = platillo.precio;
     this.imageBase64 = platillo.imagen;
+    this.tiene_tamanos = platillo.tiene_tamanos || false;
+    this.tamanos = platillo.tamanos || [];
     this.esModoEdicion = true;
     
-    // Forzar detección de cambios
     this.cdRef.detectChanges();
     
-    // Scroll al formulario
     setTimeout(() => {
       document.querySelector('.form-bar')?.scrollIntoView({ 
         behavior: 'smooth', 
@@ -156,8 +175,24 @@ export class UpFoodAmd implements OnInit, OnDestroy {
       return;
     }
 
+    // Validar tamaños si están habilitados
+    if (this.tiene_tamanos && this.tamanos.length === 0) {
+      alert("Debe agregar al menos un tamaño si ha habilitado esta opción");
+      return;
+    }
+
     this.isSubmitting = true;
-    this.cdRef.detectChanges(); // Forzar detección de cambios al iniciar envío
+    this.cdRef.detectChanges();
+
+    const platilloData: foodInterface = {
+  nombre: this.nombre,
+  descripcion: this.descripcion,
+  descripcion_real: this.descripcion_real,
+  precio: Number(this.precio), // 👈 Convertir a número
+  imagen: this.imageBase64,
+  tiene_tamanos: this.tiene_tamanos,
+  tamanos: this.tiene_tamanos ? this.tamanos : undefined
+};
 
     if (this.esModoEdicion && this.platilloEditando) {
       // MODO EDICIÓN
@@ -168,56 +203,43 @@ export class UpFoodAmd implements OnInit, OnDestroy {
         return;
       }
 
-      const platilloActualizado: foodInterface = {
-        id: this.platilloEditando.id,
-        nombre: this.nombre,
-        descripcion: this.descripcion,
-        precio: this.precio,
-        imagen: this.imageBase64
-      };
+      platilloData.id = this.platilloEditando.id;
 
-      console.log('🔄 Actualizando platillo:', platilloActualizado);
+      console.log('🔄 Actualizando platillo:', platilloData);
 
-      this.foodService.actualizarPlatillo(platilloActualizado).subscribe({
+      this.foodService.actualizarPlatillo(platilloData).subscribe({
         next: (respuesta) => {
           console.log('✅ Platillo actualizado exitosamente');
           this.esModoEdicion = false;
           this.isSubmitting = false;
           alert("Platillo actualizado exitosamente");
           this.limpiarFormulario();
-          this.cdRef.detectChanges(); // Forzar detección de cambios después de actualizar
+          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error actualizando:', err);
           this.isSubmitting = false;
           alert("Error al actualizar el platillo");
-          this.cdRef.detectChanges(); // Forzar detección de cambios en error
+          this.cdRef.detectChanges();
         }
       });
     } else {
       // MODO CREACIÓN
-      const nuevoPlatillo: foodInterface = {
-        nombre: this.nombre,
-        descripcion: this.descripcion,
-        precio: this.precio,
-        imagen: this.imageBase64
-      };
-
       console.log('🔄 Subiendo nuevo platillo');
 
-      this.foodService.agregarPlatillo(nuevoPlatillo).subscribe({
+      this.foodService.agregarPlatillo(platilloData).subscribe({
         next: (respuesta) => {
           console.log('✅ Platillo agregado exitosamente');
           this.isSubmitting = false;
           alert("Platillo subido exitosamente");
           this.limpiarFormulario();
-          this.cdRef.detectChanges(); // Forzar detección de cambios después de agregar
+          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error subiendo:', err);
           this.isSubmitting = false;
           alert("Error al subir el platillo");
-          this.cdRef.detectChanges(); // Forzar detección de cambios en error
+          this.cdRef.detectChanges();
         }
       });
     }
@@ -226,33 +248,35 @@ export class UpFoodAmd implements OnInit, OnDestroy {
   cancelarEdicion() {
     if (confirm('¿Cancelar edición? Los cambios no guardados se perderán.')) {
       this.limpiarFormulario();
-      this.cdRef.detectChanges(); // Forzar detección de cambios
+      this.cdRef.detectChanges();
     }
   }
 
   limpiarFormulario() {
     this.nombre = '';
     this.descripcion = '';
+    this.descripcion_real = '';
     this.precio = 0;
     this.imageBase64 = '';
+    this.tiene_tamanos = false;
+    this.tamanos = [];
+    this.nuevoTamano = { nombre: '', precio: 0, descripcion: '' };
     this.platilloEditando = null;
     this.esModoEdicion = false;
     this.isSubmitting = false;
     
-    // Limpiar el input de archivo
     const fileInput = document.getElementById('fileInput') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
     
-    this.cdRef.detectChanges(); // Forzar detección de cambios después de limpiar
+    this.cdRef.detectChanges();
   }
 
   getTotalPlatillos(): number {
     return this.todosLosPlatillos.length;
   }
 
-  // Método adicional para forzar recarga manual si es necesario
   forzarRecarga() {
     console.log('🔄 Forzando recarga manual...');
     this.cargarPlatillos();

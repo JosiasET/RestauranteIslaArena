@@ -298,3 +298,153 @@
     flex-direction: column;
   }
 }
+
+/* Estilos para la nueva funcionalidad */
+.textarea-descripcion {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.tamanos-toggle {
+  margin: 15px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.toggle-text {
+  font-weight: 500;
+  color: #495057;
+}
+
+.tamanos-section {
+  border: 2px dashed #dee2e6;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  background: #fafbfc;
+}
+
+.tamanos-section h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+}
+
+.nuevo-tamano-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.form-input-small {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+.btn-agregar {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.tamanos-lista h5 {
+  margin: 0 0 10px 0;
+  color: #495057;
+}
+
+.tamano-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  gap: 10px;
+}
+
+.tamano-nombre {
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.tamano-precio {
+  color: #28a745;
+  font-weight: bold;
+  min-width: 60px;
+}
+
+.tamano-desc {
+  color: #6c757d;
+  font-size: 0.8em;
+  flex: 1;
+}
+
+.btn-eliminar-tamano {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+/* Estilos para mostrar en las tarjetas */
+.descripcion-categoria {
+  color: #6c757d;
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.descripcion-real {
+  color: #495057;
+  font-size: 0.9em;
+  margin: 5px 0;
+}
+
+.precios-tamanos {
+  margin: 10px 0;
+}
+
+.precio-label {
+  font-size: 0.8em;
+  color: #6c757d;
+  margin-bottom: 5px;
+}
+
+.precio-tamano {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8em;
+  margin-bottom: 3px;
+}
+
+.tiene-tamanos-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  margin-top: 8px;
+}
