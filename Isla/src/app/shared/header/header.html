@@ -1,50 +1,28 @@
-
 <!-- BARRA SUPERIOR COMPACTA -->
 <div class="contenedor_superior">
   <div class="contenedor_lot">
     <!-- LOGO Y NOMBRE -->
     <div class="logo-section">
       <img class="logo1" (click)="goHome()" src="img/logo.png" alt="Logo Isla Arena">
-      <div class="restaurant-info">
-    
-      </div>
     </div>
 
-    <!-- MENÚ PRINCIPAL COMPACTO -->
+    <!-- MENÚ PRINCIPAL (visible en laptop/desktop) -->
     <nav class="main-menu">
-      <a class="menu-item" routerLink="Drink" (click)="setHome(false)">
-       
-        BEBIDAS
-      </a>
-      <a class="menu-item" routerLink="Food" (click)="setHome(false)">
-       
-        PLATILLOS
-      </a>
-      <a class="menu-item" routerLink="fishes" (click)="setHome(false)">
-        
-        ESPECIALES
-      </a>
-      <a class="menu-item" routerLink="celebrate" (click)="setHome(false)">
-        
-        FESTEJOS
-      </a>
+      <a class="menu-item" routerLink="Drink" (click)="setHome(false)">BEBIDAS</a>
+      <a class="menu-item" routerLink="Food" (click)="setHome(false)">PLATILLOS</a>
+      <a class="menu-item" routerLink="fishes" (click)="setHome(false)">ESPECIALES</a>
+      <a class="menu-item" routerLink="celebrate" (click)="setHome(false)">FESTEJOS</a>
     </nav>
 
-    <!-- ACCIONES -->
+    <!-- SECCIÓN DE ACCIONES -->
     <div class="actions-section">
       <!-- WhatsApp -->
       <div class="action-btn whatsapp-btn">
         <img src="img/whasap.png" alt="WhatsApp">
         <div class="whatsapp-options">
-          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20mandar%20mi%20comprobante%20de%20pago." target="_blank">
-            📎 Mandar comprobante
-          </a>
-          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20apartar%20una%20mesa." target="_blank">
-            🍽️ Apartar mesa
-          </a>
-          <a href="https://wa.me/529962054653?text=Hola%2C%20quisiera%20saber%20más%20acerca%20del%20restaurante." target="_blank">
-            ℹ️ Acerca del restaurante
-          </a>
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20mandar%20mi%20comprobante%20de%20pago." target="_blank">📎 Mandar comprobante</a>
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quiero%20apartar%20una%20mesa." target="_blank">🍽️ Apartar mesa</a>
+          <a href="https://wa.me/529962054653?text=Hola%2C%20quisiera%20saber%20más%20acerca%20del%20restaurante." target="_blank">ℹ️ Acerca del restaurante</a>
         </div>
       </div>
 
@@ -54,11 +32,20 @@
         <span class="cart-count" *ngIf="cartItemCount > 0">{{cartItemCount}}</span>
       </div>
 
-      <div class="action-btn menu-btn">
+      <!-- BOTÓN DE MENÚ (solo en móvil) -->
+      <div class="action-btn menu-btn" (click)="toggleMenu()">
         <img src="img/icons8-menú-50.png" alt="Menú">
       </div>
     </div>
   </div>
+</div>
+
+<!-- MENÚ FLOTANTE PARA MÓVIL -->
+<div class="mobile-menu" [class.active]="menuOpen">
+  <a class="menu-item" routerLink="Drink" (click)="closeMenu(); setHome(false)">BEBIDAS</a>
+  <a class="menu-item" routerLink="Food" (click)="closeMenu(); setHome(false)">PLATILLOS</a>
+  <a class="menu-item" routerLink="fishes" (click)="closeMenu(); setHome(false)">ESPECIALES</a>
+  <a class="menu-item" routerLink="celebrate" (click)="closeMenu(); setHome(false)">FESTEJOS</a>
 </div>
 
 <!-- CONTENIDO PRINCIPAL -->
@@ -70,4 +57,3 @@
 </div>
 
 <app-mycart-drawer></app-mycart-drawer>
-

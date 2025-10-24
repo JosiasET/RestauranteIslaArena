@@ -53,4 +53,16 @@ export class Header {
   updateCartCount(count: number) {
     this.cartItemCount = count;
   }
+
+    menuOpen = false;
+
+    toggleMenu() {
+      this.menuOpen = !this.menuOpen;
+    }
+
+    closeMenu() {
+      this.menuOpen = false;
+    }
+
+
 }
