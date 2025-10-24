@@ -1,7 +1,7 @@
-/* === ESTILOS GENERALES (Estilo "Food") === */
+/* === ESTILOS GENERALES (Estilo "Food" adaptado para Fishes) === */
 .Subir_p {
   background: white;
-  padding: 30px; /* Reducido de 40px */
+  padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   max-width: 1400px;
@@ -12,7 +12,7 @@
 
 .Subtitulo {
   text-align: center;
-  margin-bottom: 20px; /* Reducido de 30px */
+  margin-bottom: 20px;
   color: #2c3e50;
   font-size: 28px;
   font-weight: 700;
@@ -28,7 +28,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background: linear-gradient(90deg, #27ae60, #2ecc71);
+  background: linear-gradient(90deg, #4682b4, #87ceeb);
   border-radius: 3px;
 }
 
@@ -37,18 +37,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px; /* Reducido de 15px */
-  padding: 15px; /* Reducido de 20px */
+  gap: 12px;
+  padding: 15px;
   border-radius: 12px;
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
-  margin-bottom: 30px; /* Reducido de 40px */
+  margin-bottom: 30px;
 }
 
 .form-input {
   flex: 1 1 180px;
-  height: 44px; /* Reducido de 48px */
-  padding: 0 12px; /* Reducido de 15px */
+  height: 44px;
+  padding: 0 12px;
   border: 2px solid #e1e8ed;
   border-radius: 8px;
   font-size: 15px;
@@ -65,8 +65,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px; /* Reducido de 48px */
-  padding: 0 12px; /* Reducido de 15px */
+  height: 44px;
+  padding: 0 12px;
   background-color: #ffffff;
   color: #34495e;
   border: 2px dashed #bdc3c7;
@@ -82,8 +82,8 @@
 }
 
 .file-upload-label:hover {
-  border-color: #27ae60;
-  color: #27ae60;
+  border-color: #4682b4;
+  color: #4682b4;
 }
 
 .file-input {
@@ -93,14 +93,14 @@
 /* === BOTONES DE ACCIÓN DEL FORMULARIO === */
 .action-buttons {
   display: flex;
-  gap: 8px; /* Reducido de 10px */
+  gap: 8px;
   margin-left: auto;
 }
 
 .submit-btn,
 .cancel-btn {
-  height: 44px; /* Reducido de 48px */
-  padding: 0 20px; /* Reducido de 25px */
+  height: 44px;
+  padding: 0 20px;
   border: none;
   border-radius: 8px;
   font-size: 15px;
@@ -111,12 +111,12 @@
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background: linear-gradient(135deg, #4682b4, #87ceeb);
   color: white;
 }
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+  box-shadow: 0 6px 20px rgba(70, 130, 180, 0.4);
 }
 
 .cancel-btn {
@@ -128,10 +128,10 @@
   transform: translateY(-2px);
 }
 
-/* === CUADRÍCULA DE "FOOD" === */
+/* === CUADRÍCULA DE "FISHES" === */
 .lista-platillos {
-  margin-top: 2rem; /* Reducido de 3rem */
-  padding: 1.5rem; /* Reducido de 2rem */
+  margin-top: 2rem;
+  padding: 1.5rem;
   background: #f8f9fa;
   border-radius: 12px;
   border: 2px solid #e9ecef;
@@ -139,9 +139,9 @@
 
 .lista-header {
   text-align: center;
-  margin-bottom: 1.5rem; /* Reducido de 2rem */
+  margin-bottom: 1.5rem;
   border-bottom: 2px solid #dee2e6;
-  padding-bottom: 0.8rem; /* Reducido de 1rem */
+  padding-bottom: 0.8rem;
 }
 
 .lista-header h2 {
@@ -158,10 +158,10 @@
 .platillos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px; /* Reducido de 20px */
+  gap: 15px;
 }
 
-/* === TARJETA DE "FOOD" CON ALTURA UNIFORME === */
+/* === TARJETA DE "FISHES" CON ALTURA UNIFORME === */
 .platillo-card-admin {
   background: #ffffff;
   border: 2px solid #e9ecef;
@@ -173,19 +173,19 @@
   animation: fadeIn 0.3s ease-out;
   display: flex;
   flex-direction: column;
-  min-height: 260px; /* Reducido de 280px */
+  min-height: 260px;
 }
 
 .platillo-card-admin:hover {
-  border-color: #27ae60;
+  border-color: #4682b4;
   transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+  box-shadow: 0 4px 12px rgba(70, 130, 180, 0.2);
 }
 
 .platillo-image {
-  width: 110px; /* Reducido de 120px */
-  height: 110px; /* Reducido de 120px */
-  margin: 12px auto 8px; /* Reducido de 15px auto 10px */
+  width: 110px;
+  height: 110px;
+  margin: 12px auto 8px;
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
@@ -203,7 +203,7 @@
 }
 
 .platillo-info {
-  padding: 0 12px 8px; /* Reducido de 15px 10px */
+  padding: 0 12px 8px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -211,7 +211,7 @@
 }
 
 .platillo-info h3 {
-  margin: 0 0 6px 0; /* Reducido de 8px */
+  margin: 0 0 6px 0;
   color: #2c3e50;
   font-size: 16px;
   font-weight: 600;
@@ -222,20 +222,20 @@
   color: #6c757d;
   font-size: 0.8em;
   font-style: italic;
-  margin: 0 0 8px 0; /* Reducido de 10px */
+  margin: 0 0 8px 0;
   min-height: 1.2em;
 }
 
 .platillo-actions {
   margin-top: auto;
-  padding: 0 12px 12px; /* Reducido de 15px */
+  padding: 0 12px 12px;
   display: flex;
-  gap: 6px; /* Reducido de 8px */
+  gap: 6px;
   justify-content: center;
 }
 
 .btn-editar, .btn-eliminar {
-  padding: 6px 10px; /* Reducido de 8px 12px */
+  padding: 6px 10px;
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -253,11 +253,16 @@
 /* === ESTADO VACÍO Y FOCUS === */
 .no-platillos {
   text-align: center;
-  padding: 40px 20px; /* Reducido de 60px 20px */
+  padding: 40px 20px;
   color: #7f8c8d;
   background: #f8f9fa;
   border-radius: 12px;
   border: 2px dashed #dee2e6;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
 .form-input:focus,
@@ -267,7 +272,7 @@
 .btn-eliminar:focus,
 .file-upload-label:focus-within {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.3);
+  box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.3);
 }
 
 @keyframes fadeIn {
@@ -277,13 +282,13 @@
 
 /* === ESTILOS PARA TAMAÑOS === */
 .textarea-descripcion {
-  min-height: 70px; /* Reducido de 80px */
+  min-height: 70px;
   resize: vertical;
 }
 
 .tamanos-toggle {
-  margin: 10px 0; /* Reducido de 15px */
-  padding: 8px; /* Reducido de 10px */
+  margin: 10px 0;
+  padding: 8px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -292,7 +297,7 @@
 .toggle-label {
   display: flex;
   align-items: center;
-  gap: 8px; /* Reducido de 10px */
+  gap: 8px;
   cursor: pointer;
 }
 
@@ -304,20 +309,20 @@
 .tamanos-section {
   border: 2px dashed #dee2e6;
   border-radius: 10px;
-  padding: 12px; /* Reducido de 15px */
-  margin: 12px 0; /* Reducido de 15px */
+  padding: 12px;
+  margin: 12px 0;
   background: #fafbfc;
 }
 
 .tamanos-section h4 {
-  margin: 0 0 12px 0; /* Reducido de 15px */
+  margin: 0 0 12px 0;
   color: #2c3e50;
 }
 
 .nuevo-tamano-form {
   display: flex;
-  gap: 8px; /* Reducido de 10px */
-  margin-bottom: 12px; /* Reducido de 15px */
+  gap: 8px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -325,7 +330,7 @@
 .form-input-small {
   flex: 1;
   min-width: 120px;
-  padding: 6px 10px; /* Reducido de 8px 12px */
+  padding: 6px 10px;
   border: 1px solid #ced4da;
   border-radius: 6px;
   font-size: 0.9em;
@@ -335,7 +340,7 @@
   background: #28a745;
   color: white;
   border: none;
-  padding: 6px 12px; /* Reducido de 8px 15px */
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9em;
@@ -344,14 +349,14 @@
 /* === ESTILOS PARA LA LISTA DE TAMAÑOS === */
 .tamanos-lista {
   background: #f8f9fa;
-  padding: 12px; /* Reducido de 15px */
+  padding: 12px;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-  margin-top: 8px; /* Reducido de 10px */
+  margin-top: 8px;
 }
 
 .tamanos-lista h5 {
-  margin: 0 0 8px 0; /* Reducido de 10px */
+  margin: 0 0 8px 0;
   color: #495057;
   font-size: 14px;
 }
@@ -360,13 +365,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px; /* Reducido de 12px 15px */
+  padding: 10px 12px;
   background: white;
   border: 1px solid #e9ecef;
   border-radius: 8px;
-  margin-bottom: 6px; /* Reducido de 8px */
-  gap: 12px; /* Reducido de 15px */
-  min-height: 40px; /* Reducido de 45px */
+  margin-bottom: 6px;
+  gap: 12px;
+  min-height: 40px;
 }
 
 .tamano-nombre {
@@ -390,8 +395,8 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 24px; /* Reducido de 26px */
-  height: 24px; /* Reducido de 26px */
+  width: 24px;
+  height: 24px;
   cursor: pointer;
   font-size: 14px;
   display: flex;
@@ -404,7 +409,7 @@
 
 /* === INFORMACIÓN BÁSICA DE PRECIOS === */
 .precio-info-basica {
-  margin: 8px 0; /* Reducido de 10px */
+  margin: 8px 0;
 }
 
 .precio-con-tamanos {
@@ -415,7 +420,7 @@
   display: block;
   font-size: 0.8em;
   color: #6c757d;
-  margin-bottom: 4px; /* Reducido de 5px */
+  margin-bottom: 4px;
 }
 
 .precio-sin-tamanos {
@@ -423,7 +428,7 @@
 }
 
 .precio-valor {
-  color: #27ae60;
+  color: #4682b4;
   font-weight: bold;
   font-size: 18px;
 }
@@ -432,7 +437,7 @@
   display: inline-block;
   background: #e3f2fd;
   color: #1976d2;
-  padding: 3px 8px; /* Reducido de 4px 10px */
+  padding: 3px 8px;
   border-radius: 12px;
   font-size: 0.75em;
   font-weight: 500;
@@ -442,22 +447,22 @@
 .tamanos-imagen-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px; /* Reducido de 15px */
+  gap: 12px;
   width: 100%;
   align-items: flex-start;
-  margin: 8px 0; /* Reducido de 10px */
+  margin: 8px 0;
 }
 
 .tamanos-column {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Reducido de 10px */
+  gap: 8px;
 }
 
 .imagen-column {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* Reducido de 10px */
+  gap: 8px;
   align-items: center;
   justify-content: flex-start;
 }
@@ -466,7 +471,7 @@
 .imagen-section {
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Reducido de 15px */
+  gap: 10px;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -475,13 +480,13 @@
 /* PREVIEW DE LA IMAGEN */
 .image-preview {
   position: relative;
-  width: 300px;  /* Reducido de 350px */
-  height: 300px; /* Reducido de 350px */
+  width: 300px;
+  height: 300px;
   border: 2px solid #e9ecef;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 8px; /* Reducido de 10px */
+  margin-bottom: 8px;
 }
 
 .preview-img {
@@ -521,8 +526,8 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px; /* Reducido de 36px */
-  padding: 0 12px; /* Reducido de 15px */
+  height: 34px;
+  padding: 0 12px;
   background-color: #ffffff;
   color: #34495e;
   border: 2px dashed #bdc3c7;
@@ -538,44 +543,44 @@
 }
 
 .file-upload-label-compact:hover {
-  border-color: #27ae60;
-  color: #27ae60;
-  background-color: #f8fff9;
+  border-color: #4682b4;
+  color: #4682b4;
+  background-color: #f0f8ff;
   transform: translateY(-1px);
 }
 
 /* === BOTONES DE ACCIÓN CENTRADOS === */
 .action-buttons-centered {
   display: flex;
-  gap: 10px; /* Reducido de 12px */
+  gap: 10px;
   justify-content: center;
   width: 100%;
-  margin-top: 15px; /* Reducido de 20px */
-  padding-top: 15px; /* Reducido de 20px */
+  margin-top: 15px;
+  padding-top: 15px;
   border-top: 1px solid #e9ecef;
 }
 
 .action-buttons-centered .submit-btn,
 .action-buttons-centered .cancel-btn {
-  height: 40px; /* Reducido de 44px */
-  padding: 0 25px; /* Reducido de 30px */
+  height: 40px;
+  padding: 0 25px;
   border: none;
   border-radius: 8px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 150px; /* Reducido de 160px */
+  min-width: 150px;
 }
 
 .action-buttons-centered .submit-btn {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background: linear-gradient(135deg, #4682b4, #87ceeb);
   color: white;
 }
 
 .action-buttons-centered .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+  box-shadow: 0 6px 20px rgba(70, 130, 180, 0.4);
 }
 
 .action-buttons-centered .cancel-btn {
@@ -592,14 +597,14 @@
 .tamanos-section {
   border: 2px dashed #dee2e6;
   border-radius: 10px;
-  padding: 12px; /* Reducido de 15px */
+  padding: 12px;
   background: #fafbfc;
   height: fit-content;
 }
 
 .tamanos-toggle {
-  margin: 0 0 12px 0; /* Reducido de 15px */
-  padding: 8px; /* Reducido de 10px */
+  margin: 0 0 12px 0;
+  padding: 8px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -607,12 +612,33 @@
 
 .tamanos-lista {
   background: #f8f9fa;
-  padding: 10px; /* Reducido de 12px */
+  padding: 10px;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-  margin-top: 8px; /* Reducido de 10px */
-  max-height: 160px; /* Reducido de 180px */
+  margin-top: 8px;
+  max-height: 160px;
   overflow-y: auto;
+}
+
+/* === LOADING SPINNER === */
+.loading-container {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.loading-spinner-large {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4682b4;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* === DISEÑO RESPONSIVE === */
@@ -629,19 +655,19 @@
   
   .tamanos-imagen-container {
     grid-template-columns: 1fr;
-    gap: 10px; /* Reducido de 15px */
+    gap: 10px;
   }
   
   .imagen-section {
     flex-direction: row;
     justify-content: flex-start;
-    gap: 12px; /* Reducido de 15px */
+    gap: 12px;
     align-items: center;
   }
   
   .image-preview {
-    width: 100px; /* Reducido de 120px */
-    height: 100px; /* Reducido de 120px */
+    width: 100px;
+    height: 100px;
     margin-bottom: 0;
   }
   
@@ -653,7 +679,7 @@
   .action-buttons-centered .submit-btn,
   .action-buttons-centered .cancel-btn {
     width: 100%;
-    max-width: 180px; /* Reducido de 200px */
+    max-width: 180px;
   }
 }
 
@@ -672,7 +698,7 @@
   .tamano-item {
     flex-direction: column;
     text-align: center;
-    gap: 8px; /* Reducido de 10px */
+    gap: 8px;
   }
   
   .tamano-nombre,
@@ -686,17 +712,17 @@
   
   .imagen-section {
     flex-direction: column;
-    gap: 8px; /* Reducido de 10px */
+    gap: 8px;
   }
   
   .file-upload-label-compact {
     width: 100%;
-    max-width: 140px; /* Reducido de 160px */
+    max-width: 140px;
   }
   
   .action-buttons-centered {
     flex-direction: column;
-    gap: 8px; /* Reducido de 10px */
+    gap: 8px;
   }
   
   .action-buttons-centered .submit-btn,

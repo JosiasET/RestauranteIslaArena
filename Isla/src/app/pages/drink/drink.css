@@ -77,17 +77,26 @@
   font-weight: bold;
   margin-bottom: 0.5rem;
   color: #34495e;
+  line-height: 1.2;
+  min-height: 2.2em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .platillo-info p {
   font-size: 0.9rem;
   color: #7f8c8d;
   margin-bottom: 0.5rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .precio {
   font-size: 1.1rem;
-  color: #8e44ad; /* color morado para bebidas */
+  color: #27ae60; /* Cambiado a verde para coincidir con el diseño anterior */
   font-weight: bold;
   display: block;
   margin: 0.5rem 0 1rem 0;
@@ -96,7 +105,7 @@
 /* Botón */
 .btn-agregar {
   width: 100%;
-  background-color: #8e44ad;
+  background-color: #4682b4; /* Cambiado a azul para coincidir con el diseño anterior */
   color: #fff;
   font-weight: 600;
   border: none;
@@ -108,7 +117,7 @@
 }
 
 .btn-agregar:hover {
-  background-color: #732d91;
+  background-color: #36648b; /* Azul más oscuro al hover */
   transform: scale(1.03);
 }
 
@@ -214,7 +223,7 @@
   top: 50%;
   width: 60px;
   height: 2px;
-  background: #8e44ad;
+  background: #4682b4; /* Cambiado a azul para coincidir con el diseño anterior */
 }
 
 .titulo-bebidas::before {
@@ -223,6 +232,80 @@
 
 .titulo-bebidas::after {
   right: -70px;
+}
+
+/* Texto persuasivo */
+.texto-persuasivo {
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  font-style: italic;
+  margin: 0.5rem 0;
+}
+
+/* Estados de carga y vacío */
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: #7f8c8d;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4682b4;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-platillos {
+  text-align: center;
+  padding: 80px 20px;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  border-radius: 15px;
+  border: 3px dashed #dee2e6;
+  grid-column: 1 / -1;
+}
+
+.no-platillos h3 {
+  margin-bottom: 15px;
+  color: #95a5a6;
+  font-weight: 600;
+  font-size: 1.5em;
+}
+
+.no-platillos p {
+  font-size: 1.1em;
+  line-height: 1.6;
+}
+
+/* Badges para opciones */
+.tiene-tamanos-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  margin: 8px 0;
+}
+
+.tiene-opciones-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #87ceeb, #4682b4);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  margin: 8px 0;
+  font-weight: 500;
 }
 
 /* Responsivo - MEJORADO */
