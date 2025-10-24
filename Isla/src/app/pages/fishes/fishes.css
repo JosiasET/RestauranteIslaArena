@@ -249,6 +249,123 @@
   margin: 0 auto 20px;
 }
 
+.encabezado-profesional{
+  background: linear-gradient(135deg, #1a365d 0%, #1e4d3f 100%);
+  padding: 2rem 1rem 1.5rem;
+  margin: -2rem -1rem 2rem -1rem;
+  color: white;
+  border-radius: 0;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.contenedor-profesional{
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.texto-profesional{
+  padding: 0.5rem;
+}
+
+.titulo-elegante{
+  font-size: 2.5rem;
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  letter-spacing: -0.3px;
+}
+
+.linea-1{
+  display: block;
+  font-weight: 400;
+  color:#90cdf4;
+}
+
+.linea-2{
+  display: block;
+  font-weight: 300;
+  color: #ffffff;
+}
+
+.linea-3{
+  display: block;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.descripcion-elegante{
+  font-size: 1.05rem;
+  color: #e8f6f3;
+  line-height: 1.5;
+  max-width: 420px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  font-style: normal;
+  text-align: left;
+  margin: 0;
+}
+
+.imagen-profesional{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.img-elegante{
+  max-width: 100%;
+  max-height: 280px;
+  border-radius: 10px;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.seccion-bebidas{
+  text-align: center;
+  padding: 1rem 1rem 0.5rem;
+}
+
+.titulo-bebidas{
+  font-size: 1.6rem;
+  color: #2c3e50;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  display: inline-block;
+}
+
+.titulo-bebidas::before,
+.titulo-bebidas::after{
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 2px;
+  background: #4682b4;
+}
+
+.titulo-bebidas::before{
+  left: -50px;
+}
+
+.titulo-bebidas::after{
+  right: -50px;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -662,6 +779,62 @@
     border-right: none;
     border-bottom: 1px solid #e0e0e0;
   }
+
+    .encabezado-profesional {
+    padding: 1.5rem 1rem 1rem;
+    margin: -1.5rem -1rem 1.5rem -1rem;
+    width: 100vw;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+  
+  .titulo-elegante {
+    font-size: 1.8rem;
+  }
+  
+  .linea-3 {
+    font-size: 2rem;
+  }
+  
+  .descripcion-elegante {
+    font-size: 0.9rem;
+  }
+  
+  .titulo-bebidas {
+    font-size: 1.3rem;
+  }
+  
+  .titulo-bebidas::before,
+  .titulo-bebidas::after {
+    width: 30px;
+  }
+  
+  .titulo-bebidas::before {
+    left: -40px;
+  }
+  
+  .titulo-bebidas::after {
+    right: -40px;
+  }
+}
+@media (max-width: 900px) {
+  .contenedor-profesional {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+  
+  .texto-profesional {
+    padding: 0.5rem;
+  }
+  
+  .descripcion-elegante {
+    margin: 0 auto;
+  }
+  
+  .img-elegante {
+    max-height: 220px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -671,5 +844,47 @@
   
   .recomendaciones-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .encabezado-profesional {
+    padding: 1.2rem 0.8rem 0.8rem;
+    margin: -1rem -0.8rem 1rem -0.8rem;
+    width: 100vw;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+  
+  .titulo-elegante {
+    font-size: 1.5rem;
+  }
+  
+  .linea-3 {
+    font-size: 1.7rem;
+  }
+  
+  .descripcion-elegante {
+    font-size: 0.85rem;
+  }
+  
+  .img-elegante {
+    max-height: 180px;
+  }
+  
+  .titulo-bebidas {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+  
+  .titulo-bebidas::before,
+  .titulo-bebidas::after {
+    width: 20px;
+  }
+  
+  .titulo-bebidas::before {
+    left: -30px;
+  }
+  
+  .titulo-bebidas::after {
+    right: -30px;
   }
 }

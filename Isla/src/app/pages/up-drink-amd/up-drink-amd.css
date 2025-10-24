@@ -1,18 +1,18 @@
-/* === ESTILOS GENERALES DEL CONTENEDOR === */
+/* === ESTILOS GENERALES (Estilo "Food" adaptado para Fishes) === */
 .Subir_p {
   background: white;
-  padding: 40px; /* Incrementado para un mejor espacio */
+  padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   max-width: 1400px;
-  margin: 20px auto; /* Centrado con margen superior e inferior */
+  margin: 20px auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-sizing: border-box;
 }
 
 .Subtitulo {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   color: #2c3e50;
   font-size: 28px;
   font-weight: 700;
@@ -28,7 +28,7 @@
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background: linear-gradient(90deg, #3498db, #5dade2); /* Color para bebidas (azul) */
+  background: linear-gradient(90deg, #4682b4, #87ceeb);
   border-radius: 3px;
 }
 
@@ -37,18 +37,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 15px;
-  padding: 20px;
+  gap: 12px;
+  padding: 15px;
   border-radius: 12px;
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .form-input {
   flex: 1 1 180px;
-  height: 48px;
-  padding: 0 15px;
+  height: 44px;
+  padding: 0 12px;
   border: 2px solid #e1e8ed;
   border-radius: 8px;
   font-size: 15px;
@@ -58,17 +58,17 @@
   box-sizing: border-box;
 }
 
-/* === BOTÓN PERSONALIZADO PARA SUBIR IMAGEN (Corregido a negro) === */
+/* === BOTÓN PERSONALIZADO PARA SUBIR IMAGEN === */
 .file-upload-label {
   flex: 1 1 200px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
-  padding: 0 15px;
+  height: 44px;
+  padding: 0 12px;
   background-color: #ffffff;
-  color: #34495e; /* Texto oscuro visible (negro/gris oscuro) */
+  color: #34495e;
   border: 2px dashed #bdc3c7;
   border-radius: 8px;
   cursor: pointer;
@@ -82,8 +82,8 @@
 }
 
 .file-upload-label:hover {
-  border-color: #3498db; /* Color de hover para bebidas */
-  color: #3498db;
+  border-color: #4682b4;
+  color: #4682b4;
 }
 
 .file-input {
@@ -93,14 +93,14 @@
 /* === BOTONES DE ACCIÓN DEL FORMULARIO === */
 .action-buttons {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-left: auto;
 }
 
 .submit-btn,
 .cancel-btn {
-  height: 48px;
-  padding: 0 25px;
+  height: 44px;
+  padding: 0 20px;
   border: none;
   border-radius: 8px;
   font-size: 15px;
@@ -111,12 +111,12 @@
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, #3498db, #5dade2); /* Color principal de botón para bebidas */
+  background: linear-gradient(135deg, #4682b4, #87ceeb);
   color: white;
 }
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+  box-shadow: 0 6px 20px rgba(70, 130, 180, 0.4);
 }
 
 .cancel-btn {
@@ -128,10 +128,10 @@
   transform: translateY(-2px);
 }
 
-/* === CUADRÍCULA DE BEBIDAS (Ajustado al mismo tamaño y estilo que "Food") === */
+/* === CUADRÍCULA DE "FISHES" === */
 .lista-platillos {
-  margin-top: 3rem;
-  padding: 2rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
   background: #f8f9fa;
   border-radius: 12px;
   border: 2px solid #e9ecef;
@@ -139,9 +139,9 @@
 
 .lista-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   border-bottom: 2px solid #dee2e6;
-  padding-bottom: 1rem;
+  padding-bottom: 0.8rem;
 }
 
 .lista-header h2 {
@@ -158,10 +158,10 @@
 .platillos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  gap: 15px;
 }
 
-/* === TARJETA DE BEBIDA CON ALTURA UNIFORME === */
+/* === TARJETA DE "FISHES" CON ALTURA UNIFORME === */
 .platillo-card-admin {
   background: #ffffff;
   border: 2px solid #e9ecef;
@@ -171,29 +171,30 @@
   text-align: center;
   overflow: hidden;
   animation: fadeIn 0.3s ease-out;
-  display: flex; /* Activa Flexbox */
-  flex-direction: column; /* Apila los elementos verticalmente */
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
 }
 
 .platillo-card-admin:hover {
-  border-color: #3498db; /* Color de hover para bebidas (azul) */
+  border-color: #4682b4;
   transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 4px 12px rgba(70, 130, 180, 0.2);
 }
 
 .platillo-image {
-  width: 120px; /* Tamaño de imagen consistente */
-  height: 120px;
-  margin: 15px auto 10px; /* Margen consistente */
+  width: 110px;
+  height: 110px;
+  margin: 12px auto 8px;
   border-radius: 8px;
   overflow: hidden;
-  flex-shrink: 0; /* Evita que la imagen se encoja */
+  flex-shrink: 0;
 }
 
 .platillo-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* Ajusta la imagen sin cortar para bebidas */
+  object-fit: cover;
   transition: transform 0.3s ease;
 }
 
@@ -202,42 +203,39 @@
 }
 
 .platillo-info {
-  padding: 0 15px 15px;
-  flex-grow: 1; /* Hace que esta sección ocupe el espacio sobrante */
+  padding: 0 12px 8px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .platillo-info h3 {
-  margin: 0 0 5px 0;
+  margin: 0 0 6px 0;
   color: #2c3e50;
   font-size: 16px;
   font-weight: 600;
+  line-height: 1.3;
 }
 
-.platillo-info .descripcion {
-  color: #7f8c8d;
-  font-size: 13px;
-  margin: 0 0 10px 0;
-  height: 3.9em; /* Aprox. 3 líneas de descripción para mantener altura uniforme */
-  line-height: 1.3em;
-  overflow: hidden;
-}
-
-.platillo-info .precio {
-  color: #3498db; /* Color de precio para bebidas (azul) */
-  font-weight: bold;
-  font-size: 18px;
+.descripcion-categoria {
+  color: #6c757d;
+  font-size: 0.8em;
+  font-style: italic;
+  margin: 0 0 8px 0;
+  min-height: 1.2em;
 }
 
 .platillo-actions {
-  margin-top: auto; /* Empuja los botones al fondo */
-  padding: 0 15px 15px;
+  margin-top: auto;
+  padding: 0 12px 12px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
 }
 
 .btn-editar, .btn-eliminar {
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -247,19 +245,24 @@
   flex: 1;
 }
 
-.btn-editar { background: #5dade2; color: white; } /* Azul claro para editar */
-.btn-editar:hover { background: #2e86c1; transform: scale(1.05); }
+.btn-editar { background: #3498db; color: white; }
+.btn-editar:hover { background: #2980b9; transform: scale(1.05); }
 .btn-eliminar { background: #e74c3c; color: white; }
 .btn-eliminar:hover { background: #c0392b; transform: scale(1.05); }
 
 /* === ESTADO VACÍO Y FOCUS === */
 .no-platillos {
   text-align: center;
-  padding: 60px 20px;
+  padding: 40px 20px;
   color: #7f8c8d;
   background: #f8f9fa;
   border-radius: 12px;
   border: 2px dashed #dee2e6;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
 .form-input:focus,
@@ -269,12 +272,373 @@
 .btn-eliminar:focus,
 .file-upload-label:focus-within {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3); /* Color de focus para bebidas (azul) */
+  box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.3);
 }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* === ESTILOS PARA TAMAÑOS === */
+.textarea-descripcion {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.tamanos-toggle {
+  margin: 10px 0;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggle-text {
+  font-weight: 500;
+  color: #495057;
+}
+
+.tamanos-section {
+  border: 2px dashed #dee2e6;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 12px 0;
+  background: #fafbfc;
+}
+
+.tamanos-section h4 {
+  margin: 0 0 12px 0;
+  color: #2c3e50;
+}
+
+.nuevo-tamano-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.form-input-small {
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+.btn-agregar {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+/* === ESTILOS PARA LA LISTA DE TAMAÑOS === */
+.tamanos-lista {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-top: 8px;
+}
+
+.tamanos-lista h5 {
+  margin: 0 0 8px 0;
+  color: #495057;
+  font-size: 14px;
+}
+
+.tamano-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  gap: 12px;
+  min-height: 40px;
+}
+
+.tamano-nombre {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+  flex: 1;
+  word-break: break-word;
+}
+
+.tamano-precio {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 14px;
+  min-width: 70px;
+  text-align: right;
+}
+
+.btn-eliminar-tamano {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+
+/* === INFORMACIÓN BÁSICA DE PRECIOS === */
+.precio-info-basica {
+  margin: 8px 0;
+}
+
+.precio-con-tamanos {
+  text-align: center;
+}
+
+.precio-texto {
+  display: block;
+  font-size: 0.8em;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.precio-sin-tamanos {
+  text-align: center;
+}
+
+.precio-valor {
+  color: #4682b4;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.tiene-tamanos-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+/* === CONTENEDOR PARA TAMAÑOS E IMAGEN EN MISMA FILA - COMPACTADO === */
+.tamanos-imagen-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  align-items: flex-start;
+  margin: 8px 0;
+}
+
+.tamanos-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.imagen-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* === SECCIÓN DE IMAGEN COMPACTA === */
+.imagen-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* PREVIEW DE LA IMAGEN */
+.image-preview {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 8px;
+}
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.btn-eliminar-imagen {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-eliminar-imagen:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+/* BOTÓN DE SUBIR IMAGEN COMPACTO */
+.file-upload-label-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  background-color: #ffffff;
+  color: #34495e;
+  border: 2px dashed #bdc3c7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  white-space: nowrap;
+  width: auto;
+  min-width: 140px;
+}
+
+.file-upload-label-compact:hover {
+  border-color: #4682b4;
+  color: #4682b4;
+  background-color: #f0f8ff;
+  transform: translateY(-1px);
+}
+
+/* === BOTONES DE ACCIÓN CENTRADOS === */
+.action-buttons-centered {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.action-buttons-centered .submit-btn,
+.action-buttons-centered .cancel-btn {
+  height: 40px;
+  padding: 0 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.action-buttons-centered .submit-btn {
+  background: linear-gradient(135deg, #4682b4, #87ceeb);
+  color: white;
+}
+
+.action-buttons-centered .submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(70, 130, 180, 0.4);
+}
+
+.action-buttons-centered .cancel-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.action-buttons-centered .cancel-btn:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+}
+
+/* === MEJORAS PARA LA SECCIÓN DE TAMAÑOS === */
+.tamanos-section {
+  border: 2px dashed #dee2e6;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fafbfc;
+  height: fit-content;
+}
+
+.tamanos-toggle {
+  margin: 0 0 12px 0;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.tamanos-lista {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-top: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+/* === LOADING SPINNER === */
+.loading-container {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.loading-spinner-large {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4682b4;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* === DISEÑO RESPONSIVE === */
@@ -288,6 +652,35 @@
     flex-direction: column;
     width: 100%;
   }
+  
+  .tamanos-imagen-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .imagen-section {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .image-preview {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 0;
+  }
+  
+  .action-buttons-centered {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .action-buttons-centered .submit-btn,
+  .action-buttons-centered .cancel-btn {
+    width: 100%;
+    max-width: 180px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -296,5 +689,45 @@
   }
   .platillo-actions {
     flex-direction: column;
+  }
+  
+  .nuevo-tamano-form {
+    flex-direction: column;
+  }
+  
+  .tamano-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .tamano-nombre,
+  .tamano-precio {
+    text-align: center;
+  }
+  
+  .tamanos-imagen-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .imagen-section {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .file-upload-label-compact {
+    width: 100%;
+    max-width: 140px;
+  }
+  
+  .action-buttons-centered {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .action-buttons-centered .submit-btn,
+  .action-buttons-centered .cancel-btn {
+    min-width: auto;
+    width: 100%;
   }
 }
