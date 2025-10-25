@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const bebidasController = require('../controllers/bebidasController');
+const productosController = require('../controllers/productosController');
 
-// CRUD de bebidas
-router.post('/', bebidasController.crearBebida);
-router.get('/', bebidasController.obtenerBebidas);
-router.put('/:id', bebidasController.actualizarBebida);
-router.delete('/:id', bebidasController.eliminarBebida);
+// ✅ CRUD para bebidas (usa la tabla Productos)
+router.post('/', productosController.crearProducto);
+router.get('/', productosController.obtenerBebidas);
+router.put('/:id', productosController.actualizarProducto);
+router.delete('/:id', productosController.eliminarProducto);
 
 module.exports = router;

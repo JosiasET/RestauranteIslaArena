@@ -4,48 +4,40 @@ const { processImage, formatImageResponse } = require('../utils/imageUtils');
 function normalizarIDs(rows) {
   return rows.map(p => ({
     ...p,
-    id: p.id_especialidad,
-    // Asegurar que los campos JSON sean arrays válidos
+    id: p.id_producto,
     tipos: p.tipos ? (typeof p.tipos === 'string' ? JSON.parse(p.tipos) : p.tipos) : [],
     tamanos: p.tamanos ? (typeof p.tamanos === 'string' ? JSON.parse(p.tamanos) : p.tamanos) : [],
-    tiene_tamanos: p.tiene_tamanos
+    tiene_tamanos: p.tiene_tamanos || false
   }));
 }
 
 const especialidadesController = {
   // Crear especialidad
   crearEspecialidad: async (req, res) => {
-    const { 
-      nombre, 
-      descripcion, 
-      descripcion_real,
-      precio, 
-      imagen, 
-      tiene_tamanos,
-      tipos,
-      tamanos
-    } = req.body;
-    
+    const { nombre, descripcion, precio, imagen, tiene_tamanos, tipos, tamanos } = req.body;
+
     if (!nombre || !precio) {
       return res.status(400).json({ error: "Nombre y precio son requeridos" });
     }
 
     try {
       const buffer = processImage(imagen);
-      
-      // Convertir a JSON si viene como array
+      const categoria = "Especialidad";
       const tiposJSON = tipos ? JSON.stringify(tipos) : null;
       const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
 
       const result = await db.query(
-        `INSERT INTO Especialidades_mar 
-         (nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tipos, tamanos) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+        `INSERT INTO Productos 
+         (nombre, descripcion, precio, categoria, subcategoria, imagen)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
-        [nombre, descripcion, descripcion_real, precio, buffer, tiene_tamanos || false, tiposJSON, tamanosJSON]
+        [nombre, descripcion || "", precio, categoria, tiposJSON, buffer]
       );
-      
+
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
+      especialidad.tamanos = tamanos || [];
+      especialidad.tiene_tamanos = tiene_tamanos || false;
+
       res.json(especialidad);
     } catch (err) {
       console.error('❌ Error al crear especialidad:', err);
@@ -56,7 +48,9 @@ const especialidadesController = {
   // Obtener todas las especialidades
   obtenerEspecialidades: async (req, res) => {
     try {
-      const result = await db.query("SELECT * FROM Especialidades_mar ORDER BY id_especialidad DESC");
+      const result = await db.query(
+        "SELECT * FROM Productos WHERE categoria='Especialidad' ORDER BY id_producto DESC"
+      );
       const especialidades = normalizarIDs(formatImageResponse(result.rows));
       res.json(especialidades);
     } catch (err) {
@@ -68,48 +62,37 @@ const especialidadesController = {
   // Actualizar especialidad
   actualizarEspecialidad: async (req, res) => {
     const { id } = req.params;
-    const { 
-      nombre, 
-      descripcion, 
-      descripcion_real,
-      precio, 
-      imagen, 
-      tiene_tamanos,
-      tipos,
-      tamanos
-    } = req.body;
+    const { nombre, descripcion, precio, imagen, tiene_tamanos, tipos, tamanos } = req.body;
 
     try {
       const buffer = processImage(imagen);
-      
       const tiposJSON = tipos ? JSON.stringify(tipos) : null;
       const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
 
       let sql, values;
-
       if (buffer) {
-        sql = `UPDATE Especialidades_mar 
-               SET nombre=$1, descripcion=$2, descripcion_real=$3, precio=$4, imagen=$5, 
-                   tiene_tamanos=$6, tipos=$7, tamanos=$8 
-               WHERE id_especialidad=$9 
+        sql = `UPDATE Productos 
+               SET nombre=$1, descripcion=$2, precio=$3, subcategoria=$4, imagen=$5
+               WHERE id_producto=$6 AND categoria='Especialidad'
                RETURNING *`;
-        values = [nombre, descripcion, descripcion_real, precio, buffer, tiene_tamanos, tiposJSON, tamanosJSON, id];
+        values = [nombre, descripcion || "", precio, tiposJSON, buffer, id];
       } else {
-        sql = `UPDATE Especialidades_mar 
-               SET nombre=$1, descripcion=$2, descripcion_real=$3, precio=$4, 
-                   tiene_tamanos=$5, tipos=$6, tamanos=$7 
-               WHERE id_especialidad=$8 
+        sql = `UPDATE Productos 
+               SET nombre=$1, descripcion=$2, precio=$3, subcategoria=$4
+               WHERE id_producto=$5 AND categoria='Especialidad'
                RETURNING *`;
-        values = [nombre, descripcion, descripcion_real, precio, tiene_tamanos, tiposJSON, tamanosJSON, id];
+        values = [nombre, descripcion || "", precio, tiposJSON, id];
       }
 
       const result = await db.query(sql, values);
-
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Especialidad no encontrada" });
       }
 
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
+      especialidad.tamanos = tamanos || [];
+      especialidad.tiene_tamanos = tiene_tamanos || false;
+
       res.json(especialidad);
     } catch (err) {
       console.error('❌ Error al actualizar especialidad:', err);
@@ -122,7 +105,10 @@ const especialidadesController = {
     const { id } = req.params;
 
     try {
-      const result = await db.query("DELETE FROM Especialidades_mar WHERE id_especialidad=$1 RETURNING *", [id]);
+      const result = await db.query(
+        "DELETE FROM Productos WHERE id_producto=$1 AND categoria='Especialidad' RETURNING *",
+        [id]
+      );
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "Especialidad no encontrada" });
       }
