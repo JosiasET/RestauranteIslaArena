@@ -17,13 +17,13 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
   esModoEdicion: boolean = false;
   isLoading: boolean = true;
   isSubmitting: boolean = false;
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
 
   // Campos del formulario
   nombre: string = '';
   apellido: string = '';
   usuario: string = '';
   contrasena: string = '';
-  rol: string = '';
   turno: string = '';
 
   // Variable para controlar la visibilidad de la contraseña
@@ -39,6 +39,17 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('🔄 Inicializando componente UpCreatewaiterAmd...');
     
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.forceUpdate();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.forceUpdate();
+    });
+
     // Suscribirse al loading state
     this.subscription.add(
       this.meseroService.loading$.subscribe(loading => {
@@ -47,7 +58,7 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
       })
     );
 
-    // Suscribirse a los meseros - ESTO HACE EL REFRESH AUTOMÁTICO
+    // Suscribirse a los meseros
     this.subscription.add(
       this.meseroService.meseros$.subscribe((meseros: MeseroInterface[]) => {
         console.log('🔄 Lista de meseros actualizada:', meseros.length);
@@ -55,6 +66,9 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
         this.forceUpdate();
       })
     );
+
+    // Cargar datos iniciales
+    this.meseroService.cargarMeseros().subscribe();
   }
 
   ngOnDestroy() {
@@ -69,7 +83,7 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
   }
 
   crearMesero() {
-    if (!this.nombre || !this.apellido || !this.usuario || !this.rol || !this.turno) {
+    if (!this.nombre || !this.apellido || !this.usuario || !this.turno) {
       alert("Por favor, complete todos los campos requeridos.");
       return;
     }
@@ -87,52 +101,53 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
       apellido: this.apellido,
       usuario: this.usuario,
       contrasena: this.contrasena,
-      rol: this.rol,
+      rol: 'mesero',
       turno: this.turno,
       activo: this.meseroEditando ? this.meseroEditando.activo : true
     };
 
     if (this.esModoEdicion && this.meseroEditando) {
-      // ACTUALIZACIÓN INMEDIATA: Actualizar en el array local primero
-      const index = this.meseros.findIndex(m => m.id === this.meseroEditando!.id);
-      if (index !== -1) {
-        this.meseros[index] = { ...meseroData };
-        this.forceUpdate();
-      }
-
+      // ✅ MODO EDICIÓN CON MENSAJE OFFLINE
       this.meseroService.actualizarMesero(meseroData).subscribe({
         next: (respuesta) => {
           console.log('✅ Mesero actualizado exitosamente');
           this.isSubmitting = false;
-          alert("Mesero actualizado exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert("📱 Mesero actualizado localmente - Se sincronizará cuando haya internet");
+          } else {
+            alert("✅ Mesero actualizado exitosamente");
+          }
+          
           this.limpiarFormulario();
         },
         error: (err) => {
           console.error('❌ Error actualizando mesero:', err);
           this.isSubmitting = false;
           alert("Error al actualizar el mesero");
-          // Si hay error, recargar desde el servidor
-          this.meseroService.cargarMeseros().subscribe();
         }
       });
     } else {
-      // ACTUALIZACIÓN INMEDIATA: Agregar al array local primero (con ID temporal)
-      this.meseros = [meseroData, ...this.meseros];
-      this.forceUpdate();
-
+      // ✅ MODO CREACIÓN CON MENSAJE OFFLINE
       this.meseroService.crearMesero(meseroData).subscribe({
         next: (respuesta) => {
           console.log('✅ Mesero creado exitosamente');
           this.isSubmitting = false;
-          alert("Mesero creado exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert("📱 Mesero guardado localmente - Se sincronizará automáticamente cuando recuperes internet");
+          } else {
+            alert("✅ Mesero creado exitosamente");
+          }
+          
           this.limpiarFormulario();
         },
         error: (err) => {
           console.error('❌ Error creando mesero:', err);
           this.isSubmitting = false;
           alert("Error al crear el mesero");
-          // Si hay error, recargar desde el servidor
-          this.meseroService.cargarMeseros().subscribe();
         }
       });
     }
@@ -149,12 +164,11 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
     this.meseroEditando = mesero;
     this.esModoEdicion = true;
     
-    // Asignación segura de valores para evitar errores con datos viejos
+    // Asignación segura de valores
     this.nombre = mesero.nombre || '';
     this.apellido = mesero.apellido || '';
     this.usuario = mesero.usuario || '';
     this.contrasena = ''; // La contraseña no se carga al editar por seguridad
-    this.rol = mesero.rol || '';
     this.turno = mesero.turno || '';
 
     this.forceUpdate();
@@ -173,22 +187,35 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
       return;
     }
 
-    // ACTUALIZACIÓN INMEDIATA: Cambiar estado en el array local primero
-    const index = this.meseros.findIndex(m => m.id === mesero.id);
-    if (index !== -1) {
-      this.meseros[index] = { ...mesero, activo: !mesero.activo };
-      this.forceUpdate();
+    // ✅ CORREGIDO - Manejar IDs string y number
+    let idParaOperar: number;
+    
+    if (typeof mesero.id === 'string') {
+      idParaOperar = parseInt(mesero.id);
+      if (isNaN(idParaOperar)) {
+        idParaOperar = 0;
+      }
+    } else {
+      idParaOperar = mesero.id;
     }
 
-    this.meseroService.toggleEstado(mesero).subscribe({
+    const meseroConIdNumerico: MeseroInterface = {
+      ...mesero,
+      id: idParaOperar
+    };
+
+    this.meseroService.toggleEstado(meseroConIdNumerico).subscribe({
       next: (respuesta) => {
         console.log('✅ Estado del mesero actualizado');
+        
+        // ✅ MENSAJE MEJORADO
+        if (this.isOffline) {
+          alert(`📱 Estado cambiado localmente - Se sincronizará cuando haya internet`);
+        }
       },
       error: (err) => {
         console.error('❌ Error cambiando estado:', err);
         alert('Error al cambiar el estado del mesero');
-        // Si hay error, recargar desde el servidor
-        this.meseroService.cargarMeseros().subscribe();
       }
     });
   }
@@ -203,19 +230,30 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
     if (confirm("¿Estás seguro de que deseas eliminar a este mesero?")) {
       console.log('🗑️ Intentando eliminar mesero ID:', mesero.id);
       
-      // ACTUALIZACIÓN INMEDIATA: Eliminar del array local primero
-      this.meseros = this.meseros.filter(m => m.id !== mesero.id);
-      this.forceUpdate();
+      // ✅ CORREGIDO - Manejar IDs string y number
+      let idParaEliminar: number;
+      
+      if (typeof mesero.id === 'string') {
+        idParaEliminar = parseInt(mesero.id);
+        if (isNaN(idParaEliminar)) {
+          idParaEliminar = 0;
+        }
+      } else {
+        idParaEliminar = mesero.id;
+      }
 
-      this.meseroService.eliminarMesero(mesero.id).subscribe({
+      this.meseroService.eliminarMesero(idParaEliminar).subscribe({
         next: () => {
           console.log('✅ Eliminación completada');
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert("📱 Mesero marcado para eliminar - Se eliminará del servidor cuando haya internet");
+          }
         },
         error: (err) => {
           console.error('❌ Error eliminando mesero:', err);
           alert('Error al eliminar el mesero');
-          // Si hay error, recargar desde el servidor
-          this.meseroService.cargarMeseros().subscribe();
         }
       });
     }
@@ -231,15 +269,10 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
     this.apellido = '';
     this.usuario = '';
     this.contrasena = '';
-    this.rol = '';
     this.turno = '';
     this.meseroEditando = null;
     this.esModoEdicion = false;
     this.isSubmitting = false;
-  }
-
-  getRolText(rol: string): string {
-    return rol === 'administrador' ? '👑 Administrador' : '💳 Cajero';
   }
 
   getTurnoText(turno: string): string {
@@ -247,5 +280,32 @@ export class UpCreatewaiterAmd implements OnInit, OnDestroy {
     if (turno === 'vespertino') return '🌇 Vespertino';
     if (turno === 'completo') return '🌞 Completo';
     return turno;
+  }
+
+  getEstadoText(activo: boolean): string {
+    return activo ? '✅ Activo' : '❌ Inactivo';
+  }
+
+  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE
+  getEstadoConexion(): string {
+    return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
+  }
+
+  // ✅ MÉTODO PARA VER SI UN MESERO ES OFFLINE
+  esMeseroOffline(mesero: MeseroInterface): boolean {
+    return mesero.offline || false;
+  }
+
+  // ✅ MÉTODO PARA OBTENER ESTADO DE SINCRONIZACIÓN
+  getEstadoSincronizacion(mesero: MeseroInterface): string {
+    if (mesero.offline) {
+      switch (mesero.syncStatus) {
+        case 'pending': return '⏳ Pendiente';
+        case 'synced': return '✅ Sincronizado';
+        case 'failed': return '❌ Error';
+        default: return '⏳ Pendiente';
+      }
+    }
+    return '✅ En línea';
   }
 }

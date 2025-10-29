@@ -7,6 +7,9 @@
     <input type="text" [(ngModel)]="descripcion" placeholder="Categoría (Pescado, Marisco, Ceviche, etc.)" class="form-input">
     <textarea [(ngModel)]="descripcion_real" placeholder="Descripción real de la especialidad (ingredientes, preparación)" class="form-input textarea-descripcion"></textarea>
     <input type="number" [(ngModel)]="precio" placeholder="Precio base de la especialidad" class="form-input" min="0">
+    
+    <!-- ✅ NUEVO CAMPO STOCK -->
+    <input type="number" [(ngModel)]="stock" placeholder="Stock disponible (kg/litros)" class="form-input" step="0.1" min="0">
 
     <!-- CONTENEDOR PARA TAMAÑOS E IMAGEN (EN LA MISMA FILA) -->
     <div class="tamanos-imagen-container">
@@ -93,35 +96,41 @@
 
     <!-- Cuadrícula de especialidades -->
     <div *ngIf="!isLoading" class="platillos-grid">
-      <div *ngFor="let especialidad of todasLasEspecialidades" class="platillo-card-admin">
+      <!-- ✅ CORREGIDO: Cambiar 'especialidad' por 'esp' -->
+      <div *ngFor="let esp of todasLasEspecialidades" class="platillo-card-admin">
         <div class="platillo-image">
-          <img [src]="especialidad.imagen" [alt]="especialidad.nombre" loading="lazy">
+          <img [src]="esp.imagen" [alt]="esp.nombre" loading="lazy">
         </div>
         
         <div class="platillo-info">
-          <h3>{{ especialidad.nombre }}</h3>
-          <p class="descripcion-categoria">{{ especialidad.descripcion }}</p>
+          <h3>{{ esp.nombre }}</h3>
+          <p class="descripcion-categoria">{{ esp.descripcion }}</p>
+          
+          <!-- ✅ NUEVO: Mostrar stock -->
+          <p class="stock" [class.stock-bajo]="esp.cantidad <= 1">
+            ⚖️ Stock: {{ esp.cantidad }} kg
+          </p>
           
           <!-- Información básica del precio -->
           <div class="precio-info-basica">
-            <div *ngIf="especialidad.tiene_tamanos" class="precio-con-tamanos">
+            <div *ngIf="esp.tiene_tamanos" class="precio-con-tamanos">
               <span class="precio-texto">Con tamaños</span>
               <div class="tiene-tamanos-badge">
-                📏 {{ especialidad.tamanos?.length || 0 }} tamaños
+                📏 {{ esp.tamanos?.length || 0 }} tamaños
               </div>
             </div>
-            <div *ngIf="!especialidad.tiene_tamanos" class="precio-sin-tamanos">
+            <div *ngIf="!esp.tiene_tamanos" class="precio-sin-tamanos">
               <span class="precio-texto">Precio único:</span>
-              <span class="precio-valor">${{ especialidad.precio }}</span>
+              <span class="precio-valor">${{ esp.precio }}</span>
             </div>
           </div>
         </div>
 
         <div class="platillo-actions">
-          <button class="btn-editar" (click)="editarEspecialidad(especialidad)">
+          <button class="btn-editar" (click)="editarEspecialidad(esp)">
             ✏️ Editar
           </button>
-          <button class="btn-eliminar" (click)="eliminarEspecialidad(especialidad)">
+          <button class="btn-eliminar" (click)="eliminarEspecialidad(esp)">
             🗑️ Eliminar
           </button>
         </div>

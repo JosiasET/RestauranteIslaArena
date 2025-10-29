@@ -19,6 +19,7 @@ export class Food implements OnInit, OnDestroy {
   recomendacionesDelDia: any[] = [];
   loading: boolean = true;
   categoriaSeleccionada: string = 'todas';
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
 
   // Variables para el modal de tamaños
   mostrarModal: boolean = false;
@@ -27,7 +28,7 @@ export class Food implements OnInit, OnDestroy {
   tamanoSeleccionado: any = null;
   cantidad: number = 1;
 
-  // NUEVA VARIABLE AGREGADA AQUÍ
+  // Variable para posición del modal
   currentScrollPosition: number = 0;
 
   categorias = [
@@ -50,6 +51,18 @@ export class Food implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('🔄 Inicializando componente Food...');
+    
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.cdRef.detectChanges();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.cdRef.detectChanges();
+    });
+
     this.cargarProductosComida();
   }
 
@@ -61,23 +74,28 @@ export class Food implements OnInit, OnDestroy {
     this.loading = true;
     this.cdRef.detectChanges();
 
-    this.foodService.cargarPlatillos().subscribe();
-
+    // ✅ USAR EL MÉTODO ACTUALIZADO CON OFFLINE
     this.subscription.add(
-      this.foodService.saucer$.subscribe(comidas => {
-        console.log('🍽️ Productos cargados:', comidas.length);
-        this.todosProductos = comidas;
-        this.generarRecomendacionesDelDia();
-        this.filtrarProductos();
-        this.loading = false;
-        this.cdRef.detectChanges();
+      this.foodService.cargarPlatillos().subscribe({
+        next: (comidas: foodInterface[]) => {
+          console.log('🍽️ Productos cargados:', comidas.length);
+          this.todosProductos = comidas;
+          this.generarRecomendacionesDelDia();
+          this.filtrarProductos();
+          this.loading = false;
+          this.cdRef.detectChanges();
+        },
+        error: (error: any) => {
+          console.error('❌ Error cargando platillos:', error);
+          this.loading = false;
+          this.cdRef.detectChanges();
+        }
       })
     );
   }
 
   // MÉTODO MODIFICADO - abrirModalProducto
   abrirModalProducto(producto: any) {
-    // Calcular posición actual del viewport
     this.currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
     
     this.productoSeleccionado = producto;
@@ -96,7 +114,6 @@ export class Food implements OnInit, OnDestroy {
     this.cantidad = 1;
     this.mostrarModal = true;
     
-    // Aplicar la posición calculada después de que el modal se renderice
     setTimeout(() => {
       this.aplicarPosicionModal();
     }, 0);
@@ -104,7 +121,6 @@ export class Food implements OnInit, OnDestroy {
     this.cdRef.detectChanges();
   }
 
-  // NUEVO MÉTODO AGREGADO - aplicarPosicionModal
   aplicarPosicionModal() {
     const modalElement = document.querySelector('.modal-content.horizontal') as HTMLElement;
     if (modalElement) {
@@ -112,10 +128,7 @@ export class Food implements OnInit, OnDestroy {
       const modalHeight = modalElement.offsetHeight;
       const scrollTop = this.currentScrollPosition;
       
-      // Calcular posición para que el modal esté centrado verticalmente en el viewport
       const idealPosition = scrollTop + (viewportHeight / 2) - (modalHeight / 2);
-      
-      // Asegurar que no se salga de la pantalla
       const safePosition = Math.max(20, Math.min(idealPosition, scrollTop + (viewportHeight - modalHeight - 20)));
       
       modalElement.style.marginTop = safePosition + 'px';
@@ -136,6 +149,10 @@ export class Food implements OnInit, OnDestroy {
   }
 
   incrementarCantidad() {
+    if (this.cantidad >= 10) {
+      alert('❌ Límite máximo: 10 unidades por pedido');
+      return;
+    }
     this.cantidad++;
     this.cdRef.detectChanges();
   }
@@ -147,7 +164,6 @@ export class Food implements OnInit, OnDestroy {
     }
   }
 
-  // MÉTODO MODIFICADO - cerrarModal
   cerrarModal() {
     this.mostrarModal = false;
     this.productoSeleccionado = null;
@@ -157,14 +173,18 @@ export class Food implements OnInit, OnDestroy {
     this.cdRef.detectChanges();
   }
 
-  // El resto de tus métodos se mantienen igual...
   agregarConOpciones() {
     if (!this.productoSeleccionado) return;
+
+    if (this.cantidad > 10) {
+      alert('❌ Límite máximo: 10 unidades por pedido');
+      return;
+    }
 
     const precioFinal = this.getPrecioFinal();
 
     const item: CartItem = {
-      id: this.productoSeleccionado.id,
+      id: this.productoSeleccionado.id as number,
       nombre: this.productoSeleccionado.nombre,
       descripcion: this.productoSeleccionado.descripcion_real || this.productoSeleccionado.descripcion,
       precio: precioFinal,
@@ -235,5 +255,15 @@ export class Food implements OnInit, OnDestroy {
 
   agregarAlCarrito(producto: any) {
     this.abrirModalProducto(producto);
+  }
+
+  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE
+  getEstadoConexion(): string {
+    return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
+  }
+
+  // ✅ MÉTODO PARA VER SI UN PLATILLO ES OFFLINE
+  esPlatilloOffline(platillo: any): boolean {
+    return platillo.id && platillo.id.toString().includes('offline_');
   }
 }

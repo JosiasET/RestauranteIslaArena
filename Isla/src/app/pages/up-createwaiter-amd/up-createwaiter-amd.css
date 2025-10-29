@@ -65,7 +65,7 @@
 }
 
 .password-container .form-input {
-  padding-right: 50px; /* Espacio para el botón */
+  padding-right: 50px;
 }
 
 .password-toggle-btn {
@@ -158,8 +158,8 @@ td {
 tr:last-child td { border-bottom: none; }
 tr:hover { background-color: #f8f9fa; }
 
-/* Badges (insignias) */
-.badge-administrador, .badge-cajero, .badge-matutino, .badge-vespertino, .badge-completo, .badge-activo, .badge-inactivo {
+/* Badges (insignias) - Eliminados los estilos de rol */
+.badge-matutino, .badge-vespertino, .badge-completo, .badge-activo, .badge-inactivo {
   padding: 5px 12px;
   border-radius: 15px;
   font-size: 12px;
@@ -169,8 +169,6 @@ tr:hover { background-color: #f8f9fa; }
   text-align: center;
 }
 
-.badge-administrador { background: #e67e22; }
-.badge-cajero { background: #3498db; }
 .badge-matutino { background: #f1c40f; color: #2c3e50; }
 .badge-vespertino { background: #8e44ad; }
 .badge-completo { background: #16a085; }

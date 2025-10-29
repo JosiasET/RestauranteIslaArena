@@ -1,8 +1,9 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CelebrateService } from '../../core/service/CelebrateService';
 import { CelebrateInterface } from '../../core/interface/celebrate';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-celebrates',
@@ -11,7 +12,7 @@ import { CelebrateInterface } from '../../core/interface/celebrate';
   templateUrl: './celebrates.html',
   styleUrls: ['./celebrates.css']
 })
-export class Celebrates {
+export class Celebrates implements OnInit, OnDestroy {
   nombre: string = '';
   fechaNacimiento: string = '';
   telefono: string = '';
@@ -24,6 +25,20 @@ export class Celebrates {
   loading: boolean = false;
   codigoReserva: string = '';
   minDate: string;
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
+
+  // CONFIGURACIÓN DE CAPACIDAD
+  readonly CAPACIDAD_MAXIMA = 30;
+  readonly HORARIO_APERTURA = '10:00';
+  readonly HORARIO_CIERRE = '18:00';
+  readonly DURACION_ESTANCIA = 3;
+  
+  horariosDisponibles: string[] = [];
+  capacidadMensaje: string = '';
+  capacidadDetalle: string = '';
+  capacidadDisponible: boolean = true;
+
+  private subscription: Subscription = new Subscription();
 
   constructor(
     private celebrateService: CelebrateService,
@@ -31,6 +46,90 @@ export class Celebrates {
   ) {
     const hoy = new Date();
     this.minDate = hoy.toISOString().split('T')[0];
+    this.generarHorariosDisponibles();
+  }
+
+  ngOnInit() {
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.cdRef.detectChanges();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.cdRef.detectChanges();
+    });
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  // GENERAR HORARIOS DISPONIBLES
+  generarHorariosDisponibles() {
+    this.horariosDisponibles = [];
+    const [horaApertura, minutoApertura] = this.HORARIO_APERTURA.split(':').map(Number);
+    const [horaCierre, minutoCierre] = this.HORARIO_CIERRE.split(':').map(Number);
+    
+    let horaActual = horaApertura;
+    
+    while (horaActual <= (horaCierre - this.DURACION_ESTANCIA)) {
+      const horaFormateada = `${horaActual.toString().padStart(2, '0')}:${minutoApertura.toString().padStart(2, '0')}`;
+      this.horariosDisponibles.push(horaFormateada);
+      horaActual += 1;
+    }
+  }
+
+  // VERIFICAR DISPONIBILIDAD EN TIEMPO REAL
+  verificarDisponibilidad() {
+    if (!this.fechaReserva || !this.horaReserva || !this.personas) {
+      this.capacidadMensaje = 'Seleccione fecha, hora y número de personas';
+      this.capacidadDetalle = '';
+      this.capacidadDisponible = false;
+      return;
+    }
+
+    if (this.personas > 10) {
+      this.capacidadMensaje = '❌ Máximo 10 personas por reservación';
+      this.capacidadDetalle = 'Los grupos grandes deben hacer múltiples reservaciones';
+      this.capacidadDisponible = false;
+      return;
+    }
+
+    // Verificar que la hora permita la estancia completa
+    const horaReservaNum = parseInt(this.horaReserva.split(':')[0]);
+    const horaCierreNum = parseInt(this.HORARIO_CIERRE.split(':')[0]);
+    
+    if (horaReservaNum > (horaCierreNum - this.DURACION_ESTANCIA)) {
+      this.capacidadMensaje = `❌ Horario no disponible`;
+      this.capacidadDetalle = `El restaurante cierra a las ${this.HORARIO_CIERRE} y la estancia estimada es de ${this.DURACION_ESTANCIA} horas`;
+      this.capacidadDisponible = false;
+      return;
+    }
+
+    // USAR EL SERVICIO ACTUALIZADO
+    this.celebrateService.verificarDisponibilidad(
+      this.fechaReserva, 
+      this.horaReserva, 
+      this.personas
+    ).subscribe({
+      next: (resultado) => {
+        this.capacidadMensaje = resultado.mensaje;
+        this.capacidadDetalle = `Capacidad: ${resultado.totalReservado}/${this.CAPACIDAD_MAXIMA} personas`;
+        this.capacidadDisponible = resultado.disponible;
+        this.cdRef.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error verificando capacidad:', error);
+        this.capacidadMensaje = this.isOffline 
+          ? '📱 Verificación offline - Capacidad disponible' 
+          : '⚠️ Verificación limitada';
+        this.capacidadDetalle = 'Capacidad disponible (modo seguro)';
+        this.capacidadDisponible = true;
+        this.cdRef.detectChanges();
+      }
+    });
   }
 
   verificarCumpleanios(): boolean {
@@ -39,8 +138,7 @@ export class Celebrates {
     const fechaReserva = new Date(this.fechaReserva);
     const cumpleanios = new Date(this.fechaNacimiento);
     
-    // Permitir cualquier fecha futura, no solo el día exacto
-    return fechaReserva >= new Date(); // Solo verificar que sea fecha futura
+    return fechaReserva >= new Date();
   }
 
   esFechaCumpleaniosExacta(): boolean {
@@ -51,13 +149,6 @@ export class Celebrates {
     
     return fechaReserva.getMonth() === cumpleanios.getMonth() && 
            fechaReserva.getDate() === cumpleanios.getDate();
-  }
-
-  generarCodigoReserva(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return Array.from({ length: 8 }, () => 
-      chars[Math.floor(Math.random() * chars.length)]
-    ).join('');
   }
 
   formatearFecha(fecha: string): string {
@@ -78,108 +169,52 @@ export class Celebrates {
     return `${hora12}:${minutos} ${periodo}`;
   }
 
+  // MÉTODO ONSUBMIT CORREGIDO
   onSubmit() {
     this.loading = true;
-    console.log("⏳ Verificando datos...");
 
-    // === VALIDAR EDAD ===
-    const fechaNac = new Date(this.fechaNacimiento);
-    const hoyEdad = new Date(); // Cambié el nombre para evitar conflicto
-    let edad = hoyEdad.getFullYear() - fechaNac.getFullYear();
-    const mes = hoyEdad.getMonth() - fechaNac.getMonth();
-    if (mes < 0 || (mes === 0 && hoyEdad.getDate() < fechaNac.getDate())) {
-      edad--;
-    }
-
-    console.log("🎂 Edad calculada:", edad);
-
-    if (edad < 18) {
-      alert("🚫 Usted no es mayor de edad. No puede registrar la promoción.");
+    // VALIDAR CAMPOS REQUERIDOS
+    if (!this.nombre || !this.fechaNacimiento || !this.telefono || 
+        !this.fechaReserva || !this.horaReserva || !this.aceptoTerminos) {
+      alert('❌ Complete todos los campos obligatorios');
       this.loading = false;
       return;
     }
 
-    // === VALIDAR TELÉFONO ===
-    const telefonoValido = /^[0-9]{10}$/.test(this.telefono);
-    if (!telefonoValido) {
-      alert("📵 El número telefónico debe contener exactamente 10 dígitos numéricos.");
-      this.loading = false;
-      return;
-    }
-
-    // === VERIFICAR SI LA FECHA DE RESERVA ES FUTURA ===
-    const fechaReserva = new Date(this.fechaReserva);
-    const hoyReserva = new Date(); // Cambié el nombre para evitar conflicto
-    
-    if (fechaReserva < hoyReserva) {
-      alert("📅 La fecha de reservación debe ser una fecha futura.");
-      this.loading = false;
-      return;
-    }
-
-    // === VERIFICAR SI ES EL DÍA EXACTO DEL CUMPLEAÑOS ===
-    this.esSuCumpleanios = this.esFechaCumpleaniosExacta();
-    
-    if (!this.esSuCumpleanios) {
-      const cumpleanios = new Date(this.fechaNacimiento);
-      const confirmacion = confirm(
-        `📅 La fecha de reservación (${this.formatearFecha(this.fechaReserva)}) no coincide con tu cumpleaños (${cumpleanios.getDate()}/${cumpleanios.getMonth() + 1}).\n\n` +
-        `¿Deseas continuar con la reservación? El regalo de cumpleaños solo se entregará si vienes el día exacto de tu cumpleaños.`
-      );
-      
-      if (!confirmacion) {
-        this.loading = false;
-        return;
-      }
-    }
-
-    // === GENERAR CÓDIGO DE RESERVACIÓN ===
-    this.codigoReserva = this.generarCodigoReserva();
-
-    // === PREPARAR DATOS PARA LA BASE DE DATOS ===
-    const reservacion: CelebrateInterface = {
+    // USAR EL SERVICIO CON VALIDACIÓN EN BACKEND
+    this.celebrateService.crearCelebracionConValidacion({
       nombre_completo: this.nombre,
       fecha_nacimiento: this.fechaNacimiento,
       telefono: this.telefono,
       fecha_preferida: this.fechaReserva,
       hora_preferida: this.horaReserva,
       acepta_verificacion: this.aceptoTerminos,
-      reservation: this.codigoReserva,
       cant_people: this.personas,
       ine_verificacion: false,
       estado_verificacion: false
-    };
-
-    console.log("📊 Datos a guardar:", reservacion);
-
-    this.celebrateService.crearCelebracion(reservacion).subscribe({
-      next: (res) => {
-        console.log("✅ Guardado en DB:", res);
-        
-        // ACTUALIZAR LA VISTA INMEDIATAMENTE
-        this.formularioEnviado = true;
-        
-        // FORZAR ACTUALIZACIÓN DE LA VISTA
-        setTimeout(() => {
-          this.cdRef.detectChanges();
-          console.log("🎉 Vista actualizada después del guardado");
-        }, 100);
-        
+    }).subscribe({
+      next: (resultado: any) => {
+        if (resultado.success) {
+          // RESERVA EXITOSA
+          this.codigoReserva = resultado.data.reservation;
+          this.esSuCumpleanios = this.esFechaCumpleaniosExacta();
+          this.formularioEnviado = true;
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert(`📱 ${resultado.message}\n\nEsta reserva se sincronizará automáticamente cuando recuperes internet.`);
+          } else {
+            alert(`✅ ${resultado.message}`);
+          }
+        }
         this.loading = false;
+        this.cdRef.detectChanges();
       },
-      error: (err) => {
-        console.error("❌ Error guardando en DB:", err);
-        
-        // MOSTRAR RESULTADO AUNQUE FALLE
-        this.formularioEnviado = true;
-        
-        // FORZAR ACTUALIZACIÓN
-        setTimeout(() => {
-          this.cdRef.detectChanges();
-        }, 100);
-        
-        alert("⚠️ Se guardó localmente debido a un error en el servidor.");
+      error: (error: any) => {
+        console.error('Error en reserva:', error);
+        alert(`❌ ${error.message || 'Error al procesar la reserva'}`);
         this.loading = false;
+        this.cdRef.detectChanges();
       }
     });
   }
@@ -187,20 +222,19 @@ export class Celebrates {
   agregarACalendario() {
     const fechaEvento = new Date(this.fechaReserva + 'T' + this.horaReserva + ':00');
     const fechaFin = new Date(fechaEvento);
-    fechaFin.setHours(fechaFin.getHours() + 2);
+    fechaFin.setHours(fechaFin.getHours() + this.DURACION_ESTANCIA);
     
     const eventoCalendario = {
       title: `🎂 ${this.esSuCumpleanios ? 'Mi Cumpleaños' : 'Reservación'} en Isla Arena - ${this.codigoReserva}`,
       start: fechaEvento.toISOString(),
       end: fechaFin.toISOString(),
-      description: `Reservación en Isla Arena. ${this.esSuCumpleanios ? '¡Es mi cumpleaños! Regalo especial incluído.' : 'Reservación regular.'} Código: ${this.codigoReserva}. Personas: ${this.personas}`,
+      description: `Reservación en Isla Arena. ${this.esSuCumpleanios ? '¡Es mi cumpleaños! Regalo especial incluído.' : 'Reservación regular.'} Código: ${this.codigoReserva}. Personas: ${this.personas}. Duración estimada: ${this.DURACION_ESTANCIA} horas`,
       location: 'Isla Arena Restaurant'
     };
     
     const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventoCalendario.title)}&dates=${fechaEvento.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${fechaFin.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(eventoCalendario.description)}&location=${encodeURIComponent(eventoCalendario.location)}`;
     
     window.open(googleCalendarUrl, '_blank');
-    console.log('🗓️ Evento agregado al calendario');
   }
 
   reiniciarFormulario() {
@@ -215,8 +249,10 @@ export class Celebrates {
     this.aceptoTerminos = false;
     this.codigoReserva = '';
     this.loading = false;
+    this.capacidadMensaje = '';
+    this.capacidadDetalle = '';
+    this.capacidadDisponible = true;
     
-    // FORZAR ACTUALIZACIÓN AL REINICIAR
     setTimeout(() => {
       this.cdRef.detectChanges();
     }, 100);
@@ -226,18 +262,21 @@ export class Celebrates {
     window.print();
   }
 
-  // Método para obtener mensaje según tipo de reservación
   getMensajeReservacion(): string {
     if (this.esSuCumpleanios) {
-      return `🎉 ¡Felicidades! Tu reservación para tu cumpleaños ha sido confirmada. Te esperamos con tu regalo especial.`;
+      return `🎉 ¡Felicidades! Tu reservación para tu cumpleaños ha sido confirmada. Te esperamos con tu regalo especial.\n\n⏱️ Duración estimada: ${this.DURACION_ESTANCIA} horas`;
     } else {
-      return `✅ Tu reservación ha sido confirmada. Recuerda que el regalo de cumpleaños solo aplica si vienes el día exacto de tu cumpleaños.`;
+      return `✅ Tu reservación ha sido confirmada. Recuerda que el regalo de cumpleaños solo aplica si vienes el día exacto de tu cumpleaños.\n\n⏱️ Duración estimada: ${this.DURACION_ESTANCIA} horas`;
     }
   }
 
-  // Método para forzar actualización manual si es necesario
   forzarActualizacion() {
     this.cdRef.detectChanges();
     console.log("🔄 Vista forzada a actualizar");
+  }
+
+  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE
+  getEstadoConexion(): string {
+    return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
   }
 }

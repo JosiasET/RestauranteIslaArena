@@ -7,14 +7,15 @@ function normalizarIDs(rows) {
     id: p.id_producto,
     tipos: p.tipos ? (typeof p.tipos === 'string' ? JSON.parse(p.tipos) : p.tipos) : [],
     tamanos: p.tamanos ? (typeof p.tamanos === 'string' ? JSON.parse(p.tamanos) : p.tamanos) : [],
-    tiene_tamanos: p.tiene_tamanos || false
+    tiene_tamanos: p.tiene_tamanos || false,
+    cantidad: p.unidad || 0 // ✅ Mapear unidad a cantidad para Angular
   }));
 }
 
 const especialidadesController = {
   // Crear especialidad
   crearEspecialidad: async (req, res) => {
-    const { nombre, descripcion, precio, imagen, tiene_tamanos, tipos, tamanos } = req.body;
+    const { nombre, descripcion, precio, imagen, tiene_tamanos, tipos, tamanos, cantidad } = req.body;
 
     if (!nombre || !precio) {
       return res.status(400).json({ error: "Nombre y precio son requeridos" });
@@ -28,16 +29,23 @@ const especialidadesController = {
 
       const result = await db.query(
         `INSERT INTO Productos 
-         (nombre, descripcion, precio, categoria, subcategoria, imagen)
-         VALUES ($1, $2, $3, $4, $5, $6)
+         (nombre, descripcion, precio, categoria, subcategoria, imagen, unidad, tiene_tamanos, tamanos)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING *`,
-        [nombre, descripcion || "", precio, categoria, tiposJSON, buffer]
+        [
+          nombre, 
+          descripcion || "", 
+          precio, 
+          categoria, 
+          tiposJSON, 
+          buffer, 
+          cantidad || 0,
+          tiene_tamanos || false,
+          tamanosJSON
+        ]
       );
 
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
-      especialidad.tamanos = tamanos || [];
-      especialidad.tiene_tamanos = tiene_tamanos || false;
-
       res.json(especialidad);
     } catch (err) {
       console.error('❌ Error al crear especialidad:', err);
@@ -62,7 +70,7 @@ const especialidadesController = {
   // Actualizar especialidad
   actualizarEspecialidad: async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, precio, imagen, tiene_tamanos, tipos, tamanos } = req.body;
+    const { nombre, descripcion, precio, imagen, tiene_tamanos, tipos, tamanos, cantidad } = req.body;
 
     try {
       const buffer = processImage(imagen);
@@ -72,16 +80,24 @@ const especialidadesController = {
       let sql, values;
       if (buffer) {
         sql = `UPDATE Productos 
-               SET nombre=$1, descripcion=$2, precio=$3, subcategoria=$4, imagen=$5
-               WHERE id_producto=$6 AND categoria='Especialidad'
+               SET nombre=$1, descripcion=$2, precio=$3, subcategoria=$4, imagen=$5, 
+                   unidad=$6, tiene_tamanos=$7, tamanos=$8
+               WHERE id_producto=$9 AND categoria='Especialidad'
                RETURNING *`;
-        values = [nombre, descripcion || "", precio, tiposJSON, buffer, id];
+        values = [
+          nombre, descripcion || "", precio, tiposJSON, buffer, 
+          cantidad || 0, tiene_tamanos || false, tamanosJSON, id
+        ];
       } else {
         sql = `UPDATE Productos 
-               SET nombre=$1, descripcion=$2, precio=$3, subcategoria=$4
-               WHERE id_producto=$5 AND categoria='Especialidad'
+               SET nombre=$1, descripcion=$2, precio=$3, subcategoria=$4,
+                   unidad=$5, tiene_tamanos=$6, tamanos=$7
+               WHERE id_producto=$8 AND categoria='Especialidad'
                RETURNING *`;
-        values = [nombre, descripcion || "", precio, tiposJSON, id];
+        values = [
+          nombre, descripcion || "", precio, tiposJSON,
+          cantidad || 0, tiene_tamanos || false, tamanosJSON, id
+        ];
       }
 
       const result = await db.query(sql, values);
@@ -90,9 +106,6 @@ const especialidadesController = {
       }
 
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
-      especialidad.tamanos = tamanos || [];
-      especialidad.tiene_tamanos = tiene_tamanos || false;
-
       res.json(especialidad);
     } catch (err) {
       console.error('❌ Error al actualizar especialidad:', err);

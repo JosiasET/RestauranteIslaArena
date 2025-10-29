@@ -18,12 +18,14 @@ export class UpFishesAmd implements OnInit, OnDestroy {
   esModoEdicion: boolean = false;
   isLoading: boolean = true;
   isSubmitting: boolean = false;
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
 
   // Campos del formulario
   nombre = '';
   descripcion = '';
   descripcion_real = '';
   precio: number = 0;
+  stock: number = 0;
   imageBase64: string = '';
   tiene_tamanos: boolean = false;
 
@@ -41,6 +43,17 @@ export class UpFishesAmd implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('🔄 Inicializando componente UpFishesAmd...');
     
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.cdRef.detectChanges();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.cdRef.detectChanges();
+    });
+
     this.subscription.add(
       this.fishesService.loading$.subscribe(loading => {
         this.isLoading = loading;
@@ -52,32 +65,34 @@ export class UpFishesAmd implements OnInit, OnDestroy {
       this.fishesService.saucer$.subscribe((especialidades: Fish[]) => {
         console.log('🔄 Lista de especialidades actualizada:', especialidades.length);
         this.todasLasEspecialidades = especialidades;
+        this.isLoading = false;
         this.cdRef.detectChanges();
       })
     );
 
-    this.cargarEspecialidades();
+    if (this.todasLasEspecialidades.length === 0) {
+      this.cargarEspecialidadesInicial();
+    }
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  cargarEspecialidades() {
-    console.log('🔄 Solicitando carga de especialidades...');
+  cargarEspecialidadesInicial() {
+    console.log('🔄 Cargando especialidades inicialmente...');
     this.fishesService.cargarEspecialidades().subscribe({
       next: (especialidades) => {
         console.log('✅ Especialidades cargadas exitosamente:', especialidades.length);
-        this.cdRef.detectChanges();
       },
       error: (err) => {
         console.error('❌ Error cargando especialidades:', err);
+        this.isLoading = false;
         this.cdRef.detectChanges();
       }
     });
   }
 
-  // Método para eliminar la imagen seleccionada
   eliminarImagen() {
     if (confirm('¿Estás seguro de que deseas eliminar la imagen seleccionada?')) {
       this.imageBase64 = '';
@@ -89,7 +104,6 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     }
   }
 
-  // Métodos para gestionar tamaños
   agregarTamano() {
     if (this.nuevoTamano.nombre && this.nuevoTamano.precio > 0) {
       this.tamanos.push({...this.nuevoTamano});
@@ -124,6 +138,7 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     }
   }
 
+  // ✅ CORREGIDO - Manejar IDs string y number
   eliminarEspecialidad(especialidad: Fish) {
     if (!especialidad.id) {
       console.error('❌ No se puede eliminar: Especialidad sin ID', especialidad);
@@ -132,17 +147,27 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     }
 
     if (confirm(`¿Estás seguro de que deseas eliminar "${especialidad.nombre}"?`)) {
-      console.log('🗑️ Intentando eliminar especialidad ID:', especialidad.id);
+      // ✅ CORRECCIÓN - Manejar correctamente string y number
+      let idParaEliminar: number;
       
-      this.fishesService.eliminarEspecialidad(especialidad.id).subscribe({
+      if (typeof especialidad.id === 'string') {
+        idParaEliminar = parseInt(especialidad.id);
+        if (isNaN(idParaEliminar)) {
+          idParaEliminar = 0;
+        }
+      } else {
+        idParaEliminar = especialidad.id;
+      }
+
+      console.log('🗑️ Intentando eliminar especialidad ID:', idParaEliminar);
+      
+      this.fishesService.eliminarEspecialidad(idParaEliminar).subscribe({
         next: () => {
           console.log('✅ Eliminación completada');
-          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error eliminando especialidad:', err);
           alert('Error al eliminar la especialidad');
-          this.cdRef.detectChanges();
         }
       });
     }
@@ -161,6 +186,7 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     this.descripcion = especialidad.descripcion;
     this.descripcion_real = especialidad.descripcion_real || '';
     this.precio = especialidad.precio;
+    this.stock = especialidad.cantidad || 0;
     this.imageBase64 = especialidad.imagen;
     this.tiene_tamanos = especialidad.tiene_tamanos || false;
     this.tamanos = especialidad.tamanos || [];
@@ -190,6 +216,12 @@ export class UpFishesAmd implements OnInit, OnDestroy {
       return;
     }
 
+    // Validar stock
+    if (this.stock < 0) {
+      alert("El stock no puede ser negativo");
+      return;
+    }
+
     // Validar tamaños si están habilitados
     if (this.tiene_tamanos && this.tamanos.length === 0) {
       alert("Debe agregar al menos un tamaño si ha habilitado esta opción");
@@ -201,15 +233,16 @@ export class UpFishesAmd implements OnInit, OnDestroy {
 
     // Crear objeto con ID temporal para nuevas especialidades
     const especialidadData: Fish = {
-      id: this.esModoEdicion && this.especialidadEditando ? this.especialidadEditando.id : 0, // ID temporal para nuevas
+      id: this.esModoEdicion && this.especialidadEditando ? this.especialidadEditando.id : 0,
       nombre: this.nombre,
       descripcion: this.descripcion,
       descripcion_real: this.descripcion_real,
       precio: Number(this.precio),
+      cantidad: this.stock,
       imagen: this.imageBase64,
       tiene_tamanos: this.tiene_tamanos,
       tamanos: this.tiene_tamanos ? this.tamanos : undefined,
-      tipos: [] // Agregar tipos vacío si es requerido
+      tipos: []
     };
 
     if (this.esModoEdicion && this.especialidadEditando) {
@@ -228,14 +261,20 @@ export class UpFishesAmd implements OnInit, OnDestroy {
           console.log('✅ Especialidad actualizada exitosamente');
           this.esModoEdicion = false;
           this.isSubmitting = false;
-          alert("Especialidad actualizada exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert("📱 Especialidad actualizada localmente - Se sincronizará cuando haya internet");
+          } else {
+            alert("✅ Especialidad actualizada exitosamente en el servidor");
+          }
+          
           this.limpiarFormulario();
-          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error actualizando:', err);
           this.isSubmitting = false;
-          alert("Error al actualizar la especialidad");
+          alert("Error al actualizar la especialidad: " + err.message);
           this.cdRef.detectChanges();
         }
       });
@@ -247,14 +286,20 @@ export class UpFishesAmd implements OnInit, OnDestroy {
         next: (respuesta) => {
           console.log('✅ Especialidad agregada exitosamente');
           this.isSubmitting = false;
-          alert("Especialidad subida exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert("📱 Especialidad guardada localmente - Se subirá automáticamente cuando recuperes internet");
+          } else {
+            alert("✅ Especialidad subida exitosamente al servidor");
+          }
+          
           this.limpiarFormulario();
-          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error subiendo:', err);
           this.isSubmitting = false;
-          alert("Error al subir la especialidad");
+          alert("Error al subir la especialidad: " + err.message);
           this.cdRef.detectChanges();
         }
       });
@@ -273,6 +318,7 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     this.descripcion = '';
     this.descripcion_real = '';
     this.precio = 0;
+    this.stock = 0;
     this.imageBase64 = '';
     this.tiene_tamanos = false;
     this.tamanos = [];
@@ -295,6 +341,13 @@ export class UpFishesAmd implements OnInit, OnDestroy {
 
   forzarRecarga() {
     console.log('🔄 Forzando recarga manual...');
-    this.cargarEspecialidades();
+    this.cargarEspecialidadesInicial();
   }
+
+  // ✅ MÉTODO PARA MENSAJE OFFLINE
+  getMensajeEstado(): string {
+    return this.isOffline ? '📱 Modo offline - Los cambios se guardarán localmente' : '🌐 Conectado';
+  }
+
+  // ✅ MÉTODO PARA VER SI UNA ESPECIALIDAD ES OFFLINE
 }

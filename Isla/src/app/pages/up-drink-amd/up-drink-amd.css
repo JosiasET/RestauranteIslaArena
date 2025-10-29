@@ -731,3 +731,26 @@
     width: 100%;
   }
 }
+
+.stock-bajo {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.stock-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.stock-badge.stock-bajo {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.btn-agregar:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}

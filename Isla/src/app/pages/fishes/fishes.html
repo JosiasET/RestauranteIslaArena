@@ -87,101 +87,121 @@
     <div class="platillo-info">
       <h3>{{ producto.nombre }}</h3>
       
-      <!-- Solo precio base -->
-      <strong class="precio">{{ producto.precio | currency }}</strong>
-
-      <!-- Badge si tiene tamaños -->
-      <div *ngIf="producto.tiene_tamanos" class="tiene-tamanos-badge">
-        📏 Tamaños disponibles
+      <!-- Badge de stock -->
+      <div class="stock-badge" [class.stock-bajo]="producto.cantidad <= 1">
+        {{ producto.cantidad <= 1 ? '🟡 Poco stock' : '🟢 Disponible' }}
       </div>
-
-      <button class="btn-agregar" (click)="agregarAlCarrito(producto)">
-        ¡ORDENAR!
+      
+      <strong class="precio">{{ producto.precio | currency }}</strong>
+      <button class="btn-agregar" (click)="agregarAlCarrito(producto)"
+              [disabled]="producto.cantidad === 0">
+        {{ producto.cantidad === 0 ? '❌ Agotado' : '¡ORDENAR!' }}
       </button>
     </div>
   </div>
 </div>
 
-<!-- MODAL HORIZONTAL - VENTANA FLOTANTE IDÉNTICA AL COMPONENTE FOOD -->
+<!-- ... (contenido anterior) ... -->
+
+<!-- VENTANA FLOTANTE REDISEÑADA -->
 <div *ngIf="mostrarModal && productoSeleccionado" class="modal-overlay" (click)="cerrarModal()">
-  <div class="modal-content horizontal" (click)="$event.stopPropagation()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
     
+    <!-- HEADER -->
     <div class="modal-header">
       <h3>{{ productoSeleccionado.nombre }}</h3>
       <button class="btn-cerrar" (click)="cerrarModal()">×</button>
     </div>
 
-    <div class="modal-body-horizontal">
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="modal-content">
       
-      <!-- LAYOUT HORIZONTAL CON SCROLL INTERNO -->
-      <div class="modal-layout-horizontal">
-        
-        <!-- COLUMNA IZQUIERDA - IMAGEN -->
-        <div class="columna-imagen-horizontal">
-          <img [src]="productoSeleccionado.imagen" [alt]="productoSeleccionado.nombre" class="imagen-grande">
+      <!-- SECCIÓN IZQUIERDA - IMAGEN -->
+      <div class="modal-imagen-section">
+        <div class="imagen-container">
+          <img [src]="productoSeleccionado.imagen" 
+               [alt]="productoSeleccionado.nombre" 
+               class="imagen-producto"
+               (error)="productoSeleccionado.imagen = 'assets/default-food.jpg'">
         </div>
+      </div>
 
-        <!-- COLUMNA DERECHA - OPCIONES -->
-        <div class="columna-opciones">
+      <!-- SECCIÓN DERECHA - OPCIONES -->
+      <div class="modal-opciones-section">
+        <div class="opciones-content">
           
-          <!-- DESCRIPCIÓN (SOLO EN EL MODAL) -->
-          <div class="descripcion-horizontal">
+          <!-- DESCRIPCIÓN -->
+          <div class="descripcion-producto">
             <p>{{ productoSeleccionado.descripcion_real || productoSeleccionado.descripcion }}</p>
           </div>
 
-          <!-- SELECCIÓN DE TAMAÑOS (SOLO EN EL MODAL) -->
-          <div *ngIf="productoSeleccionado.tiene_tamanos && productoSeleccionado.tamanos" class="tamanos-horizontal">
-            <h4>Tamaño:</h4>
-            <div class="tamanos-grid-horizontal">
+          <!-- SELECTOR DE TAMAÑOS -->
+          <div class="selector-tamanos" *ngIf="productoSeleccionado.tiene_tamanos && productoSeleccionado.tamanos">
+            <h4>Selecciona el tamaño:</h4>
+            
+            <div class="tamanos-grid">
               <button *ngFor="let tamano of productoSeleccionado.tamanos" 
-                      class="btn-tamano-horizontal"
+                      class="btn-tamano"
                       [class.selected]="tamanoSeleccionado?.nombre === tamano.nombre"
                       (click)="seleccionarTamano(tamano)">
-                <span class="tamano-nombre-horizontal">{{ tamano.nombre }}</span>
-                <span class="tamano-precio-horizontal">{{ tamano.precio | currency }}</span>
+                <span class="tamano-nombre">{{ tamano.nombre }}</span>
+                <span class="tamano-precio">{{ tamano.precio | currency }}</span>
               </button>
             </div>
           </div>
 
-          <!-- CONTADOR DE CANTIDAD -->
-          <div class="cantidad-horizontal">
-            <h4>Cantidad:</h4>
-            <div class="cantidad-controls-horizontal">
-              <button class="btn-cantidad-horizontal" (click)="decrementarCantidad()">-</button>
-              <span class="cantidad-value-horizontal">{{ cantidad }}</span>
-              <button class="btn-cantidad-horizontal" (click)="incrementarCantidad()">+</button>
+          <!-- SELECTOR DE CANTIDAD -->
+          <div class="selector-cantidad">
+            <div class="cantidad-info">
+              <h5>Cantidad:</h5>
+              <div class="cantidad-detalle">
+                {{ getTotalKg() }} kg total
+              </div>
+            </div>
+            <div class="contador-cantidad">
+              <button class="btn-cantidad" 
+                      (click)="decrementarCantidad()"
+                      [disabled]="cantidadSeleccionada <= 1">-</button>
+              <span class="cantidad-valor">{{ cantidadSeleccionada }}</span>
+              <button class="btn-cantidad" 
+                      (click)="incrementarCantidad()"
+                      [disabled]="!puedeIncrementar()">+</button>
             </div>
           </div>
 
           <!-- RESUMEN DEL PEDIDO -->
-          <div class="resumen-horizontal">
-            <h4>Resumen:</h4>
+          <div class="resumen-pedido">
+            <h4>Resumen del Pedido</h4>
             <div class="resumen-detalle">
-              <div class="resumen-linea-horizontal">
-                <span>{{ productoSeleccionado.nombre }}</span>
-                <span>{{ cantidad }} x {{ getPrecioFinal() | currency }}</span>
+              <div class="resumen-linea">
+                <span>Cantidad:</span>
+                <span>{{ cantidadSeleccionada }} unidad(es)</span>
               </div>
-              <div class="resumen-linea-horizontal" *ngIf="tamanoSeleccionado && tamanoSeleccionado.nombre !== 'Único'">
-                <span class="opcion-detalle-horizontal">{{ tamanoSeleccionado.nombre }}</span>
+              <div class="resumen-linea">
+                <span>Total kg:</span>
+                <span>{{ getTotalKg() }} kg</span>
               </div>
-              <div class="resumen-total-horizontal">
-                <span>Total:</span>
-                <span>{{ (getPrecioFinal() * cantidad) | currency }}</span>
+              <div class="resumen-total">
+                <span>Total a pagar:</span>
+                <span>{{ getPrecioTotal() | currency }}</span>
               </div>
             </div>
           </div>
 
         </div>
-
       </div>
 
     </div>
 
-    <div class="modal-footer-horizontal">
-      <button class="btn-cancelar-horizontal" (click)="cerrarModal()">Cancelar</button>
-      <button class="btn-confirmar-horizontal" (click)="agregarConOpciones()">
-        Agregar - {{ (getPrecioFinal() * cantidad) | currency }}
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-confirmar" 
+              (click)="agregarAlCarritoSimplificado()"
+              [disabled]="!tamanoSeleccionado && productoSeleccionado.tiene_tamanos">
+        Agregar al carrito - {{ getPrecioTotal() | currency }}
       </button>
     </div>
+    
   </div>
 </div>

@@ -29,14 +29,19 @@
 
  
     <div class="platillo-info">
-      <h3>{{ bebida.nombre }}</h3>
-      <p>{{ bebida.descripcion }}</p>
-      <p class="texto-persuasivo">🍸 ¡Frescas, deliciosas y listas para disfrutar!</p>
-      <strong class="precio">{{ bebida.precio | currency }}</strong>
-
-      <button class="btn-agregar" (click)="agregarAlCarrito(bebida)">
-        ¡ORDENAR ESTA BEBIDA!
-      </button>
-    </div>
+  <h3>{{ bebida.nombre }}</h3>
+  <p>{{ bebida.descripcion }}</p>
+  
+  <!-- Badge de stock -->
+  <div class="stock-badge" [class.stock-bajo]="bebida.cantidad_productos <= 5">
+    {{ bebida.cantidad_productos <= 5 ? '🟡 Poco stock' : '🟢 Disponible' }}
+  </div>
+  
+  <strong class="precio">{{ bebida.precio | currency }}</strong>
+  <button class="btn-agregar" (click)="agregarAlCarrito(bebida)"
+          [disabled]="bebida.cantidad_productos === 0">
+    {{ bebida.cantidad_productos === 0 ? '❌ Agotado' : '¡ORDENAR!' }}
+  </button>
+</div>
   </div>
 </div>

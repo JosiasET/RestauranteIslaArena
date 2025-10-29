@@ -13,12 +13,6 @@
       </button>
     </div>
     
-    <select [(ngModel)]="rol" class="form-input">
-      <option value="" disabled>Seleccionar rol</option>
-      <option value="administrador">👑 Administrador</option>
-      <option value="cajero">💳 Cajero</option>
-    </select>
-    
     <select [(ngModel)]="turno" class="form-input">
       <option value="" disabled>Seleccionar turno</option>
       <option value="matutino">🌅 Matutino</option>
@@ -43,7 +37,6 @@
         <tr>
           <th>Nombre</th>
           <th>Usuario</th>
-          <th>Rol</th>
           <th>Turno</th>
           <th>Estado</th>
           <th>Acciones</th>
@@ -53,9 +46,6 @@
         <tr *ngFor="let mesero of meseros">
           <td class="nombre-cell">{{ mesero.nombre }} {{ mesero.apellido }}</td>
           <td class="usuario-cell">{{ mesero.usuario }}</td>
-          <td class="rol-cell">
-            <span [class]="'badge-' + mesero.rol">{{ getRolText(mesero.rol) }}</span>
-          </td>
           <td class="turno-cell">
             <span [class]="'badge-' + mesero.turno">{{ getTurnoText(mesero.turno) }}</span>
           </td>

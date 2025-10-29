@@ -1,12 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CelebrateService } from '../../core/service/CelebrateService';
 import { CelebrateInterface } from '../../core/interface/celebrate';
+import { Observable, map, Subscription } from 'rxjs';
 
 interface Reservacion {
-  id: number;
+  id: number | string;  // ✅ Permitir string para IDs offline
   codigo: string;
   nombre: string;
   fechaNacimiento: string;
@@ -17,12 +18,13 @@ interface Reservacion {
   ineVerificada: boolean;
   fechaCreacion: string;
   historial: HistorialEvento[];
-  id_celebracion?: number;
+  id_celebracion?: number | string;
   reservation?: string;
   cant_people?: number;
   ine_verificacion?: boolean;
   estado_verificacion?: boolean;
   acepta_verificacion?: boolean;
+  offline?: boolean; // ✅ NUEVA PROPIEDAD
 }
 
 interface HistorialEvento {
@@ -38,16 +40,27 @@ interface Estadisticas {
   esteMes: number;
 }
 
+interface HorarioCapacidad {
+  hora: string;
+  capacidadDisponible: number;
+  reservaciones: number;
+  personas: number;
+  disponible: boolean;
+  franjaOcupada: boolean;
+}
+
 @Component({
   selector: 'app-up-celebrates-amd',
+  standalone: true,
   imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './up-celebrates-amd.html',
   styleUrls: ['./up-celebrates-amd.css']
 })
-export class UpCelebratesAmd implements OnInit {
+export class UpCelebratesAmd implements OnInit, OnDestroy {
   reservaciones: Reservacion[] = [];
   reservacionesFiltradas: Reservacion[] = [];
   reservaSeleccionada: Reservacion | null = null;
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
   
   // Filtros
   fechaFiltro: string = '';
@@ -73,7 +86,21 @@ export class UpCelebratesAmd implements OnInit {
     esteMes: 0
   };
 
+  // CONFIGURACIÓN DE CAPACIDAD
+  readonly CAPACIDAD_MAXIMA = 30;
+  readonly HORARIO_APERTURA = '10:00';
+  readonly HORARIO_CIERRE = '18:00';
+  readonly DURACION_PROMEDIO_RESERVA = 3;
+  readonly INTERVALO_HORAS = 1;
+  
+  horariosDisponibles: string[] = [];
+  capacidadPorHorario: HorarioCapacidad[] = [];
+  fechaCapacidad: string = '';
+  mostrarPanelCapacidad: boolean = false;
+  
   cargando: boolean = false;
+
+  private subscription: Subscription = new Subscription();
 
   constructor(
     private celebrateService: CelebrateService,
@@ -81,54 +108,136 @@ export class UpCelebratesAmd implements OnInit {
   ) {}
 
   ngOnInit() {
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.cdRef.detectChanges();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.cdRef.detectChanges();
+    });
+
     this.cargarReservaciones();
+    this.generarHorariosDisponibles();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  // GENERAR HORARIOS DISPONIBLES
+  generarHorariosDisponibles() {
+    this.horariosDisponibles = [];
+    const [horaApertura, minutoApertura] = this.HORARIO_APERTURA.split(':').map(Number);
+    const [horaCierre, minutoCierre] = this.HORARIO_CIERRE.split(':').map(Number);
+    
+    let horaActual = horaApertura;
+    
+    while (horaActual <= (horaCierre - this.DURACION_PROMEDIO_RESERVA)) {
+      const horaFormateada = `${horaActual.toString().padStart(2, '0')}:${minutoApertura.toString().padStart(2, '0')}`;
+      this.horariosDisponibles.push(horaFormateada);
+      horaActual += this.INTERVALO_HORAS;
+    }
+  }
+
+  // VERIFICAR CAPACIDAD USANDO EL SERVICIO
+  verificarCapacidadDisponible(fecha: string, hora: string, personas: number = 1): Observable<{ 
+    disponible: boolean, 
+    mensaje: string, 
+    capacidadActual: number,
+    franjaOcupada: boolean 
+  }> {
+    return this.celebrateService.verificarDisponibilidad(fecha, hora, personas).pipe(
+      map(resultado => {
+        return {
+          disponible: resultado.disponible,
+          mensaje: resultado.mensaje,
+          capacidadActual: resultado.capacidadRestante,
+          franjaOcupada: resultado.totalReservado > 0
+        };
+      })
+    );
+  }
+
+  // CALCULAR CAPACIDAD POR FECHA
+  calcularCapacidadPorFecha(fecha: string) {
+    this.capacidadPorHorario = [];
+    this.fechaCapacidad = fecha;
+
+    const verificaciones: Observable<HorarioCapacidad>[] = this.horariosDisponibles.map(hora => {
+      return this.verificarCapacidadDisponible(fecha, hora).pipe(
+        map(resultado => {
+          return {
+            hora,
+            capacidadDisponible: resultado.capacidadActual,
+            reservaciones: 0,
+            personas: this.CAPACIDAD_MAXIMA - resultado.capacidadActual,
+            disponible: resultado.disponible,
+            franjaOcupada: resultado.franjaOcupada
+          };
+        })
+      );
+    });
+
+    // Esperar a que todas las verificaciones terminen
+    let completadas = 0;
+    verificaciones.forEach((verificacion, index) => {
+      verificacion.subscribe(capacidad => {
+        this.capacidadPorHorario[index] = capacidad;
+        completadas++;
+        
+        if (completadas === verificaciones.length) {
+          this.mostrarPanelCapacidad = true;
+          this.cdRef.detectChanges();
+        }
+      });
+    });
   }
 
   cargarReservaciones() {
     this.cargando = true;
-    this.celebrateService.obtenerCelebraciones().subscribe({
-      next: (celebraciones: CelebrateInterface[]) => {
-        console.log('📥 Datos recibidos de BD:', celebraciones);
-        
-        if (celebraciones && celebraciones.length > 0) {
-          this.reservaciones = celebraciones.map(celeb => this.celebracionToReservacion(celeb));
-          console.log('🔄 Reservaciones mapeadas:', this.reservaciones);
-        } else {
-          console.log('📭 No hay datos en BD, cargando desde localStorage');
+    
+    this.subscription.add(
+      this.celebrateService.celebraciones$.subscribe({
+        next: (celebraciones: CelebrateInterface[]) => {
+          console.log('📥 Datos recibidos:', celebraciones);
+          
+          if (celebraciones && celebraciones.length > 0) {
+            this.reservaciones = celebraciones.map(celeb => this.celebracionToReservacion(celeb));
+          } else {
+            this.cargarDesdeLocalStorage();
+          }
+          
+          this.reservacionesFiltradas = [...this.reservaciones];
+          this.calcularEstadisticas();
+          this.cargando = false;
+          this.cdRef.detectChanges();
+        },
+        error: (error: any) => {
+          console.error('❌ Error cargando reservaciones:', error);
           this.cargarDesdeLocalStorage();
+          this.cargando = false;
+          this.cdRef.detectChanges();
         }
-        
-        this.reservacionesFiltradas = [...this.reservaciones];
-        this.calcularEstadisticas();
-        this.cargando = false;
-        this.cdRef.detectChanges();
-      },
-      error: (error: any) => {
-        console.error('❌ Error cargando reservaciones:', error);
-        console.log('🔄 Cargando desde localStorage debido a error');
-        this.cargarDesdeLocalStorage();
-        this.cargando = false;
-        this.cdRef.detectChanges();
-      }
-    });
+      })
+    );
+
+    // Cargar datos iniciales
+    this.celebrateService.cargarCelebraciones().subscribe();
   }
 
   private celebracionToReservacion(celeb: CelebrateInterface): Reservacion {
-    console.log('🔄 Mapeando celebración:', celeb);
-    
-    // Generar código si no existe
     const codigo = celeb.reservation || this.generarCodigoReserva();
     
-    // Mapear estado correctamente desde la BD
     let estado: 'pendiente' | 'confirmada' | 'cumplida' | 'cancelada' = 'pendiente';
-    
     if (celeb.estado_verificacion) {
       estado = 'cumplida';
     } else if (celeb.ine_verificacion) {
       estado = 'confirmada';
     }
     
-    // Asegurar que tenemos todos los campos necesarios
     const reservacion: Reservacion = {
       id: celeb.id_celebracion || Date.now(),
       id_celebracion: celeb.id_celebracion,
@@ -140,10 +249,10 @@ export class UpCelebratesAmd implements OnInit {
       horaReserva: celeb.hora_preferida || '12:00',
       estado: estado,
       ineVerificada: celeb.ine_verificacion || false,
-      fechaCreacion: celeb.created_at || new Date().toISOString(),
+      fechaCreacion: celeb.fecha_creacion || new Date().toISOString(),
       historial: [
         { 
-          fecha: new Date(celeb.created_at || new Date()), 
+          fecha: new Date(celeb.fecha_creacion || new Date()), 
           accion: `Reservación creada para ${celeb.cant_people || 1} persona(s)`,
           usuario: 'Sistema'
         }
@@ -152,10 +261,10 @@ export class UpCelebratesAmd implements OnInit {
       cant_people: celeb.cant_people || 1,
       ine_verificacion: celeb.ine_verificacion || false,
       estado_verificacion: celeb.estado_verificacion || false,
-      acepta_verificacion: celeb.acepta_verificacion || false
+      acepta_verificacion: celeb.acepta_verificacion || false,
+      offline: celeb.offline || false // ✅ NUEVA PROPIEDAD
     };
     
-    console.log('✅ Reservación mapeada:', reservacion);
     return reservacion;
   }
 
@@ -170,9 +279,7 @@ export class UpCelebratesAmd implements OnInit {
     const reservacionesGuardadas = localStorage.getItem('reservacionesCumpleanos');
     if (reservacionesGuardadas) {
       this.reservaciones = JSON.parse(reservacionesGuardadas);
-      console.log('📂 Datos cargados desde localStorage:', this.reservaciones);
     } else {
-      console.log('🆕 Inicializando con datos de prueba');
       this.reservaciones = this.getDatosIniciales();
       this.guardarEnLocalStorage();
     }
@@ -188,7 +295,7 @@ export class UpCelebratesAmd implements OnInit {
         fechaNacimiento: '1990-03-15',
         telefono: '555-1234',
         fechaReserva: hoy,
-        horaReserva: '19:00',
+        horaReserva: '12:00',
         estado: 'pendiente',
         ineVerificada: false,
         fechaCreacion: new Date().toISOString(),
@@ -207,15 +314,13 @@ export class UpCelebratesAmd implements OnInit {
     ];
   }
 
+  // CREAR RESERVA CON VERIFICACIÓN DE CAPACIDAD
   crearReserva() {
     if (!this.validarFormulario()) {
       return;
     }
 
     this.cargando = true;
-    
-    const codigoReserva = this.generarCodigoReserva();
-    const cantidadPersonas = this.nuevaReserva.cant_people || 1;
     
     const reservacion: CelebrateInterface = {
       nombre_completo: this.nuevaReserva.nombre_completo,
@@ -224,83 +329,34 @@ export class UpCelebratesAmd implements OnInit {
       fecha_preferida: this.nuevaReserva.fecha_preferida,
       hora_preferida: this.nuevaReserva.hora_preferida,
       acepta_verificacion: this.nuevaReserva.acepta_verificacion,
-      reservation: codigoReserva,
-      cant_people: cantidadPersonas,
+      cant_people: this.nuevaReserva.cant_people || 1,
       ine_verificacion: false,
       estado_verificacion: false
     };
 
-    console.log('💾 Guardando en BD:', reservacion);
-
-    this.celebrateService.crearCelebracion(reservacion).subscribe({
-      next: (response: any) => {
-        console.log('✅ Guardado en DB:', response);
-        
-        if (response && response.data) {
-          const celebracionCreada = response.data;
-          const nuevaReservacion = this.celebracionToReservacion(celebracionCreada);
-          
-          this.reservaciones.unshift(nuevaReservacion);
-          this.reservacionesFiltradas.unshift(nuevaReservacion);
-          
-          this.guardarEnLocalStorage();
-          this.calcularEstadisticas();
+    this.celebrateService.crearCelebracionConValidacion(reservacion).subscribe({
+      next: (resultado: any) => {
+        if (resultado.success) {
           this.mostrarFormulario = false;
           this.limpiarFormulario();
           
-          alert(`✅ Reservación creada exitosamente para ${cantidadPersonas} persona(s)`);
-        } else {
-          this.crearReservacionLocal(codigoReserva, cantidadPersonas);
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert(`📱 ${resultado.message}\n\nEsta reserva se sincronizará automáticamente cuando recuperes internet.`);
+          } else {
+            alert(`✅ ${resultado.message}\n\nCódigo: ${resultado.data.reservation}\nPersonas: ${reservacion.cant_people}\nCapacidad restante: ${resultado.capacidad_restante}`);
+          }
         }
-        
         this.cargando = false;
         this.cdRef.detectChanges();
-        setTimeout(() => this.cargarReservaciones(), 1000);
       },
       error: (error: any) => {
-        console.error('❌ Error creando reservación:', error);
-        this.crearReservacionLocal(codigoReserva, cantidadPersonas);
+        console.error('❌ Error creando reserva:', error);
+        alert(`❌ ${error.message || 'Error al crear la reserva'}`);
         this.cargando = false;
         this.cdRef.detectChanges();
       }
     });
-  }
-
-  private crearReservacionLocal(codigoReserva: string, cantidadPersonas: number) {
-    const nuevaReservacion: Reservacion = {
-      id: Date.now(),
-      codigo: codigoReserva,
-      nombre: this.nuevaReserva.nombre_completo,
-      fechaNacimiento: this.nuevaReserva.fecha_nacimiento,
-      telefono: this.nuevaReserva.telefono,
-      fechaReserva: this.nuevaReserva.fecha_preferida,
-      horaReserva: this.nuevaReserva.hora_preferida,
-      estado: 'pendiente',
-      ineVerificada: false,
-      fechaCreacion: new Date().toISOString(),
-      historial: [
-        { 
-          fecha: new Date(), 
-          accion: `Reservación creada para ${cantidadPersonas} persona(s)`,
-          usuario: 'Sistema'
-        }
-      ],
-      reservation: codigoReserva,
-      cant_people: cantidadPersonas,
-      ine_verificacion: false,
-      estado_verificacion: false,
-      acepta_verificacion: this.nuevaReserva.acepta_verificacion
-    };
-
-    this.reservaciones.unshift(nuevaReservacion);
-    this.reservacionesFiltradas.unshift(nuevaReservacion);
-    
-    this.guardarEnLocalStorage();
-    this.calcularEstadisticas();
-    this.mostrarFormulario = false;
-    this.limpiarFormulario();
-    
-    alert(`✅ Reservación creada exitosamente para ${cantidadPersonas} persona(s) (modo local)`);
   }
 
   private validarFormulario(): boolean {
@@ -328,6 +384,24 @@ export class UpCelebratesAmd implements OnInit {
     }
     if (!cant_people || cant_people < 1) {
       alert('La cantidad de personas debe ser al menos 1');
+      return false;
+    }
+    if (cant_people > 10) {
+      alert('❌ No se permiten reservaciones de más de 10 personas por grupo');
+      return false;
+    }
+    
+    const horaReserva = parseInt(hora_preferida.split(':')[0]);
+    const horaApertura = parseInt(this.HORARIO_APERTURA.split(':')[0]);
+    const horaCierre = parseInt(this.HORARIO_CIERRE.split(':')[0]);
+    
+    if (horaReserva < horaApertura || horaReserva >= horaCierre) {
+      alert(`❌ El restaurante solo opera de ${this.HORARIO_APERTURA} a ${this.HORARIO_CIERRE}`);
+      return false;
+    }
+    
+    if (horaReserva > (horaCierre - this.DURACION_PROMEDIO_RESERVA)) {
+      alert(`❌ No se pueden hacer reservas para las ${hora_preferida} porque el restaurante cierra a las ${this.HORARIO_CIERRE} y la estancia estimada es de ${this.DURACION_PROMEDIO_RESERVA} horas.`);
       return false;
     }
     
@@ -386,158 +460,155 @@ export class UpCelebratesAmd implements OnInit {
 
   cerrarModal() {
     this.reservaSeleccionada = null;
+    this.mostrarPanelCapacidad = false;
   }
 
-  // MÉTODOS ACTUALIZADOS - GUARDAN EN BD
   confirmarReserva(reserva: Reservacion) {
-  if (reserva.id_celebracion) {
-    this.celebrateService.actualizarVerificacion(reserva.id_celebracion, {
-      ine_verificacion: false,    // INE aún no verificada
-      estado_verificacion: false  // Estado aún no cumplido
-    }).subscribe({
-      next: (response: any) => {
-        console.log('✅ Confirmación actualizada en BD:', response);
-        reserva.estado = 'confirmada';
-        reserva.ine_verificacion = false;
-        reserva.estado_verificacion = false;
-        this.agregarAlHistorial(reserva, `Reservación confirmada para ${reserva.cant_people || 1} persona(s)`);
-        this.actualizarYGuardar(reserva);
-        alert(`Reservación ${reserva.codigo} confirmada para ${reserva.cant_people || 1} persona(s)`);
-      },
-      error: (error) => {
-        console.error('Error actualizando BD:', error);
-        alert('Error al actualizar la base de datos');
-      }
-    });
-  } else {
-    reserva.estado = 'confirmada';
-    this.agregarAlHistorial(reserva, `Reservación confirmada para ${reserva.cant_people || 1} persona(s)`);
-    this.actualizarYGuardar(reserva);
-    alert(`Reservación ${reserva.codigo} confirmada para ${reserva.cant_people || 1} persona(s)`);
+    if (reserva.id_celebracion) {
+      this.celebrateService.actualizarVerificacion(Number(reserva.id_celebracion), {
+        ine_verificacion: false,
+        estado_verificacion: false
+      }).subscribe({
+        next: (response: any) => {
+          reserva.estado = 'confirmada';
+          reserva.ine_verificacion = false;
+          reserva.estado_verificacion = false;
+          this.agregarAlHistorial(reserva, `Reservación confirmada para ${reserva.cant_people || 1} persona(s)`);
+          this.actualizarYGuardar(reserva);
+          
+          // ✅ MENSAJE MEJORADO
+          const mensaje = this.isOffline 
+            ? `📱 Reservación ${reserva.codigo} confirmada localmente - Se sincronizará cuando haya internet`
+            : `✅ Reservación ${reserva.codigo} confirmada para ${reserva.cant_people || 1} persona(s)`;
+          alert(mensaje);
+        },
+        error: (error) => {
+          console.error('Error actualizando BD:', error);
+          alert('Error al actualizar la base de datos');
+        }
+      });
+    } else {
+      reserva.estado = 'confirmada';
+      this.agregarAlHistorial(reserva, `Reservación confirmada para ${reserva.cant_people || 1} persona(s)`);
+      this.actualizarYGuardar(reserva);
+      alert(`📱 Reservación ${reserva.codigo} confirmada localmente - Se sincronizará cuando haya internet`);
+    }
   }
-}
 
-// MÉTODO CORREGIDO PARA VERIFICAR INE
-marcarINEVerificada(reserva: Reservacion) {
-  if (reserva.id_celebracion) {
-    this.celebrateService.actualizarVerificacion(reserva.id_celebracion, {
-      ine_verificacion: true,     // INE verificada
-      estado_verificacion: false  // Estado aún no cumplido
-    }).subscribe({
-      next: (response: any) => {
-        console.log('✅ INE verificada en BD:', response);
-        reserva.ineVerificada = true;
-        reserva.ine_verificacion = true;
-        reserva.estado_verificacion = false;
-        this.agregarAlHistorial(reserva, `INE verificada para ${reserva.cant_people || 1} persona(s)`);
-        this.actualizarYGuardar(reserva);
-        alert(`✅ INE verificada para ${reserva.nombre} (${reserva.cant_people || 1} persona(s))`);
-      },
-      error: (error) => {
-        console.error('Error actualizando BD:', error);
-        alert('Error al actualizar la base de datos');
-      }
-    });
-  } else {
-    reserva.ineVerificada = true;
-    reserva.ine_verificacion = true;
-    this.agregarAlHistorial(reserva, `INE verificada para ${reserva.cant_people || 1} persona(s)`);
-    this.actualizarYGuardar(reserva);
-    alert(`✅ INE verificada para ${reserva.nombre} (${reserva.cant_people || 1} persona(s))`);
+  marcarINEVerificada(reserva: Reservacion) {
+    if (reserva.id_celebracion) {
+      this.celebrateService.actualizarVerificacion(Number(reserva.id_celebracion), {
+        ine_verificacion: true,
+        estado_verificacion: false
+      }).subscribe({
+        next: (response: any) => {
+          reserva.ineVerificada = true;
+          reserva.ine_verificacion = true;
+          reserva.estado_verificacion = false;
+          this.agregarAlHistorial(reserva, `INE verificada para ${reserva.cant_people || 1} persona(s)`);
+          this.actualizarYGuardar(reserva);
+          
+          // ✅ MENSAJE MEJORADO
+          const mensaje = this.isOffline
+            ? `📱 INE verificada localmente para ${reserva.nombre} - Se sincronizará cuando haya internet`
+            : `✅ INE verificada para ${reserva.nombre} (${reserva.cant_people || 1} persona(s))`;
+          alert(mensaje);
+        },
+        error: (error) => {
+          console.error('Error actualizando BD:', error);
+          alert('Error al actualizar la base de datos');
+        }
+      });
+    } else {
+      reserva.ineVerificada = true;
+      reserva.ine_verificacion = true;
+      this.agregarAlHistorial(reserva, `INE verificada para ${reserva.cant_people || 1} persona(s)`);
+      this.actualizarYGuardar(reserva);
+      alert(`📱 INE verificada localmente para ${reserva.nombre} - Se sincronizará cuando haya internet`);
+    }
   }
-}
 
-// MÉTODO CORREGIDO PARA ENTREGAR REGALO
-marcarRegaloEntregado(reserva: Reservacion) {
-  if (reserva.id_celebracion) {
-    this.celebrateService.actualizarVerificacion(reserva.id_celebracion, {
-      ine_verificacion: true,    // INE verificada
-      estado_verificacion: true  // Estado cumplido
-    }).subscribe({
-      next: (response: any) => {
-        console.log('✅ Regalo entregado en BD:', response);
-        reserva.estado = 'cumplida';
-        reserva.estado_verificacion = true;
-        reserva.ine_verificacion = true;
-        reserva.ineVerificada = true;
-        this.agregarAlHistorial(reserva, `🎁 Regalo entregado a ${reserva.cant_people || 1} persona(s)`);
-        this.actualizarYGuardar(reserva);
-        alert(`🎁 Regalo entregado a ${reserva.nombre} para ${reserva.cant_people || 1} persona(s)`);
-      },
-      error: (error) => {
-        console.error('Error actualizando BD:', error);
-        alert('Error al actualizar la base de datos');
-      }
-    });
-  } else {
-    reserva.estado = 'cumplida';
-    reserva.estado_verificacion = true;
-    reserva.ine_verificacion = true;
-    reserva.ineVerificada = true;
-    this.agregarAlHistorial(reserva, `🎁 Regalo entregado a ${reserva.cant_people || 1} persona(s)`);
-    this.actualizarYGuardar(reserva);
-    alert(`🎁 Regalo entregado a ${reserva.nombre} para ${reserva.cant_people || 1} persona(s)`);
+  marcarRegaloEntregado(reserva: Reservacion) {
+    if (reserva.id_celebracion) {
+      this.celebrateService.actualizarVerificacion(Number(reserva.id_celebracion), {
+        ine_verificacion: true,
+        estado_verificacion: true
+      }).subscribe({
+        next: (response: any) => {
+          reserva.estado = 'cumplida';
+          reserva.estado_verificacion = true;
+          reserva.ine_verificacion = true;
+          reserva.ineVerificada = true;
+          this.agregarAlHistorial(reserva, `🎁 Regalo entregado a ${reserva.cant_people || 1} persona(s)`);
+          this.actualizarYGuardar(reserva);
+          
+          // ✅ MENSAJE MEJORADO
+          const mensaje = this.isOffline
+            ? `📱 Regalo marcado como entregado localmente - Se sincronizará cuando haya internet`
+            : `🎁 Regalo entregado a ${reserva.nombre} para ${reserva.cant_people || 1} persona(s)`;
+          alert(mensaje);
+        },
+        error: (error) => {
+          console.error('Error actualizando BD:', error);
+          alert('Error al actualizar la base de datos');
+        }
+      });
+    } else {
+      reserva.estado = 'cumplida';
+      reserva.estado_verificacion = true;
+      reserva.ine_verificacion = true;
+      reserva.ineVerificada = true;
+      this.agregarAlHistorial(reserva, `🎁 Regalo entregado a ${reserva.cant_people || 1} persona(s)`);
+      this.actualizarYGuardar(reserva);
+      alert(`📱 Regalo marcado como entregado localmente - Se sincronizará cuando haya internet`);
+    }
   }
-}
 
   cancelarReserva(reserva: Reservacion) {
     if (confirm(`¿Cancelar reservación de ${reserva.nombre} para ${reserva.cant_people || 1} persona(s)?`)) {
       reserva.estado = 'cancelada';
       this.agregarAlHistorial(reserva, `Reservación cancelada para ${reserva.cant_people || 1} persona(s)`);
       this.actualizarYGuardar(reserva);
-      alert(`Reservación cancelada para ${reserva.cant_people || 1} persona(s)`);
+      
+      // ✅ MENSAJE MEJORADO
+      const mensaje = this.isOffline
+        ? `📱 Reservación cancelada localmente - Se sincronizará cuando haya internet`
+        : `Reservación cancelada para ${reserva.cant_people || 1} persona(s)`;
+      alert(mensaje);
     }
   }
 
   eliminarReserva(reserva: Reservacion) {
-  if (confirm(`¿Eliminar permanentemente la reservación de ${reserva.nombre} (${reserva.codigo}) para ${reserva.cant_people || 1} persona(s)?\n\n⚠️ Esta acción no se puede deshacer.`)) {
-    console.log('🗑️ Intentando eliminar reservación:', reserva);
-    
-    // Si tiene ID de BD, eliminar de la base de datos
-    if (reserva.id_celebracion) {
-      this.cargando = true;
-      this.celebrateService.eliminarCelebracion(reserva.id_celebracion).subscribe({
-        next: (response: any) => {
-          console.log('✅ Eliminado de BD:', response);
-          
-          // Eliminar también del array local
-          this.reservaciones = this.reservaciones.filter(r => r.id !== reserva.id);
-          this.reservacionesFiltradas = this.reservacionesFiltradas.filter(r => r.id !== reserva.id);
-          
-          this.guardarEnLocalStorage();
-          this.calcularEstadisticas();
-          this.cargando = false;
-          this.cdRef.detectChanges();
-    
-        },
-        error: (error: any) => {
-          console.error('❌ Error eliminando de BD:', error);
-          
-          // Si falla la eliminación en BD, eliminar solo localmente
-          this.reservaciones = this.reservaciones.filter(r => r.id !== reserva.id);
-          this.reservacionesFiltradas = this.reservacionesFiltradas.filter(r => r.id !== reserva.id);
-          
-          this.guardarEnLocalStorage();
-          this.calcularEstadisticas();
-          this.cargando = false;
-          this.cdRef.detectChanges();
-          
-          
-        }
-      });
-    } else {
-      // Si no tiene ID de BD, eliminar solo localmente
-      this.reservaciones = this.reservaciones.filter(r => r.id !== reserva.id);
-      this.reservacionesFiltradas = this.reservacionesFiltradas.filter(r => r.id !== reserva.id);
-      
-      this.guardarEnLocalStorage();
-      this.calcularEstadisticas();
-      this.cdRef.detectChanges();
-      
-      
+    if (confirm(`¿Eliminar permanentemente la reservación de ${reserva.nombre} (${reserva.codigo}) para ${reserva.cant_people || 1} persona(s)?\n\n⚠️ Esta acción no se puede deshacer.`)) {
+      if (reserva.id_celebracion && typeof reserva.id_celebracion === 'number') {
+        this.cargando = true;
+        this.celebrateService.eliminarCelebracion(reserva.id_celebracion).subscribe({
+          next: (response: any) => {
+            this.reservaciones = this.reservaciones.filter(r => r.id !== reserva.id);
+            this.reservacionesFiltradas = this.reservacionesFiltradas.filter(r => r.id !== reserva.id);
+            this.guardarEnLocalStorage();
+            this.calcularEstadisticas();
+            this.cargando = false;
+            this.cdRef.detectChanges();
+          },
+          error: (error: any) => {
+            this.reservaciones = this.reservaciones.filter(r => r.id !== reserva.id);
+            this.reservacionesFiltradas = this.reservacionesFiltradas.filter(r => r.id !== reserva.id);
+            this.guardarEnLocalStorage();
+            this.calcularEstadisticas();
+            this.cargando = false;
+            this.cdRef.detectChanges();
+          }
+        });
+      } else {
+        this.reservaciones = this.reservaciones.filter(r => r.id !== reserva.id);
+        this.reservacionesFiltradas = this.reservacionesFiltradas.filter(r => r.id !== reserva.id);
+        this.guardarEnLocalStorage();
+        this.calcularEstadisticas();
+        this.cdRef.detectChanges();
+      }
     }
   }
-}
 
   private actualizarYGuardar(reservaActualizada: Reservacion) {
     const index = this.reservaciones.findIndex(r => r.id === reservaActualizada.id);
@@ -598,16 +669,22 @@ marcarRegaloEntregado(reserva: Reservacion) {
     localStorage.setItem('reservacionesCumpleanos', JSON.stringify(this.reservaciones));
   }
 
-  // MÉTODO PARA LIMPIAR DATOS DE PRUEBA
-  limpiarDatosPrueba() {
-    if (confirm('¿Eliminar todos los datos de prueba del localStorage?')) {
-      localStorage.removeItem('reservacionesCumpleanos');
-      this.reservaciones = [];
-      this.reservacionesFiltradas = [];
-      this.calcularEstadisticas();
-      this.cdRef.detectChanges();
-      alert('Datos limpiados del localStorage. Recarga la página para ver datos de BD.');
-      setTimeout(() => this.cargarReservaciones(), 1000);
+  // MÉTODO PARA VER CAPACIDAD
+  verCapacidad() {
+    if (!this.fechaFiltro) {
+      alert('Seleccione una fecha primero para ver la capacidad');
+      return;
     }
+    this.calcularCapacidadPorFecha(this.fechaFiltro);
+  }
+
+  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE
+  getEstadoConexion(): string {
+    return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
+  }
+
+  // ✅ MÉTODO PARA VER SI UNA RESERVA ES OFFLINE
+  esReservaOffline(reserva: Reservacion): boolean {
+    return reserva.offline || false;
   }
 }

@@ -6,13 +6,15 @@
     <input type="text" [(ngModel)]="nombre" placeholder="Nombre de la bebida" class="form-input">
     <input type="text" [(ngModel)]="descripcion" placeholder="Descripción de la bebida" class="form-input">
     <input type="number" [(ngModel)]="precio" placeholder="Precio de la bebida" class="form-input" min="0">
+    
+    <!-- ✅ CORREGIDO: Input de stock en el formulario -->
+    <input type="number" [(ngModel)]="stock" placeholder="Stock disponible (unidades)" class="form-input" min="0">
 
     <label for="fileInput" class="file-upload-label">
       <span class="upload-icon">📁</span>
       <span class="upload-text">{{ imageBase64 ? 'Imagen Seleccionada' : 'Seleccionar Imagen' }}</span>
     </label>
     <input id="fileInput" type="file" (change)="OnfileSelected($event)" class="file-input" accept="image/*">
-
 
     <div class="action-buttons-centered">
       <button 
@@ -52,6 +54,11 @@
           <h3>{{ bebida.nombre }}</h3>
           <p class="descripcion">{{ bebida.descripcion }}</p>
           <p class="precio">${{ bebida.precio }}</p>
+          
+          <!-- ✅ CORREGIDO: Solo mostrar stock, no input para editar -->
+          <p class="stock" [class.stock-bajo]="bebida.cantidad_productos <= 5">
+            📦 Stock: {{ bebida.cantidad_productos }} unidades
+          </p>
         </div>
 
         <div class="platillo-actions">

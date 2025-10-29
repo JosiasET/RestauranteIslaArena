@@ -4,14 +4,17 @@ const { processImage, formatImageResponse } = require('../utils/imageUtils');
 function normalizarIDs(rows) {
   return rows.map(p => ({
     ...p,
-    id: p.id_producto, // Angular usará 'id' universalmente
+    id: p.id_producto,
+    // SOLO procesar los campos que existen en la tabla
+    tamanos: p.tamanos ? (typeof p.tamanos === 'string' ? JSON.parse(p.tamanos) : p.tamanos) : [],
+    tiene_tamanos: p.tiene_tamanos || false
   }));
 }
 
 const platillosController = {
   // Crear platillo
   crearPlatillo: async (req, res) => {
-    const { nombre, descripcion, descripcion_real, precio, imagen } = req.body;
+    const { nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tamanos } = req.body;
 
     if (!nombre || !precio) {
       return res.status(400).json({ error: "Nombre y precio son requeridos" });
@@ -20,14 +23,26 @@ const platillosController = {
     try {
       const buffer = processImage(imagen);
       const categoria = "Platillo";           
-      const subcategoria = descripcion;        // subcategoría
-      const descripcionGeneral = descripcion_real || null; // descripción general
+      const subcategoria = descripcion;
+      const descripcionGeneral = descripcion_real || null;
+      
+      // SOLO tamanos (no tipos)
+      const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
 
       const result = await db.query(
         `INSERT INTO Productos
-         (nombre, descripcion, subcategoria, precio, categoria, imagen)
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-        [nombre, descripcionGeneral, subcategoria, precio, categoria, buffer]
+         (nombre, descripcion, subcategoria, precio, categoria, imagen, tiene_tamanos, tamanos)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        [
+          nombre, 
+          descripcionGeneral, 
+          subcategoria, 
+          precio, 
+          categoria, 
+          buffer,
+          tiene_tamanos || false,
+          tamanosJSON
+        ]
       );
 
       const platillo = normalizarIDs(formatImageResponse(result.rows))[0];
@@ -55,24 +70,46 @@ const platillosController = {
   // Actualizar platillo
   actualizarPlatillo: async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, descripcion_real, precio, imagen } = req.body;
+    const { nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tamanos } = req.body;
 
     try {
       const buffer = processImage(imagen);
-      const subcategoria = descripcion;        // subcategoría
-      const descripcionGeneral = descripcion_real || null; // descripción general
+      const subcategoria = descripcion;
+      const descripcionGeneral = descripcion_real || null;
+      
+      // SOLO tamanos (no tipos)
+      const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
 
       let sql, values;
       if (buffer) {
         sql = `UPDATE Productos
-               SET nombre=$1, descripcion=$2, subcategoria=$3, precio=$4, imagen=$5
-               WHERE id_producto=$6 RETURNING *`;
-        values = [nombre, descripcionGeneral, subcategoria, precio, buffer, id];
+               SET nombre=$1, descripcion=$2, subcategoria=$3, precio=$4, imagen=$5, 
+                   tiene_tamanos=$6, tamanos=$7
+               WHERE id_producto=$8 RETURNING *`;
+        values = [
+          nombre, 
+          descripcionGeneral, 
+          subcategoria, 
+          precio, 
+          buffer,
+          tiene_tamanos || false,
+          tamanosJSON,
+          id
+        ];
       } else {
         sql = `UPDATE Productos
-               SET nombre=$1, descripcion=$2, subcategoria=$3, precio=$4
-               WHERE id_producto=$5 RETURNING *`;
-        values = [nombre, descripcionGeneral, subcategoria, precio, id];
+               SET nombre=$1, descripcion=$2, subcategoria=$3, precio=$4,
+                   tiene_tamanos=$5, tamanos=$6
+               WHERE id_producto=$7 RETURNING *`;
+        values = [
+          nombre, 
+          descripcionGeneral, 
+          subcategoria, 
+          precio,
+          tiene_tamanos || false,
+          tamanosJSON,
+          id
+        ];
       }
 
       const result = await db.query(sql, values);

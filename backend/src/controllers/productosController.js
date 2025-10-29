@@ -4,15 +4,16 @@ const { processImage, formatImageResponse } = require('../utils/imageUtils');
 function normalizarIDs(rows) {
   return rows.map(p => ({
     ...p,
-    id: p.id_producto, // Angular usará “id” universalmente
+    id: p.id_producto,
+    cantidad_productos: p.cantidad_productos || 0 // ✅ Stock para drinks
   }));
 }
 
 const productosController = {
-  // ✅ Crear producto (por ahora solo categoría "Bebida")
+  // Crear producto (Drinks)
   crearProducto: async (req, res) => {
-    const { nombre, descripcion, precio, imagen } = req.body;
-    const categoria = "Bebida"; // 🔥 Se guarda automáticamente como bebida
+    const { nombre, descripcion, precio, imagen, cantidad_productos } = req.body;
+    const categoria = "Bebida";
 
     if (!nombre || !precio) {
       return res.status(400).json({ error: "Nombre y precio son requeridos" });
@@ -21,8 +22,8 @@ const productosController = {
     try {
       const buffer = processImage(imagen);
       const result = await db.query(
-        "INSERT INTO Productos (nombre, descripcion, precio, categoria, imagen) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [nombre, descripcion, precio, categoria, buffer]
+        "INSERT INTO Productos (nombre, descripcion, precio, categoria, imagen, cantidad_productos) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+        [nombre, descripcion, precio, categoria, buffer, cantidad_productos || 0]
       );
 
       const producto = normalizarIDs(formatImageResponse(result.rows))[0];
@@ -33,7 +34,7 @@ const productosController = {
     }
   },
 
-  // ✅ Obtener solo bebidas
+  // Obtener solo bebidas
   obtenerBebidas: async (req, res) => {
     try {
       const result = await db.query(
@@ -47,21 +48,21 @@ const productosController = {
     }
   },
 
-  // ✅ Actualizar bebida
+  // Actualizar bebida
   actualizarProducto: async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, precio, imagen } = req.body;
+    const { nombre, descripcion, precio, imagen, cantidad_productos } = req.body;
 
     try {
       const buffer = processImage(imagen);
       let sql, values;
 
       if (buffer) {
-        sql = "UPDATE Productos SET nombre=$1, descripcion=$2, precio=$3, imagen=$4 WHERE id_producto=$5 RETURNING *";
-        values = [nombre, descripcion, precio, buffer, id];
+        sql = "UPDATE Productos SET nombre=$1, descripcion=$2, precio=$3, imagen=$4, cantidad_productos=$5 WHERE id_producto=$6 RETURNING *";
+        values = [nombre, descripcion, precio, buffer, cantidad_productos || 0, id];
       } else {
-        sql = "UPDATE Productos SET nombre=$1, descripcion=$2, precio=$3 WHERE id_producto=$4 RETURNING *";
-        values = [nombre, descripcion, precio, id];
+        sql = "UPDATE Productos SET nombre=$1, descripcion=$2, precio=$3, cantidad_productos=$4 WHERE id_producto=$5 RETURNING *";
+        values = [nombre, descripcion, precio, cantidad_productos || 0, id];
       }
 
       const result = await db.query(sql, values);
@@ -78,7 +79,7 @@ const productosController = {
     }
   },
 
-  // ✅ Eliminar bebida
+  // Eliminar bebida
   eliminarProducto: async (req, res) => {
     const { id } = req.params;
 

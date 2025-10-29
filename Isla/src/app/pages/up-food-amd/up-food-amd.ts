@@ -18,6 +18,7 @@ export class UpFoodAmd implements OnInit, OnDestroy {
   esModoEdicion: boolean = false;
   isLoading: boolean = true;
   isSubmitting: boolean = false;
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
 
   // Campos del formulario
   nombre = '';
@@ -27,9 +28,9 @@ export class UpFoodAmd implements OnInit, OnDestroy {
   imageBase64: string = '';
   tiene_tamanos: boolean = false;
 
-  // Gestión de tamaños (SIMPLIFICADO - sin descripción)
+  // Gestión de tamaños
   tamanos: any[] = [];
-  nuevoTamano: any = { nombre: '', precio: 0 }; // Solo nombre y precio
+  nuevoTamano: any = { nombre: '', precio: 0 };
 
   private subscription: Subscription = new Subscription();
 
@@ -41,6 +42,17 @@ export class UpFoodAmd implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('🔄 Inicializando componente UpFoodAmd...');
     
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.cdRef.detectChanges();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.cdRef.detectChanges();
+    });
+
     this.subscription.add(
       this.foodService.loading$.subscribe(loading => {
         this.isLoading = loading;
@@ -52,49 +64,50 @@ export class UpFoodAmd implements OnInit, OnDestroy {
       this.foodService.saucer$.subscribe((platillos: foodInterface[]) => {
         console.log('🔄 Lista de platillos actualizada:', platillos.length);
         this.todosLosPlatillos = platillos;
+        this.isLoading = false;
         this.cdRef.detectChanges();
       })
     );
 
-    this.cargarPlatillos();
+    if (this.todosLosPlatillos.length === 0) {
+      this.cargarPlatillosInicial();
+    }
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  cargarPlatillos() {
-    console.log('🔄 Solicitando carga de platillos...');
+  cargarPlatillosInicial() {
+    console.log('🔄 Cargando platillos inicialmente...');
     this.foodService.cargarPlatillos().subscribe({
       next: (platillos) => {
         console.log('✅ Platillos cargados exitosamente:', platillos.length);
-        this.cdRef.detectChanges();
       },
       error: (err) => {
         console.error('❌ Error cargando platillos:', err);
+        this.isLoading = false;
         this.cdRef.detectChanges();
       }
     });
   }
 
-  // Método para eliminar la imagen seleccionada
-eliminarImagen() {
-  if (confirm('¿Estás seguro de que deseas eliminar la imagen seleccionada?')) {
-    this.imageBase64 = '';
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
+  eliminarImagen() {
+    if (confirm('¿Estás seguro de que deseas eliminar la imagen seleccionada?')) {
+      this.imageBase64 = '';
+      const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      this.cdRef.detectChanges();
     }
-    this.cdRef.detectChanges();
   }
-}
 
-  // Métodos para gestionar tamaños (SIMPLIFICADO)
   agregarTamano() {
     if (this.nuevoTamano.nombre && this.nuevoTamano.precio > 0) {
       this.tamanos.push({...this.nuevoTamano});
       console.log('✅ Tamaño agregado:', this.tamanos[this.tamanos.length - 1]);
-      this.nuevoTamano = { nombre: '', precio: 0 }; // Solo nombre y precio
+      this.nuevoTamano = { nombre: '', precio: 0 };
       this.cdRef.detectChanges();
     } else {
       alert('Por favor, complete el nombre y precio del tamaño');
@@ -124,6 +137,7 @@ eliminarImagen() {
     }
   }
 
+  // ✅ CORREGIDO - Manejar IDs string y number
   eliminarPlatillo(platillo: foodInterface) {
     if (!platillo.id) {
       console.error('❌ No se puede eliminar: Platillo sin ID', platillo);
@@ -132,17 +146,27 @@ eliminarImagen() {
     }
 
     if (confirm(`¿Estás seguro de que deseas eliminar "${platillo.nombre}"?`)) {
-      console.log('🗑️ Intentando eliminar platillo ID:', platillo.id);
+      // ✅ CORRECCIÓN - Manejar correctamente string y number
+      let idParaEliminar: number;
       
-      this.foodService.eliminarPlatillo(platillo.id).subscribe({
+      if (typeof platillo.id === 'string') {
+        idParaEliminar = parseInt(platillo.id);
+        if (isNaN(idParaEliminar)) {
+          idParaEliminar = 0;
+        }
+      } else {
+        idParaEliminar = platillo.id;
+      }
+
+      console.log('🗑️ Intentando eliminar platillo ID:', idParaEliminar);
+      
+      this.foodService.eliminarPlatillo(idParaEliminar).subscribe({
         next: () => {
           console.log('✅ Eliminación completada');
-          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error eliminando platillo:', err);
           alert('Error al eliminar el platillo');
-          this.cdRef.detectChanges();
         }
       });
     }
@@ -179,7 +203,6 @@ eliminarImagen() {
   }
 
   subirsaucer() {
-    // Validaciones
     if (!this.nombre || !this.descripcion || !this.precio || !this.imageBase64) {
       alert("Por favor, rellene todos los espacios");
       return;
@@ -190,7 +213,6 @@ eliminarImagen() {
       return;
     }
 
-    // Validar tamaños si están habilitados
     if (this.tiene_tamanos && this.tamanos.length === 0) {
       alert("Debe agregar al menos un tamaño si ha habilitado esta opción");
       return;
@@ -200,6 +222,7 @@ eliminarImagen() {
     this.cdRef.detectChanges();
 
     const platilloData: foodInterface = {
+      id: this.esModoEdicion && this.platilloEditando ? this.platilloEditando.id : 0,
       nombre: this.nombre,
       descripcion: this.descripcion,
       descripcion_real: this.descripcion_real,
@@ -218,8 +241,6 @@ eliminarImagen() {
         return;
       }
 
-      platilloData.id = this.platilloEditando.id;
-
       console.log('🔄 Actualizando platillo:', platilloData);
 
       this.foodService.actualizarPlatillo(platilloData).subscribe({
@@ -227,14 +248,20 @@ eliminarImagen() {
           console.log('✅ Platillo actualizado exitosamente');
           this.esModoEdicion = false;
           this.isSubmitting = false;
-          alert("Platillo actualizado exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert("📱 Platillo actualizado localmente - Se sincronizará cuando haya internet");
+          } else {
+            alert("✅ Platillo actualizado exitosamente en el servidor");
+          }
+          
           this.limpiarFormulario();
-          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error actualizando:', err);
           this.isSubmitting = false;
-          alert("Error al actualizar el platillo");
+          alert("Error al actualizar el platillo: " + err.message);
           this.cdRef.detectChanges();
         }
       });
@@ -246,14 +273,20 @@ eliminarImagen() {
         next: (respuesta) => {
           console.log('✅ Platillo agregado exitosamente');
           this.isSubmitting = false;
-          alert("Platillo subido exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+          if (this.isOffline) {
+            alert("📱 Platillo guardado localmente - Se subirá automáticamente cuando recuperes internet");
+          } else {
+            alert("✅ Platillo subido exitosamente al servidor");
+          }
+          
           this.limpiarFormulario();
-          this.cdRef.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error subiendo:', err);
           this.isSubmitting = false;
-          alert("Error al subir el platillo");
+          alert("Error al subir el platillo: " + err.message);
           this.cdRef.detectChanges();
         }
       });
@@ -275,7 +308,7 @@ eliminarImagen() {
     this.imageBase64 = '';
     this.tiene_tamanos = false;
     this.tamanos = [];
-    this.nuevoTamano = { nombre: '', precio: 0 }; // Solo nombre y precio
+    this.nuevoTamano = { nombre: '', precio: 0 };
     this.platilloEditando = null;
     this.esModoEdicion = false;
     this.isSubmitting = false;
@@ -294,6 +327,14 @@ eliminarImagen() {
 
   forzarRecarga() {
     console.log('🔄 Forzando recarga manual...');
-    this.cargarPlatillos();
+    this.cargarPlatillosInicial();
   }
+
+  // ✅ MÉTODO PARA MENSAJE OFFLINE
+  getMensajeEstado(): string {
+    return this.isOffline ? '📱 Modo offline - Los cambios se guardarán localmente' : '🌐 Conectado';
+  }
+
+  // ✅ MÉTODO PARA VER SI UN PLATILLO ES OFFLINE
+  
 }

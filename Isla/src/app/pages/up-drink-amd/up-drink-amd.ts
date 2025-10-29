@@ -18,11 +18,13 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
   esModoEdicion: boolean = false;
   isLoading: boolean = true;
   isSubmitting: boolean = false;
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
 
   nombre = '';
   descripcion = '';
   precio: number = 0;
   imageBase64: string = '';
+  stock: number = 0;
 
   private subscription: Subscription = new Subscription();
 
@@ -34,6 +36,17 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('🔄 Inicializando componente UpDrinkAmd...');
     
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.cdRef.detectChanges();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.cdRef.detectChanges();
+    });
+
     // Suscribirse al loading state
     this.subscription.add(
       this.drinkService.loading$.subscribe(loading => {
@@ -42,12 +55,12 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
       })
     );
 
-    // Suscribirse a las bebidas - ESTO ES LO MÁS IMPORTANTE
+    // Suscribirse a las bebidas
     this.subscription.add(
       this.drinkService.saucer$.subscribe((bebidas: Drinkinterface[]) => {
         console.log('🔄 Lista de bebidas actualizada:', bebidas.length);
         this.todasLasBebidas = bebidas;
-        this.cdRef.detectChanges(); // ESTO HACE EL REFRESH AUTOMÁTICO
+        this.cdRef.detectChanges();
       })
     );
   }
@@ -67,20 +80,34 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
     }
   }
 
+  // ✅ CORREGIDO - Manejar IDs string y number
   eliminarBebida(bebida: Drinkinterface) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta bebida?')) {
-      this.drinkService.eliminarBebida(bebida.id!).subscribe({
-        next: () => {
-          console.log('✅ Bebida eliminada');
-          // El refresh automático se hace por la suscripción a saucer$
-        },
-        error: (err) => {
-          console.error('❌ Error eliminando bebida:', err);
-          alert('Error al eliminar la bebida');
-        }
-      });
+  if (confirm('¿Estás seguro de que deseas eliminar esta bebida?')) {
+    // ✅ CORRECCIÓN - Manejar correctamente string y number
+    let idParaEliminar: number;
+    
+    if (typeof bebida.id === 'string') {
+      // Si es string, intentar convertir a número
+      idParaEliminar = parseInt(bebida.id);
+      // Si no es un número válido, usar un valor por defecto
+      if (isNaN(idParaEliminar)) {
+        idParaEliminar = 0; // Valor temporal para offline
+      }
+    } else {
+      idParaEliminar = bebida.id;
     }
+
+    this.drinkService.eliminarBebida(idParaEliminar).subscribe({
+      next: () => {
+        console.log('✅ Bebida eliminada');
+      },
+      error: (err) => {
+        console.error('❌ Error eliminando bebida:', err);
+        alert('Error al eliminar la bebida');
+      }
+    });
   }
+}
 
   editarBebida(bebida: Drinkinterface) {
     this.bebidaEditando = bebida;
@@ -88,6 +115,7 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
     this.descripcion = bebida.descripcion;
     this.precio = bebida.precio;
     this.imageBase64 = bebida.imagen;
+    this.stock = bebida.cantidad_productos;
     this.esModoEdicion = true;
   }
 
@@ -111,44 +139,55 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
         nombre: this.nombre,
         descripcion: this.descripcion,
         precio: this.precio,
-        imagen: this.imageBase64
+        imagen: this.imageBase64,
+        cantidad_productos: this.stock
       };
 
       this.drinkService.actualizarBebida(bebidaActualizada).subscribe({
-        next: () => {
+        next: (bebidaActualizadaResp: Drinkinterface) => {
           this.esModoEdicion = false;
           this.isSubmitting = false;
-          alert("Bebida actualizada exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+            alert("📱 Bebida actualizada localmente - Se sincronizará cuando haya internet");
+            alert("✅ Bebida actualizada exitosamente en el servidor");
+        
+          
           this.limpiarFormulario();
-          // El refresh automático se hace por la suscripción a saucer$
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('❌ Error actualizando:', err);
           this.isSubmitting = false;
-          alert("Error al actualizar la bebida");
+          alert("❌ Error al actualizar la bebida: " + err.message);
         }
       });
     } else {
-      // MODO CREACIÓN - AGREGAR ID: 0 TEMPORAL
+      // MODO CREACIÓN
       const nuevaBebida: Drinkinterface = {
-        id: 0, // ID temporal que será reemplazado por el backend
+        id: 0, // ID temporal
         nombre: this.nombre,
         descripcion: this.descripcion,
         precio: this.precio,
-        imagen: this.imageBase64
+        imagen: this.imageBase64,
+        cantidad_productos: this.stock
       };
 
       this.drinkService.agregarBebida(nuevaBebida).subscribe({
-        next: () => {
+        next: (nuevaBebidaResp: Drinkinterface) => {
           this.isSubmitting = false;
-          alert("Bebida subida exitosamente");
+          
+          // ✅ MENSAJE MEJORADO
+            alert("📱 Bebida guardada localmente - Se subirá automáticamente cuando recuperes internet");
+
+            alert("✅ Bebida subida exitosamente al servidor");
+ 
+          
           this.limpiarFormulario();
-          // El refresh automático se hace por la suscripción a saucer$
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('❌ Error subiendo:', err);
           this.isSubmitting = false;
-          alert("Error al subir la bebida");
+          alert("❌ Error al subir la bebida: " + err.message);
         }
       });
     }
@@ -165,6 +204,7 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
     this.descripcion = '';
     this.precio = 0;
     this.imageBase64 = '';
+    this.stock = 0;
     this.bebidaEditando = null;
     this.esModoEdicion = false;
     this.isSubmitting = false;
@@ -178,4 +218,12 @@ export class UpDrinkAmd implements OnInit, OnDestroy {
   getTotalBebidas(): number {
     return this.todasLasBebidas.length;
   }
+
+  // ✅ MÉTODO PARA MENSAJE OFFLINE
+  getMensajeEstado(): string {
+    return this.isOffline ? '📱 Modo offline - Los cambios se guardarán localmente' : '🌐 Conectado';
+  }
+
+  // ✅ MÉTODO PARA VER SI UNA BEBIDA ES OFFLINE
+  
 }

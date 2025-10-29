@@ -457,3 +457,21 @@
     font-size: 2rem;
   }
 }
+/* BADGE DE STOCK */
+.stock-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  margin-bottom: 8px;
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.stock-badge.stock-bajo {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}

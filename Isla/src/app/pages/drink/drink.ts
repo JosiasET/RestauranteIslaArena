@@ -16,6 +16,7 @@ import { Subscription } from 'rxjs';
 export class Drink implements OnInit, OnDestroy {
   saucer: Drinkinterface[] = [];
   loading: boolean = true;
+  isOffline: boolean = false;
 
   private subscription: Subscription = new Subscription();
 
@@ -38,22 +39,35 @@ export class Drink implements OnInit, OnDestroy {
     this.loading = true;
     this.cdRef.detectChanges();
 
-    // 🔥 FORZAR CARGA INICIAL - ESTO ES LO QUE FALTA
-    this.drinkService.cargarBebidas().subscribe();
-
+    // ✅ USAR EL MÉTODO ORIGINAL cargarBebidas()
     this.subscription.add(
-      this.drinkService.saucer$.subscribe((data: Drinkinterface[]) => {
-        console.log("🥤 Bebidas recibidas:", data.length);
-        this.saucer = data;
-        this.loading = false;
-        this.cdRef.detectChanges();
+      this.drinkService.cargarBebidas().subscribe({
+        next: (bebidas: Drinkinterface[]) => {
+          console.log("🥤 Bebidas cargadas:", bebidas.length);
+          this.saucer = bebidas;
+          this.isOffline = !navigator.onLine;
+          this.loading = false;
+          this.cdRef.detectChanges();
+        },
+        error: (error: any) => {
+          console.error('❌ Error cargando bebidas:', error);
+          this.loading = false;
+          this.cdRef.detectChanges();
+        }
       })
     );
   }
 
-  agregarAlCarrito(producto: any) {
+  // ✅ MÉTODO ACTUALIZADO - agregarAlCarrito con validación de stock
+  agregarAlCarrito(producto: Drinkinterface) {
+    // VALIDAR STOCK para drinks (unidades)
+    if (producto.cantidad_productos <= 0) {
+      alert('❌ Producto agotado');
+      return;
+    }
+
     const cartItem: CartItem = {
-      id: producto.id,
+      id: producto.id as number, // ✅ Asegurar que es number para el carrito
       nombre: producto.nombre,
       descripcion: producto.descripcion,
       precio: producto.precio,
@@ -61,5 +75,10 @@ export class Drink implements OnInit, OnDestroy {
       cantidad: 1
     };
     this.cartService.addToCart(cartItem);
+  }
+
+  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE EN TEMPLATE
+  getEstadoConexion(): string {
+    return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
   }
 }

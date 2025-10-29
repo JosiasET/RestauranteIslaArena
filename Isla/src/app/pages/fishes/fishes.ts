@@ -18,13 +18,13 @@ export class Fishes implements OnInit, OnDestroy {
   productosFiltrados: any[] = [];
   recomendacionesDelDia: any[] = [];
   loading: boolean = true;
+  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
 
-  // Variables para el modal de tamaños (VENTANAS FLOTANTES)
+  // ✅ VARIABLES SIMPLIFICADAS para el modal
   mostrarModal: boolean = false;
   productoSeleccionado: any = null;
-  tipoSeleccionado: any = null;
   tamanoSeleccionado: any = null;
-  cantidad: number = 1;
+  cantidadSeleccionada: number = 1;
 
   // Variable para posición del modal
   currentScrollPosition: number = 0;
@@ -39,6 +39,18 @@ export class Fishes implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('🔄 Inicializando componente Fishes...');
+    
+    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => {
+      this.isOffline = false;
+      this.cdRef.detectChanges();
+    });
+    window.addEventListener('offline', () => {
+      this.isOffline = true;
+      this.cdRef.detectChanges();
+    });
+
     this.cargarEspecialidades();
   }
 
@@ -50,33 +62,26 @@ export class Fishes implements OnInit, OnDestroy {
     this.loading = true;
     this.cdRef.detectChanges();
 
-    // FORZAR CARGA INICIAL
-    this.fishesService.cargarEspecialidades().subscribe();
-
+    // ✅ USAR EL MÉTODO ACTUALIZADO CON OFFLINE
     this.subscription.add(
-      this.fishesService.saucer$.subscribe((data: Fish[]) => {
-        console.log("🐟 Especialidades recibidas:", data.length);
-        this.saucer = data;
-        
-        // Preparar datos para las ventanas flotantes
-        this.productosFiltrados = data.map(producto => ({
-          ...producto,
-          descripcion_real: producto.descripcion_real || producto.descripcion || '',
-          tiene_tamanos: producto.tiene_tamanos || false,
-          tamanos: producto.tamanos || [],
-          tipos: producto.tipos || []
-        }));
-        
-        this.generarRecomendacionesDelDia();
-        this.loading = false;
-        this.cdRef.detectChanges();
-      })
-    );
-
-    // Suscribirse al estado de loading
-    this.subscription.add(
-      this.fishesService.loading$.subscribe((loading: boolean) => {
-        if (!loading) {
+      this.fishesService.cargarEspecialidades().subscribe({
+        next: (data: Fish[]) => {
+          console.log("🐟 Especialidades cargadas:", data.length);
+          this.saucer = data;
+          
+          this.productosFiltrados = data.map(producto => ({
+            ...producto,
+            descripcion_real: producto.descripcion_real || producto.descripcion || '',
+            tiene_tamanos: producto.tiene_tamanos || false,
+            tamanos: producto.tamanos || []
+          }));
+          
+          this.generarRecomendacionesDelDia();
+          this.loading = false;
+          this.cdRef.detectChanges();
+        },
+        error: (error: any) => {
+          console.error('❌ Error cargando especialidades:', error);
           this.loading = false;
           this.cdRef.detectChanges();
         }
@@ -84,23 +89,24 @@ export class Fishes implements OnInit, OnDestroy {
     );
   }
 
-  // MÉTODO PARA ABRIR MODAL - VENTANA FLOTANTE
+  // ✅ MÉTODO SIMPLIFICADO - Abrir modal
   abrirModalProducto(producto: any) {
     this.currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
     this.productoSeleccionado = producto;
     
     console.log('📦 Producto seleccionado:', producto);
     
+    // ✅ INICIALIZAR: Seleccionar primer tamaño por defecto
     if (producto.tiene_tamanos && producto.tamanos && producto.tamanos.length > 0) {
       this.tamanoSeleccionado = producto.tamanos[0];
     } else {
       this.tamanoSeleccionado = {
-        nombre: 'Único',
+        nombre: '1 kg',
         precio: producto.precio
       };
     }
     
-    this.cantidad = 1;
+    this.cantidadSeleccionada = 1;
     this.mostrarModal = true;
     
     setTimeout(() => {
@@ -124,61 +130,111 @@ export class Fishes implements OnInit, OnDestroy {
     }
   }
 
+  // ✅ MÉTODO SIMPLIFICADO - Seleccionar tamaño
   seleccionarTamano(tamano: any) {
     this.tamanoSeleccionado = tamano;
+    // Resetear cantidad cuando cambia el tamaño
+    this.cantidadSeleccionada = 1;
     this.cdRef.detectChanges();
   }
 
+  // ✅ MÉTODO SIMPLIFICADO - Incrementar cantidad
   incrementarCantidad() {
-    this.cantidad++;
-    this.cdRef.detectChanges();
-  }
-
-  decrementarCantidad() {
-    if (this.cantidad > 1) {
-      this.cantidad--;
+    if (this.puedeIncrementar()) {
+      this.cantidadSeleccionada++;
       this.cdRef.detectChanges();
     }
+  }
+
+  // ✅ MÉTODO SIMPLIFICADO - Decrementar cantidad
+  decrementarCantidad() {
+    if (this.cantidadSeleccionada > 1) {
+      this.cantidadSeleccionada--;
+      this.cdRef.detectChanges();
+    }
+  }
+
+  // ✅ MÉTODO SIMPLIFICADO - Verificar si puede incrementar
+  puedeIncrementar(): boolean {
+    const totalKg = this.getTotalKg();
+    return totalKg < this.productoSeleccionado.cantidad;
+  }
+
+  // ✅ MÉTODO SIMPLIFICADO - Calcular total en kg
+  getTotalKg(): number {
+    const equivalencia = this.getEquivalenciaPorUnidad(this.tamanoSeleccionado);
+    return this.cantidadSeleccionada * equivalencia;
+  }
+
+  // ✅ MÉTODO SIMPLIFICADO - Calcular precio total
+  getPrecioTotal(): number {
+    if (!this.tamanoSeleccionado) return 0;
+    return this.tamanoSeleccionado.precio * this.cantidadSeleccionada;
+  }
+
+  // ✅ MÉTODO SIMPLIFICADO - Calcular equivalencia por unidad
+  getEquivalenciaPorUnidad(tamano: any): number {
+    if (!tamano) return 1;
+    
+    const nombreTamano = tamano.nombre.toLowerCase();
+    
+    if (nombreTamano.includes('1/4 kg') || nombreTamano === '1/4 kg') {
+      return 0.25;
+    } else if (nombreTamano.includes('1/2 kg') || nombreTamano === '1/2 kg' || nombreTamano.includes('medio kg')) {
+      return 0.5;
+    } else if (nombreTamano.includes('1 kg') || nombreTamano === '1 kg') {
+      return 1;
+    } else {
+      return 1;
+    }
+  }
+
+  // ✅ MÉTODO SIMPLIFICADO - Agregar al carrito
+  agregarAlCarritoSimplificado() {
+    if (!this.productoSeleccionado) return;
+
+    // Validar stock
+    const totalKg = this.getTotalKg();
+    if (totalKg > this.productoSeleccionado.cantidad) {
+      alert(`❌ No hay suficiente stock. Disponible: ${this.productoSeleccionado.cantidad} kg`);
+      return;
+    }
+
+    const item: CartItem = {
+      id: this.productoSeleccionado.id as number,
+      nombre: this.productoSeleccionado.nombre,
+      descripcion: this.productoSeleccionado.descripcion_real || this.productoSeleccionado.descripcion,
+      precio: this.tamanoSeleccionado.precio,
+      imagen: this.productoSeleccionado.imagen,
+      cantidad: this.cantidadSeleccionada,
+      tamanoSeleccionado: {
+        nombre: this.tamanoSeleccionado.nombre,
+        precio: this.tamanoSeleccionado.precio,
+        equivalenciaKg: this.getEquivalenciaPorUnidad(this.tamanoSeleccionado)
+      },
+      tieneTamanos: this.productoSeleccionado.tiene_tamanos,
+      cantidadEnKg: totalKg
+    };
+
+    console.log('🛒 Agregando al carrito:', item);
+    this.cartService.addToCart(item);
+    
+    // Mostrar confirmación
+    this.cerrarModal();
+    this.mostrarConfirmacionAgregado();
+  }
+
+  mostrarConfirmacionAgregado() {
+    // Puedes implementar un toast o notificación aquí
+    console.log('✅ Producto agregado al carrito');
   }
 
   cerrarModal() {
     this.mostrarModal = false;
     this.productoSeleccionado = null;
-    this.tipoSeleccionado = null;
     this.tamanoSeleccionado = null;
-    this.cantidad = 1;
+    this.cantidadSeleccionada = 1;
     this.cdRef.detectChanges();
-  }
-
-  agregarConOpciones() {
-    if (!this.productoSeleccionado) return;
-
-    const precioFinal = this.getPrecioFinal();
-
-    const item: CartItem = {
-      id: this.productoSeleccionado.id,
-      nombre: this.productoSeleccionado.nombre,
-      descripcion: this.productoSeleccionado.descripcion_real || this.productoSeleccionado.descripcion,
-      precio: precioFinal,
-      imagen: this.productoSeleccionado.imagen,
-      cantidad: this.cantidad,
-      tamanoSeleccionado: this.tamanoSeleccionado ? {
-        nombre: this.tamanoSeleccionado.nombre,
-        precio: this.tamanoSeleccionado.precio
-      } : undefined,
-      tieneTamanos: this.productoSeleccionado.tiene_tamanos
-    };
-
-    console.log('🛒 Agregando al carrito:', item);
-    this.cartService.addToCart(item);
-    this.cerrarModal();
-  }
-
-  getPrecioFinal(): number {
-    if (this.tamanoSeleccionado) {
-      return this.tamanoSeleccionado.precio;
-    }
-    return this.productoSeleccionado?.precio || 0;
   }
 
   generarRecomendacionesDelDia() {
@@ -193,5 +249,15 @@ export class Fishes implements OnInit, OnDestroy {
 
   agregarAlCarrito(producto: any) {
     this.abrirModalProducto(producto);
+  }
+
+  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE
+  getEstadoConexion(): string {
+    return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
+  }
+
+  // ✅ MÉTODO PARA VER SI UNA ESPECIALIDAD ES OFFLINE
+  esEspecialidadOffline(especialidad: any): boolean {
+    return especialidad.id && especialidad.id.toString().includes('offline_');
   }
 }

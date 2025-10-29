@@ -8,12 +8,14 @@ export interface CartItem {
   precio: number;
   imagen: string;
   cantidad: number;
-  // NUEVO: Campos para tamaños
+  // ✅ ACTUALIZADO: Campos para tamaños con equivalencia
   tamanoSeleccionado?: {
     nombre: string;
     precio: number;
+    equivalenciaKg?: number; // ✅ NUEVA: Para calcular stock en kg
   };
   tieneTamanos?: boolean;
+  cantidadEnKg?: number; // ✅ NUEVA: Para mostrar el total en kg
 }
 
 @Injectable({
@@ -39,7 +41,8 @@ export class CartService {
       nombre: product.nombre,
       precio: product.precio,
       tamano: product.tamanoSeleccionado,
-      cantidad: product.cantidad
+      cantidad: product.cantidad,
+      cantidadEnKg: product.cantidadEnKg // ✅ NUEVO: Mostrar kg
     });
     
     console.log('🛒 Carrito ANTES:', this.cartItems.map(item => ({
@@ -47,7 +50,8 @@ export class CartService {
       nombre: item.nombre, 
       precio: item.precio,
       tamano: item.tamanoSeleccionado,
-      cantidad: item.cantidad
+      cantidad: item.cantidad,
+      cantidadEnKg: item.cantidadEnKg // ✅ NUEVO: Mostrar kg
     })));
 
     // Buscar item con mismo ID Y mismo tamaño
@@ -58,6 +62,10 @@ export class CartService {
     
     if (existingItem) {
       existingItem.cantidad += product.cantidad;
+      // ✅ ACTUALIZAR también la cantidad en kg si existe
+      if (existingItem.cantidadEnKg && product.cantidadEnKg) {
+        existingItem.cantidadEnKg += product.cantidadEnKg;
+      }
       console.log('✅ EXISTE - Cantidad incrementada:', existingItem.nombre, 'x', existingItem.cantidad);
     } else {
       this.cartItems.push({...product});
@@ -72,7 +80,8 @@ export class CartService {
       nombre: item.nombre, 
       precio: item.precio,
       tamano: item.tamanoSeleccionado,
-      cantidad: item.cantidad
+      cantidad: item.cantidad,
+      cantidadEnKg: item.cantidadEnKg // ✅ NUEVO: Mostrar kg
     })));
     console.log('=== 🚨 FIN DEBUG ===');
   }
@@ -95,6 +104,16 @@ export class CartService {
 
   getTotal(): number {
     return this.cartItems.reduce((total, item) => total + (item.precio * item.cantidad), 0);
+  }
+
+  // ✅ NUEVO MÉTODO: Obtener total en kg (para fishes)
+  getTotalEnKg(): number {
+    return this.cartItems.reduce((total, item) => {
+      if (item.cantidadEnKg) {
+        return total + item.cantidadEnKg;
+      }
+      return total;
+    }, 0);
   }
 
   private updateCart() {
@@ -146,6 +165,10 @@ export class CartService {
         // Producto duplicado - sumar cantidades
         const existingItem = seenNames.get(normalizedName)!;
         existingItem.cantidad += item.cantidad;
+        // ✅ ACTUALIZAR también la cantidad en kg si existe
+        if (existingItem.cantidadEnKg && item.cantidadEnKg) {
+          existingItem.cantidadEnKg += item.cantidadEnKg;
+        }
         console.log('🔀 Unificado:', existingItem.nombre, 'cantidad:', existingItem.cantidad);
       } else {
         // Producto nuevo - agregar
