@@ -39,35 +39,44 @@ export class Drink implements OnInit, OnDestroy {
     this.loading = true;
     this.cdRef.detectChanges();
 
-    // ✅ USAR EL MÉTODO ORIGINAL cargarBebidas()
+    // ✅ SUSCRIBIRSE AL BEHAVIORSUBJECT EN LUGAR DE HACER NUEVA PETICIÓN
     this.subscription.add(
-      this.drinkService.cargarBebidas().subscribe({
+      this.drinkService.saucer$.subscribe({
         next: (bebidas: Drinkinterface[]) => {
-          console.log("🥤 Bebidas cargadas:", bebidas.length);
+          console.log("🥤 Bebidas actualizadas desde BehaviorSubject:", bebidas.length);
           this.saucer = bebidas;
           this.isOffline = !navigator.onLine;
           this.loading = false;
           this.cdRef.detectChanges();
         },
         error: (error: any) => {
-          console.error('❌ Error cargando bebidas:', error);
+          console.error('❌ Error en BehaviorSubject:', error);
           this.loading = false;
           this.cdRef.detectChanges();
         }
       })
     );
+
+    // ✅ SOLO CARGAR DESDE API SI NO HAY DATOS EN EL BEHAVIORSUBJECT
+    this.subscription.add(
+      this.drinkService.loading$.subscribe(loading => {
+        if (!loading && this.drinkService['saucerSource'].getValue().length === 0) {
+          console.log('🔄 No hay bebidas en cache, cargando desde API...');
+          this.drinkService.cargarBebidas().subscribe();
+        }
+      })
+    );
   }
 
-  // ✅ MÉTODO ACTUALIZADO - agregarAlCarrito con validación de stock
+  // ✅ MANTENER EL RESTO DE MÉTODOS SIN CAMBIOS
   agregarAlCarrito(producto: Drinkinterface) {
-    // VALIDAR STOCK para drinks (unidades)
     if (producto.cantidad_productos <= 0) {
       alert('❌ Producto agotado');
       return;
     }
 
     const cartItem: CartItem = {
-      id: producto.id as number, // ✅ Asegurar que es number para el carrito
+      id: producto.id as number,
       nombre: producto.nombre,
       descripcion: producto.descripcion,
       precio: producto.precio,
@@ -77,8 +86,14 @@ export class Drink implements OnInit, OnDestroy {
     this.cartService.addToCart(cartItem);
   }
 
-  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE EN TEMPLATE
   getEstadoConexion(): string {
     return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
+  }
+
+  // ✅ MÉTODO OPCIONAL PARA FORZAR RECARGA SI ES NECESARIO
+  recargarBebidas() {
+    console.log('🔄 Recargando bebidas manualmente...');
+    this.loading = true;
+    this.drinkService.cargarBebidas().subscribe();
   }
 }

@@ -13,6 +13,10 @@ export class FishesService {
 
   saucer$ = this.saucerSource.asObservable();
   loading$ = this.loadingSource.asObservable();
+  
+   getEspecialidadesActuales(): Fish[] {
+    return this.saucerSource.getValue();
+  }
 
   // ✅ CONTROL DE SINCRONIZACIÓN
   private isSyncing = false;

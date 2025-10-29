@@ -18,7 +18,7 @@ export class Fishes implements OnInit, OnDestroy {
   productosFiltrados: any[] = [];
   recomendacionesDelDia: any[] = [];
   loading: boolean = true;
-  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
+  isOffline: boolean = false;
 
   // ✅ VARIABLES SIMPLIFICADAS para el modal
   mostrarModal: boolean = false;
@@ -62,11 +62,11 @@ export class Fishes implements OnInit, OnDestroy {
     this.loading = true;
     this.cdRef.detectChanges();
 
-    // ✅ USAR EL MÉTODO ACTUALIZADO CON OFFLINE
+    // ✅ SUSCRIBIRSE AL BEHAVIORSUBJECT EN LUGAR DE HACER NUEVA PETICIÓN
     this.subscription.add(
-      this.fishesService.cargarEspecialidades().subscribe({
+      this.fishesService.saucer$.subscribe({
         next: (data: Fish[]) => {
-          console.log("🐟 Especialidades cargadas:", data.length);
+          console.log("🐟 Especialidades actualizadas desde BehaviorSubject:", data.length);
           this.saucer = data;
           
           this.productosFiltrados = data.map(producto => ({
@@ -81,15 +81,30 @@ export class Fishes implements OnInit, OnDestroy {
           this.cdRef.detectChanges();
         },
         error: (error: any) => {
-          console.error('❌ Error cargando especialidades:', error);
+          console.error('❌ Error en BehaviorSubject:', error);
           this.loading = false;
           this.cdRef.detectChanges();
         }
       })
     );
+
+    // ✅ SUSCRIBIRSE AL ESTADO DE LOADING
+    this.subscription.add(
+      this.fishesService.loading$.subscribe(loading => {
+        this.loading = loading;
+        this.cdRef.detectChanges();
+      })
+    );
+
+    // ✅ SOLO CARGAR DESDE API SI NO HAY DATOS EN EL BEHAVIORSUBJECT
+    const especialidadesActuales = this.fishesService.getEspecialidadesActuales();
+    if (especialidadesActuales.length === 0) {
+      console.log('🔄 No hay especialidades en cache, cargando desde API...');
+      this.fishesService.cargarEspecialidades().subscribe();
+    }
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Abrir modal
+  // ✅ MANTENER TODOS LOS MÉTODOS EXISTENTES SIN CAMBIOS
   abrirModalProducto(producto: any) {
     this.currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
     this.productoSeleccionado = producto;
@@ -130,7 +145,6 @@ export class Fishes implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Seleccionar tamaño
   seleccionarTamano(tamano: any) {
     this.tamanoSeleccionado = tamano;
     // Resetear cantidad cuando cambia el tamaño
@@ -138,7 +152,6 @@ export class Fishes implements OnInit, OnDestroy {
     this.cdRef.detectChanges();
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Incrementar cantidad
   incrementarCantidad() {
     if (this.puedeIncrementar()) {
       this.cantidadSeleccionada++;
@@ -146,7 +159,6 @@ export class Fishes implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Decrementar cantidad
   decrementarCantidad() {
     if (this.cantidadSeleccionada > 1) {
       this.cantidadSeleccionada--;
@@ -154,25 +166,21 @@ export class Fishes implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Verificar si puede incrementar
   puedeIncrementar(): boolean {
     const totalKg = this.getTotalKg();
     return totalKg < this.productoSeleccionado.cantidad;
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Calcular total en kg
   getTotalKg(): number {
     const equivalencia = this.getEquivalenciaPorUnidad(this.tamanoSeleccionado);
     return this.cantidadSeleccionada * equivalencia;
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Calcular precio total
   getPrecioTotal(): number {
     if (!this.tamanoSeleccionado) return 0;
     return this.tamanoSeleccionado.precio * this.cantidadSeleccionada;
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Calcular equivalencia por unidad
   getEquivalenciaPorUnidad(tamano: any): number {
     if (!tamano) return 1;
     
@@ -189,7 +197,6 @@ export class Fishes implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ MÉTODO SIMPLIFICADO - Agregar al carrito
   agregarAlCarritoSimplificado() {
     if (!this.productoSeleccionado) return;
 
@@ -259,5 +266,12 @@ export class Fishes implements OnInit, OnDestroy {
   // ✅ MÉTODO PARA VER SI UNA ESPECIALIDAD ES OFFLINE
   esEspecialidadOffline(especialidad: any): boolean {
     return especialidad.id && especialidad.id.toString().includes('offline_');
+  }
+
+  // ✅ MÉTODO OPCIONAL PARA FORZAR RECARGA SI ES NECESARIO
+  recargarEspecialidades() {
+    console.log('🔄 Recargando especialidades manualmente...');
+    this.loading = true;
+    this.fishesService.cargarEspecialidades().subscribe();
   }
 }

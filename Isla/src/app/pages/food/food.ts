@@ -19,7 +19,7 @@ export class Food implements OnInit, OnDestroy {
   recomendacionesDelDia: any[] = [];
   loading: boolean = true;
   categoriaSeleccionada: string = 'todas';
-  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
+  isOffline: boolean = false;
 
   // Variables para el modal de tamaños
   mostrarModal: boolean = false;
@@ -74,11 +74,11 @@ export class Food implements OnInit, OnDestroy {
     this.loading = true;
     this.cdRef.detectChanges();
 
-    // ✅ USAR EL MÉTODO ACTUALIZADO CON OFFLINE
+    // ✅ SUSCRIBIRSE AL BEHAVIORSUBJECT EN LUGAR DE HACER NUEVA PETICIÓN
     this.subscription.add(
-      this.foodService.cargarPlatillos().subscribe({
+      this.foodService.saucer$.subscribe({
         next: (comidas: foodInterface[]) => {
-          console.log('🍽️ Productos cargados:', comidas.length);
+          console.log('🍽️ Productos actualizados desde BehaviorSubject:', comidas.length);
           this.todosProductos = comidas;
           this.generarRecomendacionesDelDia();
           this.filtrarProductos();
@@ -86,15 +86,30 @@ export class Food implements OnInit, OnDestroy {
           this.cdRef.detectChanges();
         },
         error: (error: any) => {
-          console.error('❌ Error cargando platillos:', error);
+          console.error('❌ Error en BehaviorSubject:', error);
           this.loading = false;
           this.cdRef.detectChanges();
         }
       })
     );
+
+    // ✅ SUSCRIBIRSE AL ESTADO DE LOADING
+    this.subscription.add(
+      this.foodService.loading$.subscribe(loading => {
+        this.loading = loading;
+        this.cdRef.detectChanges();
+      })
+    );
+
+    // ✅ SOLO CARGAR DESDE API SI NO HAY DATOS EN EL BEHAVIORSUBJECT
+    const platillosActuales = this.foodService.getPlatillosActuales();
+    if (platillosActuales.length === 0) {
+      console.log('🔄 No hay platillos en cache, cargando desde API...');
+      this.foodService.cargarPlatillos().subscribe();
+    }
   }
 
-  // MÉTODO MODIFICADO - abrirModalProducto
+  // ✅ MANTENER TODOS LOS MÉTODOS EXISTENTES SIN CAMBIOS
   abrirModalProducto(producto: any) {
     this.currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
     
@@ -265,5 +280,12 @@ export class Food implements OnInit, OnDestroy {
   // ✅ MÉTODO PARA VER SI UN PLATILLO ES OFFLINE
   esPlatilloOffline(platillo: any): boolean {
     return platillo.id && platillo.id.toString().includes('offline_');
+  }
+
+  // ✅ MÉTODO OPCIONAL PARA FORZAR RECARGA SI ES NECESARIO
+  recargarPlatillos() {
+    console.log('🔄 Recargando platillos manualmente...');
+    this.loading = true;
+    this.foodService.cargarPlatillos().subscribe();
   }
 }
