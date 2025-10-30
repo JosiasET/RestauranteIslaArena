@@ -24,6 +24,7 @@ import { Drink } from './pages/client/drink/drink';
 import { Food } from './pages/client/food/food';
 import { Celebrates } from './pages/client/celebrates/celebrates';
 import { Promotions } from './pages/client/promotions/promotions';
+import { EditHome } from './pages/admin/edit-home/edit-home';
 
 
 export const routes: Routes = [
@@ -56,7 +57,8 @@ export const routes: Routes = [
     { path: 'upfish', component: UpFishesAmd },
     { path: 'uppromotion', component: UpPromotionAmd },
     { path: 'celebrae', component: UpCelebratesAmd},
-    { path: 'cwaiter', component: UpCreatewaiterAmd }
+    { path: 'cwaiter', component: UpCreatewaiterAmd },   
+    {path: 'edit-home', component: EditHome}
   ]
 },
 
