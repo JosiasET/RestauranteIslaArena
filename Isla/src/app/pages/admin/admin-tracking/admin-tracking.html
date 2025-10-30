@@ -1,0 +1,245 @@
+<div class="admin-tracking-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <h1>📦 Barra de Pedidos</h1>
+    <p>Gestión visual de pedidos - Haz clic para ver detalles</p>
+  </div>
+
+  <!-- Filtros rápidos -->
+  <div class="quick-filters">
+    <button class="filter-btn active" (click)="filterByStatus('')">📋 Todos ({{ stats.total }})</button>
+    <button class="filter-btn" (click)="filterByStatus('pendientes')">⏳ Pendientes ({{ stats.pendientes }})</button>
+    <button class="filter-btn" (click)="filterByStatus('en_proceso')">👨‍🍳 En Proceso ({{ stats.en_proceso }})</button>
+    <button class="filter-btn" (click)="filterByStatus('entregados')">✅ Entregados ({{ stats.entregados }})</button>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="search-controls">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="filterOrders()"
+        placeholder="🔍 Buscar pedido..."
+        class="search-input"
+      >
+    </div>
+    <button class="refresh-btn" (click)="loadOrders()" [disabled]="loading">
+      {{ loading ? '🔄' : '🔄' }}
+    </button>
+  </div>
+
+  <!-- Grid de pedidos tipo barra -->
+  <div class="orders-grid">
+    
+    <!-- Loading -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando pedidos...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredOrders.length === 0" class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h3>No hay pedidos</h3>
+      <p>No se encontraron pedidos con los filtros actuales.</p>
+    </div>
+
+    <!-- Tarjetas de pedido -->
+    <div *ngFor="let order of filteredOrders" 
+         class="order-card" 
+         [class]="getOrderCardClass(order)"
+         (click)="openOrderDetails(order)">
+      
+      <!-- Header de la tarjeta -->
+      <div class="card-header">
+        <div class="order-code">{{ order.tracking_code }}</div>
+        <div class="order-time">{{ getTimeAgo(order.order_date) }}</div>
+      </div>
+
+      <!-- Cliente -->
+      <div class="customer-info">
+        <div class="customer-name">👤 {{ order.customer_name }}</div>
+        <div class="customer-phone">📞 {{ order.customer_phone || 'N/A' }}</div>
+      </div>
+
+      <!-- Estado -->
+      <div class="order-status">
+        <span [class]="'status-badge ' + getStatusBadgeClass(order.status)">
+          {{ getStatusText(order.status) }}
+        </span>
+      </div>
+
+      <!-- Información de pago -->
+      <div class="payment-info">
+        <div class="payment-method">{{ getPaymentMethodText(order.payment_method) }}</div>
+        <div class="payment-status" [class]="order.payment_verified ? 'verified' : 'pending'">
+          {{ order.payment_verified ? '✅' : '⏳' }}
+        </div>
+      </div>
+
+      <!-- Total y cambio -->
+      <div class="amount-info">
+        <div class="total-amount">💰 ${{ order.total_amount }}</div>
+        
+        <!-- Mostrar información de efectivo si aplica -->
+        <div *ngIf="order.payment_method === 'efectivo'" class="cash-info">
+          <div *ngIf="order.delivery_address?.cashAmount" class="cash-details">
+            <div class="cash-amount">💵 Paga con: ${{ order.delivery_address?.cashAmount }}</div>
+            <div class="change-amount" 
+                 [class.exact]="getChangeAmount(order) === 0"
+                 [class.positive]="getChangeAmount(order) > 0"
+                 [class.negative]="getChangeAmount(order) < 0">
+              🔄 Cambio: ${{ getChangeAmount(order) | number:'1.2-2' }}
+            </div>
+          </div>
+          <div *ngIf="!order.delivery_address?.cashAmount" class="cash-warning">
+            ⚠️ No especificó con cuánto paga
+          </div>
+        </div>
+      </div>
+
+      <!-- Productos (resumen) -->
+      <div class="products-preview">
+        <div *ngFor="let item of order.order_items.slice(0, 2)" class="product-preview">
+          {{ item.nombre }} x{{ item.cantidad }}
+        </div>
+        <div *ngIf="order.order_items.length > 2" class="more-items">
+          +{{ (order.order_items.length - 2) }} más
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal de detalles -->
+  <div *ngIf="selectedOrder" class="modal-overlay" (click)="closeOrderDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      
+      <!-- Header del modal -->
+      <div class="modal-header">
+        <h2>📋 Detalles del Pedido</h2>
+        <button class="close-btn" (click)="closeOrderDetails()">×</button>
+      </div>
+
+      <!-- Información del pedido -->
+      <div class="modal-body">
+        
+        <!-- Información básica -->
+        <div class="detail-section">
+          <h3>Información del Cliente</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Código:</label>
+              <span>{{ selectedOrder.tracking_code }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Cliente:</label>
+              <span>{{ selectedOrder.customer_name }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Teléfono:</label>
+              <span>{{ selectedOrder.customer_phone || 'N/A' }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Fecha:</label>
+              <span>{{ selectedOrder.order_date | date:'medium' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información de pago -->
+        <div class="detail-section">
+          <h3>Información de Pago</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Método:</label>
+              <span>{{ getPaymentMethodText(selectedOrder.payment_method) }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Estado pago:</label>
+              <span>
+                <button 
+                  class="payment-toggle" 
+                  [class.verified]="selectedOrder.payment_verified"
+                  [class.pending]="!selectedOrder.payment_verified"
+                  (click)="togglePaymentStatus(selectedOrder)"
+                >
+                  {{ selectedOrder.payment_verified ? '✅ Verificado' : '⏳ Pendiente' }}
+                </button>
+              </span>
+            </div>
+            <div class="detail-item">
+              <label>Total:</label>
+              <span class="total-amount">${{ selectedOrder.total_amount }}</span>
+            </div>
+            
+            <!-- Información de efectivo -->
+            <div *ngIf="selectedOrder.payment_method === 'efectivo'" class="detail-item">
+              <label>Información Efectivo:</label>
+              <div class="cash-details-modal">
+                <div *ngIf="selectedOrder.delivery_address?.cashAmount; else noCashInfo">
+                  <div>💵 Paga con: ${{ selectedOrder.delivery_address?.cashAmount }}</div>
+                  <div [class]="getChangeAmount(selectedOrder) >= 0 ? 'change-positive' : 'change-negative'">
+                    🔄 Cambio: ${{ getChangeAmount(selectedOrder) | number:'1.2-2' }}
+                  </div>
+                  <div *ngIf="getChangeAmount(selectedOrder) < 0" class="change-alert">
+                    ⚠️ El cliente no lleva suficiente dinero
+                  </div>
+                </div>
+                <ng-template #noCashInfo>
+                  <div class="cash-warning">⚠️ No especificó con cuánto paga</div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Productos -->
+        <div class="detail-section">
+          <h3>🛒 Productos ({{ selectedOrder.order_items.length }})</h3>
+          <div class="products-list-detailed">
+            <div *ngFor="let item of selectedOrder.order_items" class="product-item-detailed">
+              <div class="product-info">
+                <span class="product-name">{{ item.nombre }}</span>
+                <span class="product-quantity">x{{ item.cantidad }}</span>
+              </div>
+              <div class="product-price">${{ (item.precio * item.cantidad) | number:'1.2-2' }}</div>
+            </div>
+            <div class="products-total">
+              <strong>Total: ${{ selectedOrder.total_amount }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div *ngIf="selectedOrder.delivery_address" class="detail-section">
+          <h3>📍 Dirección de Entrega</h3>
+          <div class="address-details">
+            <p>{{ selectedOrder.delivery_address.address }}</p>
+            <p>{{ selectedOrder.delivery_address.neighborhood }}, {{ selectedOrder.delivery_address.city }}</p>
+            <p *ngIf="selectedOrder.delivery_address.references">
+              <strong>Referencias:</strong> {{ selectedOrder.delivery_address.references }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Controles de estado -->
+        <div class="detail-section">
+          <h3>🔄 Actualizar Estado</h3>
+          <div class="status-controls">
+            <button 
+              *ngFor="let status of statusOptions"
+              class="status-btn" 
+              [class.active]="selectedOrder.status === status.value"
+              (click)="updateOrderStatus(selectedOrder, status.value)"
+            >
+              {{ status.icon }} {{ status.label }}
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { CartService, CartItem } from '../../core/interface/cart.services';
 
 @Component({
@@ -32,10 +33,12 @@ export class Checkoutpage implements OnInit {
   paymentMethod: string = '';
   cashAmount: number = 0;
   transferReference: string = '';
+  trackingCode: string = ''; // ← NUEVO: Para guardar el código generado
 
   constructor(
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient // ← AGREGAR HttpClient
   ) {}
 
   ngOnInit() {
@@ -53,7 +56,17 @@ export class Checkoutpage implements OnInit {
     }
   }
 
-  placeOrder() {
+  // GENERAR CÓDIGO ALEATORIO
+  generateTrackingCode(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'MS-';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  async placeOrder() {
     if (!this.isFormValid()) {
       alert('Por favor completa todos los campos obligatorios');
       return;
@@ -66,27 +79,59 @@ export class Checkoutpage implements OnInit {
 
     this.isSubmitting = true;
 
-    setTimeout(() => {
-      console.log('Datos del pedido:', {
-        customer: this.customerData,
-        payment: this.paymentMethod,
-        cashAmount: this.cashAmount,
-        transferReference: this.transferReference,
-        cart: this.cartItems,
-        total: this.total
-      });
+    try {
+      // 1. Generar código de seguimiento
+      this.trackingCode = this.generateTrackingCode();
       
-      // 1. Limpiar el carrito
+        const orderData = {
+          tracking_code: this.trackingCode,
+          customer_name: `${this.customerData.firstName} ${this.customerData.lastName}`,
+          customer_phone: this.customerData.phoneNumber,
+          customer_email: this.customerData.email || '',
+          order_items: this.cartItems,
+          total_amount: this.total,
+          status: 'pedido_recibido',
+          payment_verified: false,
+          payment_method: this.paymentMethod,
+          payment_reference: this.transferReference,
+          delivery_address: {
+            address: this.customerData.address,
+            neighborhood: this.customerData.neighborhood,
+            postal_code: this.customerData.postalCode,
+            city: this.customerData.city,
+            state: this.customerData.state,
+            references: this.customerData.references,
+            // ✅ AGREGAR cashAmount aquí
+            cashAmount: this.paymentMethod === 'efectivo' ? this.cashAmount : null
+          }
+        };
+
+      console.log('Enviando pedido a la base de datos:', orderData);
+
+      // 3. Guardar en la base de datos
+      const response: any = await this.http.post('http://localhost:3000/tracking', orderData).toPromise();
+      
+      console.log('Pedido guardado en BD:', response);
+
+      // 4. Limpiar el carrito
       this.cartService.clearCart();
       
-      // 2. Mostrar confirmación
-      alert(`¡Pedido realizado con éxito! Método de pago: ${this.getPaymentMethodText()}`);
+      // 5. Mostrar confirmación con código de seguimiento
+      alert(`¡Pedido realizado con éxito! 
       
-      // 3. Redirigir a home
+Tu código de seguimiento es: ${this.trackingCode}
+
+Guarda este código para rastrear tu pedido.`);
+
+      // 6. Redirigir a home
       this.router.navigate(['/Home']);
       
+    } catch (error) {
+      console.error('Error al guardar el pedido:', error);
+      alert('Error al procesar el pedido. Por favor intenta nuevamente.');
+    } finally {
       this.isSubmitting = false;
-    }, 1000);
+    }
   }
 
   // Validar formulario
@@ -104,7 +149,7 @@ export class Checkoutpage implements OnInit {
     return requiredFields.every(field => field && field.trim() !== '');
   }
 
-  // Validar método de pago - CORREGIDO
+  // Validar método de pago
   isPaymentValid(): boolean {
     if (!this.paymentMethod) return false;
     
@@ -113,10 +158,10 @@ export class Checkoutpage implements OnInit {
     }
     
     if (this.paymentMethod === 'transferencia') {
-      return !!this.transferReference && this.transferReference.trim() !== ''; // ← CORREGIDO
+      return !!this.transferReference && this.transferReference.trim() !== '';
     }
     
-    return true; // Para tarjeta, solo necesita estar seleccionada
+    return true;
   }
 
   getPaymentMethodText(): string {

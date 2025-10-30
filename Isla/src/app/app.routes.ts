@@ -24,7 +24,8 @@ import { Drink } from './pages/client/drink/drink';
 import { Food } from './pages/client/food/food';
 import { Celebrates } from './pages/client/celebrates/celebrates';
 import { Promotions } from './pages/client/promotions/promotions';
-
+import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/seguimiento-pedidos';
+import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
 
 export const routes: Routes = [
   {
@@ -38,7 +39,8 @@ export const routes: Routes = [
       { path: 'celebrate', component: Celebrates },
       { path: 'prmotion', component: Promotions },
       { path: 'cart', component: Mycart },
-      { path: 'checkout', component: Checkoutpage } 
+      { path: 'checkout', component: Checkoutpage },
+      { path: 'seguimiento', component: SeguimientoPedidosComponent }
     ]
   },
 
@@ -56,7 +58,8 @@ export const routes: Routes = [
     { path: 'upfish', component: UpFishesAmd },
     { path: 'uppromotion', component: UpPromotionAmd },
     { path: 'celebrae', component: UpCelebratesAmd},
-    { path: 'cwaiter', component: UpCreatewaiterAmd }
+    { path: 'cwaiter', component: UpCreatewaiterAmd },
+    {path: 'tracking', component: AdminTrackingComponent }
   ]
 },
 

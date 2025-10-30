@@ -56,3 +56,8 @@ app.listen(PORT, () => {
   console.log(`   👨‍💼 Mesero:         http://localhost:${PORT}/mesero`); // ✅ mesero
   console.log('=============================================');
 });
+
+const trackingRoutes = require('./src/routes/trackingRoutes');
+
+// ✅ Después de los otros app.use()
+app.use('/tracking', trackingRoutes);

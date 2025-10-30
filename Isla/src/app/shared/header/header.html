@@ -12,6 +12,14 @@
       <a class="menu-item" routerLink="Food" (click)="setHome(false)">PLATILLOS</a>
       <a class="menu-item" routerLink="fishes" (click)="setHome(false)">ESPECIALES</a>
       <a class="menu-item" routerLink="celebrate" (click)="setHome(false)">FESTEJOS</a>
+      
+      <!-- BARRA DE BÚSQUEDA DE PEDIDOS -->
+      <div class="search-order-container">
+        <div class="search-order-input" (click)="openOrderSearch()">
+          <span class="search-icon">🔍</span>
+          <span class="search-placeholder">Buscar pedido...</span>
+        </div>
+      </div>
     </nav>
 
     <!-- SECCIÓN DE ACCIONES -->
@@ -40,12 +48,91 @@
   </div>
 </div>
 
+<!-- VENTANA FLOTANTE DE BÚSQUEDA -->
+<div *ngIf="showOrderSearch" class="order-search-overlay" (click)="closeOrderSearch()">
+  <div class="order-search-modal" (click)="$event.stopPropagation()">
+    <div class="search-modal-header">
+      <h3>🔍 Rastrear Pedido</h3>
+      <button class="close-search-btn" (click)="closeOrderSearch()">×</button>
+    </div>
+    
+    <div class="search-modal-body">
+      <div class="search-input-container">
+        <input 
+          type="text" 
+          [(ngModel)]="orderSearchTerm"
+          (input)="searchOrder()"
+          placeholder="Ingresa código de seguimiento o nombre del cliente..."
+          class="search-modal-input"
+          #searchInput
+        >
+        <span class="search-modal-icon">🔍</span>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="orderSearchLoading" class="search-loading">
+        <div class="search-spinner"></div>
+        <p>Buscando pedido...</p>
+      </div>
+
+      <!-- Resultados -->
+      <div *ngIf="searchedOrder && !orderSearchLoading" class="search-results">
+        <div class="order-result-card">
+          <h4>✅ Pedido Encontrado</h4>
+          <div class="result-details">
+            <p><strong>Código:</strong> {{ searchedOrder.tracking_code }}</p>
+            <p><strong>Cliente:</strong> {{ searchedOrder.customer_name }}</p>
+            <p><strong>Estado:</strong> 
+              <span [class]="'status-badge ' + getStatusBadgeClass(searchedOrder.status)">
+                {{ getStatusText(searchedOrder.status) }}
+              </span>
+            </p>
+            <p><strong>Fecha:</strong> {{ searchedOrder.order_date | date:'medium' }}</p>
+            <p><strong>Total:</strong> ${{ searchedOrder.total_amount }}</p>
+          </div>
+
+          <!-- Timeline de estados -->
+          <div class="result-timeline">
+            <div *ngFor="let status of statusOptions" 
+                 [class]="getTimelineStatusClass(searchedOrder.status, status.value)"
+                 class="timeline-step">
+              <span class="timeline-dot"></span>
+              <span class="timeline-text">{{ status.label }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="orderSearchError && !orderSearchLoading" class="search-error">
+        <div class="error-icon">❌</div>
+        <p>{{ orderSearchError }}</p>
+        <small>Verifica el código o intenta con el nombre del cliente</small>
+      </div>
+
+      <!-- Instrucciones -->
+      <div *ngIf="!searchedOrder && !orderSearchLoading && !orderSearchError" class="search-instructions">
+        <div class="instructions-icon">💡</div>
+        <p><strong>¿Cómo buscar?</strong></p>
+        <ul>
+          <li>Ingresa el código de seguimiento (ej: MS-ABC123)</li>
+          <li>O escribe el nombre del cliente</li>
+          <li>También puedes usar el número de teléfono</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Resto de tu header actual (menú móvil, contenido principal) -->
+
 <!-- MENÚ FLOTANTE PARA MÓVIL -->
 <div class="mobile-menu" [class.active]="menuOpen">
   <a class="menu-item" routerLink="Drink" (click)="closeMenu(); setHome(false)">BEBIDAS</a>
   <a class="menu-item" routerLink="Food" (click)="closeMenu(); setHome(false)">PLATILLOS</a>
   <a class="menu-item" routerLink="fishes" (click)="closeMenu(); setHome(false)">ESPECIALES</a>
   <a class="menu-item" routerLink="celebrate" (click)="closeMenu(); setHome(false)">FESTEJOS</a>
+  <a class="menu-item" routerLink="seguimiento" (click)="setHome(false)">SEGUIMIENTO</a>
 </div>
 
 <!-- CONTENIDO PRINCIPAL -->
