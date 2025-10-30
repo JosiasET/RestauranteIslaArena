@@ -26,19 +26,13 @@
 }
 
 .logo1 {
-  width: 70px;
-  height: 70px;
+  width: 80px;
+  height: 80px;
   cursor: pointer;
   border: solid 2px transparent;
-  background-color: rgb(228, 229, 230);
   padding: 4px;
   transition: transform 0.4s ease, filter 0.4s ease;
   filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
-}
-
-.logo1:hover {
-  transform: scale(1.08) rotate(2deg);
-  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.7));
 }
 
 /* ==== MENÚ PRINCIPAL ==== */
