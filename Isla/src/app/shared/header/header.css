@@ -288,3 +288,354 @@
     display: none;
   }
 }
+
+/* ===== ESTILOS PARA BÚSQUEDA DE PEDIDOS ===== */
+
+/* Barra de búsqueda en el header */
+/* ===== ESTILOS PARA BÚSQUEDA DE PEDIDOS ===== */
+
+/* Barra de búsqueda en el header */
+.search-order-container {
+  margin-left: auto;
+  margin-right: 1rem;
+}
+
+.search-order-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  min-width: 200px;
+}
+
+.search-order-input:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.search-icon {
+  font-size: 0.9rem;
+}
+
+.search-placeholder {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Modal de búsqueda - MÁS ANCHO */
+.order-search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.order-search-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 700px; /* ← MÁS ANCHO */
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  color: #333; /* ← COLOR DE TEXTO PRINCIPAL */
+}
+
+.search-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.search-modal-header h3 {
+  margin: 0;
+  color: #0a3d62;
+}
+
+.close-search-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-search-btn:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.search-modal-body {
+  padding: 1.5rem;
+  color: #333; /* ← COLOR DE TEXTO PRINCIPAL */
+}
+
+.search-input-container {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.search-modal-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #333; /* ← COLOR DE TEXTO VISIBLE */
+}
+
+.search-modal-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+}
+
+/* Estados de carga y resultados */
+.search-loading, .search-error, .search-instructions {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.search-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007bff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.search-error {
+  background: #f8d7da;
+  color: #721c24;
+  border-radius: 8px;
+}
+
+.error-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.search-instructions {
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #333; /* ← COLOR DE TEXTO VISIBLE */
+}
+
+.instructions-icon {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.search-instructions ul {
+  text-align: left;
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  color: #333; /* ← COLOR DE TEXTO VISIBLE */
+}
+
+.search-instructions li {
+  margin-bottom: 0.5rem;
+  color: #333; /* ← COLOR DE TEXTO VISIBLE */
+}
+
+/* Resultados del pedido */
+.search-results {
+  margin-top: 1rem;
+}
+
+.order-result-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  color: #333; /* ← COLOR DE TEXTO VISIBLE */
+}
+
+.order-result-card h4 {
+  margin: 0 0 1rem 0;
+  color: #0a3d62;
+}
+
+.result-details p {
+  margin: 0.5rem 0;
+  color: #333; /* ← COLOR DE TEXTO VISIBLE */
+}
+
+.result-details strong {
+  color: #0a3d62;
+}
+
+/* Badges de estado */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.status-badge-received { background: #fff3cd; color: #856404; }
+.status-badge-verified { background: #d1ecf1; color: #0c5460; }
+.status-badge-preparing { background: #d4edda; color: #155724; }
+.status-badge-shipping { background: #cce5ff; color: #004085; }
+.status-badge-delivered { background: #d4edda; color: #155724; }
+.status-badge-completed { background: #e2e3e5; color: #383d41; }
+
+/* Timeline de estados - MEJOR ESPACIADO */
+.result-timeline {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+  position: relative;
+  gap: 0.5rem; /* ← ESPACIO ENTRE ELEMENTOS */
+}
+
+.result-timeline::before {
+  content: '';
+  position: absolute;
+  top: 20px; /* ← AJUSTAR POSICIÓN */
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: #ddd;
+  z-index: 1;
+}
+
+.timeline-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-width: 80px; /* ← ANCHO MÍNIMO */
+}
+
+.timeline-dot {
+  width: 16px; /* ← MÁS GRANDE */
+  height: 16px; /* ← MÁS GRANDE */
+  border-radius: 50%;
+  background: #ddd;
+  margin-bottom: 0.5rem;
+  z-index: 3;
+}
+
+.timeline-text {
+  font-size: 0.75rem; /* ← TEXTO MÁS PEQUEÑO */
+  text-align: center;
+  white-space: normal; /* ← PERMITIR SALTO DE LÍNEA */
+  line-height: 1.2;
+  color: #333; /* ← COLOR DE TEXTO VISIBLE */
+  font-weight: 500;
+  min-height: 2.5rem; /* ← ALTURA MÍNIMA */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeline-completed .timeline-dot {
+  background: #28a745;
+}
+
+.timeline-completed .timeline-text {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.timeline-active .timeline-dot {
+  background: #007bff;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #007bff;
+}
+
+.timeline-active .timeline-text {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.timeline-pending .timeline-dot {
+  background: #ddd;
+}
+
+.timeline-pending .timeline-text {
+  color: #666;
+}
+
+/* Asegurar que todos los textos sean visibles */
+.order-search-modal * {
+  color: #333 !important; /* ← FORZAR COLOR DE TEXTO */
+}
+
+.search-modal-body * {
+  color: #333 !important; /* ← FORZAR COLOR DE TEXTO */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-order-container {
+    display: none; /* Ocultar en móvil */
+  }
+  
+  .order-search-modal {
+    margin: 1rem;
+    max-height: 70vh;
+    max-width: 90%; /* ← MÁS ANCHO EN MÓVIL */
+  }
+  
+  .result-timeline {
+    flex-wrap: wrap; /* ← PERMITIR SALTO DE LÍNEA */
+    gap: 1rem;
+  }
+  
+  .result-timeline::before {
+    display: none;
+  }
+  
+  .timeline-step {
+    min-width: 70px;
+    flex: 0 0 calc(33.333% - 1rem); /* ← 3 COLUMNAS */
+  }
+  
+  .timeline-text {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-step {
+    flex: 0 0 calc(50% - 1rem); /* ← 2 COLUMNAS EN MÓVIL PEQUEÑO */
+  }
+}

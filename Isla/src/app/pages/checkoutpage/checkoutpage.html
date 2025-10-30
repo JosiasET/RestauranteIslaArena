@@ -69,86 +69,66 @@
     </div>
   </div>
 
-  <div class="payment-section">
-    <h2>Método de Pago</h2>
-    
-    <div class="payment-methods">
-      <div class="payment-option" [class.selected]="paymentMethod === 'transferencia'" (click)="selectPaymentMethod('transferencia')">
-        <div class="payment-icon">🏦</div>
-        <div class="payment-info">
-          <strong>Transferencia Bancaria</strong>
-          <small>Paga mediante transferencia interbancaria</small>
+  <!-- Método de Pago -->
+<div class="payment-section">
+  <h2>Método de Pago</h2>
+  
+  <div class="payment-methods">
+    <!-- Transferencia Bancaria -->
+    <div class="payment-option" [class.selected]="paymentMethod === 'transferencia'" (click)="selectPaymentMethod('transferencia')">
+      <div class="payment-icon">🏦</div>
+      <div class="payment-info">
+        <strong>Transferencia Bancaria</strong>
+        <small>Paga mediante transferencia interbancaria</small>
+      </div>
+    </div>
+
+    <!-- Información de transferencia -->
+    <div class="payment-details" *ngIf="paymentMethod === 'transferencia'">
+      <div class="bank-info">
+        <h4>Datos para Transferencia</h4>
+        <div class="bank-details">
+          <p><strong>Banco:</strong> Banamex</p>
+          <p><strong>Beneficiario:</strong> Restaurante Isla Arena</p>
+          <p><strong>Número de Cuenta:</strong> 5304 - 1690 - 8502 - 4849</p>
+        </div>
+        
+        <div class="form-group">
+          <label>Detalle de transferencia *</label>
+          <input type="text" [(ngModel)]="transferReference" [class.error]="!transferReference && isSubmitting" required placeholder="Ingresa el folio de tu transferencia">
+          <small class="error-message" *ngIf="!transferReference && isSubmitting">Ingresa el folio de transferencia</small>
+          <small class="help-text">⚠️ Tu pedido se procesará hasta que confirmemos la transferencia</small>
         </div>
       </div>
+    </div>
 
-      <!-- Información de transferencia -->
-      <div class="payment-details" *ngIf="paymentMethod === 'transferencia'">
-        <div class="bank-info">
-          <h4>Datos para Transferencia</h4>
-          <div class="bank-details">
-            <p><strong>Banco:</strong> Banamex</p>
-            <p><strong>Beneficiario:</strong> Restaurante Isla Arena</p>
-            <p><strong>Número de Cuenta:</strong> 5304 - 1690 - 8502 - 4849</p>
-          </div>
-          
-          <div class="form-group">
-            <label>Detalle de transferencia *</label>
-            <input type="text" [(ngModel)]="transferReference" [class.error]="!transferReference && isSubmitting" required placeholder="Ingresa el folio de tu transferencia">
-            <small class="error-message" *ngIf="!transferReference && isSubmitting">Ingresa el folio de transferencia y concepto</small>
-            <small class="help-text">⚠️ Tu pedido se procesará hasta que confirmemos la transferencia</small>
-          </div>
-        </div>
+    <!-- Efectivo -->
+    <div class="payment-option" [class.selected]="paymentMethod === 'efectivo'" (click)="selectPaymentMethod('efectivo')">
+      <div class="payment-icon">💵</div>
+      <div class="payment-info">
+        <strong>Efectivo</strong>
+        <small>Paga al momento de la entrega</small>
       </div>
+    </div>
 
-      <div class="payment-option" [class.selected]="paymentMethod === 'tarjeta'" (click)="selectPaymentMethod('tarjeta')">
-        <div class="payment-icon">💳</div>
-        <div class="payment-info">
-          <strong>Tarjeta Crédito/Débito</strong>
-          <small>Pago seguro con tarjeta</small>
+    <!-- Campo para especificar cantidad en efectivo -->
+    <div class="payment-details" *ngIf="paymentMethod === 'efectivo'">
+      <div class="cash-amount">
+        <div class="form-group">
+          <label>¿Con cuánto pagarás? *</label>
+          <input type="number" [(ngModel)]="cashAmount" [class.error]="!cashAmount && isSubmitting" placeholder="Ej: 500.00" min="0">
+          <small class="error-message" *ngIf="!cashAmount && isSubmitting">Especifica la cantidad con la que pagarás</small>
         </div>
-      </div>
-
-      <!-- Información de tarjeta -->
-      <div class="payment-details" *ngIf="paymentMethod === 'tarjeta'">
-        <div class="card-info">
-          <h4>💡 Pago con Tarjeta</h4>
-          <p><strong>Únicamente disponible en tienda</strong></p>
-          <p>Acude a nuestro restaurante para realizar el pago con tarjeta</p>
-          <div class="store-info">
-            <p>📍 <strong>Restaurante Isla Arena</strong></p>
-            <p>🏠 Dirección: Calle 9 Col. La Fatima</p>
-            <p>📞 Teléfono: 996-205-5604</p>
-            <p>🕒 Horario: 10 am a 4 pm</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="payment-option" [class.selected]="paymentMethod === 'efectivo'" (click)="selectPaymentMethod('efectivo')">
-        <div class="payment-icon">💵</div>
-        <div class="payment-info">
-          <strong>Efectivo</strong>
-          <small>Paga al momento de la entrega</small>
-        </div>
-      </div>
-
-      <!-- Campo para especificar cantidad en efectivo -->
-      <div class="payment-details" *ngIf="paymentMethod === 'efectivo'">
-        <div class="cash-amount">
-          <div class="form-group">
-            <label>¿Con cuánto pagarás? *</label>
-            <input type="number" [(ngModel)]="cashAmount" [class.error]="!cashAmount && isSubmitting" placeholder="Ej: 500.00" min="0">
-            <small class="error-message" *ngIf="!cashAmount && isSubmitting">Especifica la cantidad con la que pagarás</small>
-          </div>
-          
-          <div class="cash-change" *ngIf="cashAmount && total > 0">
-            <p>Total: <strong>{{ total | currency }}</strong></p>
-            <p>Cambio: <strong [class.negative]="(cashAmount - total) < 0">{{ (cashAmount - total) | currency }}</strong></p>
-            <small *ngIf="(cashAmount - total) < 0" class="warning-text">⚠️ La cantidad es menor al total</small>
-          </div>
+        
+        <div class="cash-change" *ngIf="cashAmount && total > 0">
+          <p>Total: <strong>{{ total | currency }}</strong></p>
+          <p>Cambio: <strong [class.negative]="(cashAmount - total) < 0">{{ (cashAmount - total) | currency }}</strong></p>
+          <small *ngIf="(cashAmount - total) < 0" class="warning-text">⚠️ La cantidad es menor al total</small>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Columna derecha - Resumen del pedido -->
   <div class="order-summary">

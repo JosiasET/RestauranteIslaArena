@@ -1,0 +1,74 @@
+<div class="seguimiento-container">
+  <h2>📦 Seguimiento de Pedido</h2>
+  
+  <div class="search-section">
+    <input 
+      type="text" 
+      [(ngModel)]="trackingCode"
+      placeholder="Ingresa tu código de seguimiento (ej: MS-ABC123)"
+      class="search-input"
+      (keyup.enter)="searchOrder()"
+    >
+    <button (click)="searchOrder()" [disabled]="loading" class="search-btn">
+      {{ loading ? '🔍 Buscando...' : '🔍 Buscar Pedido' }}
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Buscando tu pedido...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error && !loading" class="error-message">
+    ❌ {{ error }}
+  </div>
+
+  <!-- Order Details -->
+  <div *ngIf="order && !loading" class="order-details">
+    <h3>✅ Pedido Encontrado</h3>
+    <div class="order-info">
+  <p><strong>📋 Código:</strong> {{ order.tracking_code }}</p>
+  <p><strong>👤 Cliente:</strong> {{ order.customer_name }}</p>
+  <p><strong>📞 Teléfono:</strong> {{ order.customer_phone }}</p>
+  <p><strong>💳 Método de pago:</strong> {{ getPaymentMethodText(order.payment_method || '') }}</p>
+  <p><strong>✅ Estado pago:</strong> 
+  <span [class]="order.payment_verified ? 'status-verificado' : 'status-pendiente'">
+    {{ order.payment_verified ? '✅ Verificado' : '⏳ Pendiente' }}
+  </span>
+</p>
+  <p><strong>📦 Estado pedido:</strong> 
+    <span [class]="'status-' + order.status" class="status-badge">
+      {{ getStatusText(order.status) }}
+    </span>
+  </p>
+  <p><strong>📅 Fecha:</strong> {{ order.order_date | date:'medium' }}</p>
+  <p><strong>💰 Total:</strong> ${{ order.total_amount }}</p>
+</div>
+
+    <!-- Status Timeline -->
+    <div class="status-timeline">
+      <div [class]="getStatusClass('pedido_recibido')">
+        <span class="status-dot"></span>
+        <span class="status-text">Pedido Recibido</span>
+      </div>
+      <div [class]="getStatusClass('pago_verificado')">
+        <span class="status-dot"></span>
+        <span class="status-text">Pago Verificado</span>
+      </div>
+      <div [class]="getStatusClass('en_preparacion')">
+        <span class="status-dot"></span>
+        <span class="status-text">En Preparación</span>
+      </div>
+      <div [class]="getStatusClass('en_camino')">
+        <span class="status-dot"></span>
+        <span class="status-text">En Camino</span>
+      </div>
+      <div [class]="getStatusClass('entregado')">
+        <span class="status-dot"></span>
+        <span class="status-text">Entregado</span>
+      </div>
+    </div>
+  </div>
+</div>

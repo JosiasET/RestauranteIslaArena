@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterOutlet, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { StockService } from '../../core/service/Stock.service';
 
 @Component({
   standalone: true,
@@ -21,7 +22,8 @@ export class Gestoramd implements OnInit {
     especialidades: 12,
     reservas: 8,
     meseros: 6,
-    ventas: 45
+    ventas: 45,
+    stock: 30
   };
 
   constructor(private router: Router) { }

@@ -130,7 +130,48 @@ const especialidadesController = {
       console.error('❌ Error al eliminar especialidad:', err);
       res.status(500).json({ error: "Error al eliminar especialidad: " + err.message });
     }
+  }, // ✅ AGREGAR COMA AQUÍ
+
+  // Obtener especialidades con stock
+  obtenerEspecialidadesConStock: async (req, res) => {
+    try {
+      const result = await db.query(
+        "SELECT * FROM Productos WHERE categoria='Especialidad' ORDER BY nombre"
+      );
+      const especialidades = normalizarIDs(formatImageResponse(result.rows));
+      res.json(especialidades);
+    } catch (err) {
+      console.error('❌ Error al obtener especialidades con stock:', err);
+      res.status(500).json({ error: "Error al obtener especialidades con stock: " + err.message });
+    }
+  },
+
+  // Actualizar stock de especialidad
+  actualizarStockEspecialidad: async (req, res) => {
+    const { id } = req.params;
+    const { cantidad } = req.body;
+
+    if (cantidad === undefined || cantidad === null) {
+      return res.status(400).json({ error: "La cantidad es requerida" });
+    }
+
+    try {
+      const result = await db.query(
+        "UPDATE Productos SET unidad = $1 WHERE id_producto = $2 AND categoria='Especialidad' RETURNING *",
+        [cantidad, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Especialidad no encontrada" });
+      }
+
+      const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
+      res.json(especialidad);
+    } catch (err) {
+      console.error('❌ Error al actualizar stock de especialidad:', err);
+      res.status(500).json({ error: "Error al actualizar stock: " + err.message });
+    }
   }
-};
+}; // ✅ CIERRE CORRECTO DEL OBJETO
 
 module.exports = especialidadesController;
