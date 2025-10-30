@@ -107,29 +107,31 @@ export class Header {
   }
 
   searchOrder() {
-    if (!this.orderSearchTerm.trim()) {
-      this.searchedOrder = null;
-      this.orderSearchError = '';
-      return;
-    }
-
-    this.orderSearchLoading = true;
-    this.orderSearchError = '';
+  // Si el término de búsqueda está vacío, limpiar resultados
+  if (!this.orderSearchTerm.trim()) {
     this.searchedOrder = null;
-
-    this.trackingService.getOrderByCode(this.orderSearchTerm).subscribe({
-      next: (order: OrderTracking) => {
-        this.searchedOrder = order;
-        this.orderSearchLoading = false;
-      },
-      error: (error: any) => {
-        console.error('Error buscando pedido:', error);
-        this.orderSearchError = 'Pedido no encontrado';
-        this.orderSearchLoading = false;
-        this.searchedOrder = null;
-      }
-    });
+    this.orderSearchError = '';
+    return;
   }
+
+  this.orderSearchLoading = true;
+  this.orderSearchError = '';
+  this.searchedOrder = null;
+
+  // ✅ BUSCAR AUTOMÁTICAMENTE AL ESCRIBIR (con debounce)
+  this.trackingService.getOrderByCode(this.orderSearchTerm).subscribe({
+    next: (order: OrderTracking) => {
+      this.searchedOrder = order;
+      this.orderSearchLoading = false;
+    },
+    error: (error: any) => {
+      console.error('Error buscando pedido:', error);
+      this.orderSearchError = 'Pedido no encontrado';
+      this.orderSearchLoading = false;
+      this.searchedOrder = null;
+    }
+  });
+}
 
   // Métodos auxiliares para mostrar estados
   getStatusBadgeClass(status: string): string {

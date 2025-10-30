@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CartService, CartItem } from '../../core/interface/cart.services';
+import { TrackingService } from '../../core/service/tracking.service'; // ← AGREGAR
 
 @Component({
   selector: 'app-checkoutpage',
@@ -33,12 +34,13 @@ export class Checkoutpage implements OnInit {
   paymentMethod: string = '';
   cashAmount: number = 0;
   transferReference: string = '';
-  trackingCode: string = ''; // ← NUEVO: Para guardar el código generado
+  trackingCode: string = '';
 
   constructor(
     private cartService: CartService,
     private router: Router,
-    private http: HttpClient // ← AGREGAR HttpClient
+    private http: HttpClient,
+    private trackingService: TrackingService // ← AGREGAR
   ) {}
 
   ngOnInit() {
@@ -66,7 +68,7 @@ export class Checkoutpage implements OnInit {
     return result;
   }
 
-  async placeOrder() {
+  placeOrder() {
     if (!this.isFormValid()) {
       alert('Por favor completa todos los campos obligatorios');
       return;
@@ -79,59 +81,61 @@ export class Checkoutpage implements OnInit {
 
     this.isSubmitting = true;
 
-    try {
-      // 1. Generar código de seguimiento
-      this.trackingCode = this.generateTrackingCode();
-      
-        const orderData = {
-          tracking_code: this.trackingCode,
-          customer_name: `${this.customerData.firstName} ${this.customerData.lastName}`,
-          customer_phone: this.customerData.phoneNumber,
-          customer_email: this.customerData.email || '',
-          order_items: this.cartItems,
-          total_amount: this.total,
-          status: 'pedido_recibido',
-          payment_verified: false,
-          payment_method: this.paymentMethod,
-          payment_reference: this.transferReference,
-          delivery_address: {
-            address: this.customerData.address,
-            neighborhood: this.customerData.neighborhood,
-            postal_code: this.customerData.postalCode,
-            city: this.customerData.city,
-            state: this.customerData.state,
-            references: this.customerData.references,
-            // ✅ AGREGAR cashAmount aquí
-            cashAmount: this.paymentMethod === 'efectivo' ? this.cashAmount : null
-          }
-        };
+    // 1. Generar código de seguimiento
+    this.trackingCode = this.generateTrackingCode();
+    
+    // 2. Preparar datos del pedido
+    const orderData = {
+      tracking_code: this.trackingCode,
+      customer_name: `${this.customerData.firstName} ${this.customerData.lastName}`,
+      customer_phone: this.customerData.phoneNumber,
+      customer_email: this.customerData.email || '',
+      order_items: this.cartItems,
+      total_amount: this.total,
+      status: 'pedido_recibido',
+      payment_verified: false,
+      payment_method: this.paymentMethod,
+      payment_reference: this.transferReference,
+      delivery_address: {
+        address: this.customerData.address,
+        neighborhood: this.customerData.neighborhood,
+        postal_code: this.customerData.postalCode,
+        city: this.customerData.city,
+        state: this.customerData.state,
+        references: this.customerData.references,
+        cashAmount: this.paymentMethod === 'efectivo' ? this.cashAmount : null
+      }
+    };
 
-      console.log('Enviando pedido a la base de datos:', orderData);
+    console.log('Enviando pedido...');
 
-      // 3. Guardar en la base de datos
-      const response: any = await this.http.post('http://localhost:3000/tracking', orderData).toPromise();
-      
-      console.log('Pedido guardado en BD:', response);
+    // 3. Guardar en la base de datos (online/offline)
+    this.trackingService.createOrder(orderData).subscribe({
+      next: (response: any) => {
+        console.log('Pedido guardado:', response);
+        
+        // 4. Limpiar el carrito
+        this.cartService.clearCart();
+        
+        // 5. Mostrar confirmación
+        const mensaje = navigator.onLine 
+          ? `¡Pedido realizado con éxito! Tu código de seguimiento es: ${this.trackingCode}`
+          : `¡Pedido guardado localmente! Código temporal: ${this.trackingCode}. Se subirá automáticamente cuando recuperes internet.`;
+        
+        alert(mensaje);
 
-      // 4. Limpiar el carrito
-      this.cartService.clearCart();
-      
-      // 5. Mostrar confirmación con código de seguimiento
-      alert(`¡Pedido realizado con éxito! 
-      
-Tu código de seguimiento es: ${this.trackingCode}
-
-Guarda este código para rastrear tu pedido.`);
-
-      // 6. Redirigir a home
-      this.router.navigate(['/Home']);
-      
-    } catch (error) {
-      console.error('Error al guardar el pedido:', error);
-      alert('Error al procesar el pedido. Por favor intenta nuevamente.');
-    } finally {
-      this.isSubmitting = false;
-    }
+        // 6. Redirigir a home
+        this.router.navigate(['/Home']);
+        
+      },
+      error: (error: any) => {
+        console.error('Error al procesar el pedido:', error);
+        alert('Error al procesar el pedido. Por favor intenta nuevamente.');
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      }
+    });
   }
 
   // Validar formulario
