@@ -26,6 +26,8 @@ import { Celebrates } from './pages/client/celebrates/celebrates';
 import { Promotions } from './pages/client/promotions/promotions';
 import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/seguimiento-pedidos';
 import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
+import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
+
 
 export const routes: Routes = [
   {
@@ -59,7 +61,8 @@ export const routes: Routes = [
     { path: 'uppromotion', component: UpPromotionAmd },
     { path: 'celebrae', component: UpCelebratesAmd},
     { path: 'cwaiter', component: UpCreatewaiterAmd },
-    {path: 'tracking', component: AdminTrackingComponent }
+    {path: 'tracking', component: AdminTrackingComponent },
+    { path: 'upstock', component: UpStockAmdPage }
   ]
 },
 

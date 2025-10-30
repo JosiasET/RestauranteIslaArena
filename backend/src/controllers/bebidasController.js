@@ -87,6 +87,48 @@ const bebidasController = {
       console.error(err);
       res.status(500).json({ error: "Error al eliminar bebida" });
     }
+  },
+  // bebidasController.js - AGREGAR AL FINAL
+
+// Obtener bebidas con stock
+obtenerBebidasConStock: async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT * FROM Bebidas ORDER BY nombre"
+    );
+    const bebidas = normalizarIDs(formatImageResponse(result.rows));
+    res.json(bebidas);
+  } catch (err) {
+    console.error('❌ Error al obtener bebidas con stock:', err);
+    res.status(500).json({ error: "Error al obtener bebidas con stock: " + err.message });
+  }
+},
+
+// Actualizar stock de bebida
+actualizarStockBebida: async (req, res) => {
+  const { id } = req.params;
+  const { cantidad_productos } = req.body;
+
+  if (cantidad_productos === undefined || cantidad_productos === null) {
+    return res.status(400).json({ error: "La cantidad es requerida" });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE Bebidas SET cantidad_productos = $1 WHERE id_bebida = $2 RETURNING *",
+      [cantidad_productos, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Bebida no encontrada" });
+    }
+
+    const bebida = normalizarIDs(formatImageResponse(result.rows))[0];
+    res.json(bebida);
+  } catch (err) {
+    console.error('❌ Error al actualizar stock de bebida:', err);
+    res.status(500).json({ error: "Error al actualizar stock: " + err.message });
+    }
   }
 };
 

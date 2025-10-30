@@ -56,6 +56,12 @@
           <div class="nav-icon">📦</div>
           <span class="nav-text">Seguimiento de Pedidos</span>
         </a>
+
+        <!-- En el sidebar-nav, agregar este enlace después de los demás: -->
+        <a routerLink="upstock" routerLinkActive="active">
+          <div class="nav-icon">📦</div>
+          <span class="nav-text">Gestión de Stock</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -176,6 +182,14 @@
                 <p>Monitorear ventas activas</p>
                 <span class="action-badge">{{contadores.ventas}} hoy</span>
               </div>
+            </div>
+
+            <!-- En quick-actions-grid, agregar esta tarjeta: -->
+            <div class="quick-action-card" (click)="navegarA('upstock')">
+              <div class="action-icon">📦</div>
+              <h4>Gestión de Stock</h4>
+              <p>Administrar inventario de productos</p>
+              <span class="action-badge">{{contadores.stock}} productos</span>
             </div>
           </div>
 

@@ -98,7 +98,91 @@ const productosController = {
       console.error(err);
       res.status(500).json({ error: "Error al eliminar producto" });
     }
+  },
+
+    obtenerProductosConStock: async (req, res) => {
+      try {
+        const result = await db.query(
+          "SELECT * FROM Productos WHERE categoria IN ('Bebida', 'Especialidad') ORDER BY categoria, nombre"
+        );
+        const productos = normalizarIDs(formatImageResponse(result.rows));
+        res.json(productos);
+      } catch (err) {
+        console.error('❌ Error al obtener productos con stock:', err);
+        res.status(500).json({ error: "Error al obtener productos con stock: " + err.message });
+      }
+    },
+
+    // Actualizar solo el stock de un producto
+    actualizarStock: async (req, res) => {
+      const { id } = req.params;
+      const { cantidad_productos } = req.body;
+
+      if (cantidad_productos === undefined || cantidad_productos === null) {
+        return res.status(400).json({ error: "La cantidad es requerida" });
+      }
+
+      try {
+        const result = await db.query(
+          "UPDATE Productos SET cantidad_productos = $1, fecha_actualizacion = NOW() WHERE id_producto = $2 RETURNING *",
+          [cantidad_productos, id]
+        );
+
+        if (result.rows.length === 0) {
+          return res.status(404).json({ error: "Producto no encontrado" });
+        }
+
+        const producto = normalizarIDs(formatImageResponse(result.rows))[0];
+        res.json(producto);
+      } catch (err) {
+        console.error('❌ Error al actualizar stock:', err);
+        res.status(500).json({ error: "Error al actualizar stock: " + err.message });
+      }
+  },
+
+  // productosController.js - AGREGAR AL FINAL
+// Obtener bebidas con stock
+// productosController.js - CORREGIR CONSULTAS
+// Obtener bebidas con stock
+obtenerBebidasConStock: async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT * FROM Productos WHERE categoria = 'Bebida' ORDER BY nombre"
+    );
+    const bebidas = normalizarIDs(formatImageResponse(result.rows));
+    res.json(bebidas);
+  } catch (err) {
+    console.error('❌ Error al obtener bebidas con stock:', err);
+    res.status(500).json({ error: "Error al obtener bebidas con stock: " + err.message });
   }
+},
+
+// Actualizar stock de bebida
+actualizarStockBebida: async (req, res) => {
+  const { id } = req.params;
+  const { cantidad_productos } = req.body;
+
+  if (cantidad_productos === undefined || cantidad_productos === null) {
+    return res.status(400).json({ error: "La cantidad es requerida" });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE Productos SET cantidad_productos = $1 WHERE id_producto = $2 AND categoria = 'Bebida' RETURNING *",
+      [cantidad_productos, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Bebida no encontrada" });
+    }
+
+    const bebida = normalizarIDs(formatImageResponse(result.rows))[0];
+    res.json(bebida);
+  } catch (err) {
+    console.error('❌ Error al actualizar stock de bebida:', err);
+    res.status(500).json({ error: "Error al actualizar stock: " + err.message });
+  }
+}
 };
 
 module.exports = productosController;

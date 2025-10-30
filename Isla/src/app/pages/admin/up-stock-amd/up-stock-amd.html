@@ -1,0 +1,203 @@
+<!-- src/app/pages/admin/up-stock-amd/up-stock-amd.page.html -->
+<div class="stock-container">
+  <!-- HEADER -->
+  <div class="stock-header">
+    <div class="header-title">
+      <h1>📦 Gestión de Stock</h1>
+      <p>Administra el inventario de bebidas y especialidades</p>
+    </div>
+    
+    <div class="header-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{totalProductos}}</span>
+        <span class="stat-label">Productos</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{totalStock}}</span>
+        <span class="stat-label">Total Stock</span>
+      </div>
+      <div class="stat-item stock-bajo-alert" *ngIf="productosStockBajo > 0">
+        <span class="stat-number">{{productosStockBajo}}</span>
+        <span class="stat-label">Stock Bajo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTROS Y BÚSQUEDA -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="terminoBusqueda" 
+        (input)="buscarProductos()"
+        placeholder="🔍 Buscar productos..."
+        class="search-input">
+    </div>
+    
+    <div class="filter-controls">
+      <select [(ngModel)]="categoriaFiltro" (change)="aplicarFiltros()" class="filter-select">
+        <option value="">Todas las categorías</option>
+        <option value="Bebida">Bebidas</option>
+        <option value="Especialidad">Especialidades</option>
+      </select>
+
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          [(ngModel)]="stockBajoFiltro" 
+          (change)="aplicarFiltros()">
+        Mostrar solo stock bajo (≤10)
+      </label>
+
+      <button (click)="limpiarFiltros()" class="btn btn-secondary">
+        🗑️ Limpiar Filtros
+      </button>
+
+      <button (click)="cargarProductos()" class="btn btn-primary" [disabled]="isLoading">
+        🔄 {{isLoading ? 'Cargando...' : 'Actualizar'}}
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLA DE PRODUCTOS -->
+  <div class="products-table-container">
+    <div class="table-responsive">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Stock Actual</th>
+            <th>Acciones</th>
+            <th>Actualización Rápida</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- LOADING STATE -->
+          <tr *ngIf="isLoading">
+            <td colspan="5" class="loading-row">
+              <div class="loading-spinner">🔄</div>
+              Cargando productos...
+            </td>
+          </tr>
+
+          <!-- NO PRODUCTS STATE -->
+          <tr *ngIf="!isLoading && productosFiltrados.length === 0">
+            <td colspan="5" class="no-products">
+              📭 No se encontraron productos
+            </td>
+          </tr>
+
+          <!-- PRODUCTOS -->
+          <tr *ngFor="let producto of productosFiltrados" 
+              [class.stock-bajo-row]="producto.cantidad_productos <= 10"
+              [class.stock-cero-row]="producto.cantidad_productos === 0">
+            
+            <!-- INFORMACIÓN DEL PRODUCTO -->
+            <td class="product-info">
+              <div class="product-image">
+                <img [src]="producto.imagen" [alt]="producto.nombre" 
+                     (error)="producto.imagen = 'assets/images/placeholder-food.jpg'">
+              </div>
+              <div class="product-details">
+                <strong>{{producto.nombre}}</strong>
+                <small>{{producto.descripcion || 'Sin descripción'}}</small>
+                <div class="product-price">${{producto.precio}}</div>
+              </div>
+            </td>
+
+            <!-- CATEGORÍA -->
+            <td class="category-cell">
+              <span class="category-badge" [class]="producto.categoria.toLowerCase()">
+                {{getCategoriaIcon(producto.categoria)}} {{producto.categoria}}
+              </span>
+            </td>
+
+            <!-- STOCK ACTUAL -->
+            <td class="stock-cell">
+              <span class="stock-badge" [class]="getStockClass(producto.cantidad_productos)">
+                {{producto.cantidad_productos}}
+                <span *ngIf="producto.cantidad_productos === 0" class="stock-alert">⚠️</span>
+                <span *ngIf="producto.cantidad_productos > 0 && producto.cantidad_productos <= 5" class="stock-alert">🔻</span>
+              </span>
+            </td>
+
+            <!-- ACCIONES -->
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button 
+                  (click)="decrementarStock(producto, 1)" 
+                  [disabled]="isUpdating || producto.cantidad_productos === 0"
+                  class="btn btn-danger btn-sm"
+                  title="Quitar 1 unidad">
+                  ➖
+                </button>
+                
+                <button 
+                  (click)="incrementarStock(producto, 1)" 
+                  [disabled]="isUpdating"
+                  class="btn btn-success btn-sm"
+                  title="Agregar 1 unidad">
+                  ➕
+                </button>
+
+                <button 
+                  (click)="incrementarStock(producto, 5)" 
+                  [disabled]="isUpdating"
+                  class="btn btn-success btn-sm"
+                  title="Agregar 5 unidades">
+                  +5
+                </button>
+              </div>
+            </td>
+
+            <!-- ACTUALIZACIÓN RÁPIDA -->
+            <td class="quick-update-cell">
+              <div class="quick-update">
+                <input 
+                  type="number" 
+                  [value]="producto.cantidad_productos"
+                  #stockInput
+                  min="0"
+                  class="stock-input"
+                  (keyup.enter)="actualizarStock(producto, stockInput.valueAsNumber)">
+                <button 
+                  (click)="actualizarStock(producto, stockInput.valueAsNumber)"
+                  [disabled]="isUpdating"
+                  class="btn btn-primary btn-sm">
+                  ✅
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PIE DE PÁGINA INFORMATIVO -->
+  <div class="stock-footer">
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-color stock-alto"></span>
+        <span>Stock suficiente (>10)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color stock-medio"></span>
+        <span>Stock medio (6-10)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color stock-bajo"></span>
+        <span>Stock bajo (1-5)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color stock-cero"></span>
+        <span>Sin stock (0)</span>
+      </div>
+    </div>
+    
+    <div class="last-update">
+      Última actualización: {{isLoading ? 'Actualizando...' : (today | date:'medium')}}
+    </div>
+  </div>
+</div>
