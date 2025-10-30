@@ -1,10 +1,12 @@
+import { FoodService } from './../../../core/service/foodService';
+import { CartItem, CartService } from './../../../core/interface/cart.services';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CartService, CartItem } from '../../core/interface/cart.services';
-import { FoodService } from '../../core/service/foodService';
-import { foodInterface } from '../../core/interface/foodInterface';
+
+
 import { Subscription } from 'rxjs';
+import { foodInterface } from '../../../core/interface/foodInterface';
 
 @Component({
   selector: 'app-food',

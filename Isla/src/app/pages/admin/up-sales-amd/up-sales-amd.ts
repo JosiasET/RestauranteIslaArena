@@ -1,14 +1,14 @@
+import { FoodService } from './../../../core/service/foodService';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DrinkService } from '../../core/service/DrinkService';
-import { FoodService } from '../../core/service/foodService';
-import { FishesService } from '../../core/service/FishesService';
-import { SaleDataService } from '../../core/service/SaleDataService';
-import { Drinkinterface } from '../../core/interface/drink';
-import { foodInterface } from '../../core/interface/foodInterface';
-import { Fish } from '../../core/interface/Fish';
+import { DrinkService } from '../../../core/service/DrinkService';
+import { FishesService } from '../../../core/service/FishesService';
+import { SaleDataService } from '../../../core/service/SaleDataService';
+import { Drinkinterface } from '../../../core/interface/drink';
+import { foodInterface } from '../../../core/interface/foodInterface';
+import { Fish } from '../../../core/interface/Fish';
 
 interface CartItem {
   product: any;

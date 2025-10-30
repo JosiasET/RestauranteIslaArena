@@ -1,9 +1,11 @@
+import { CartItem } from './../../../core/interface/cart.services';
 import { Component } from '@angular/core';
-import { PromoService } from '../../core/service/PromoService';
-import { CartService, CartItem } from '../../core/interface/cart.services';
-import { PromoInterface } from '../../core/interface/PromoInterface';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PromoService } from '../../../core/service/PromoService';
+import { CartService } from '../../../core/interface/cart.services';
+import { PromoInterface } from '../../../core/interface/PromoInterface';
 
 @Component({
   selector: 'app-promotions',
@@ -28,7 +30,7 @@ export class Promotions {
   }
 
   agregarAlCarrito(platillo: PromoInterface) {
-    const cartItem: CartItem = {
+    const cartItem: CartItem= {
       id: Date.now(),
       nombre: platillo.nombre,
       descripcion: platillo.descripcion,

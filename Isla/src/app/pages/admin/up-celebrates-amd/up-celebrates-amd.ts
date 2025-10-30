@@ -1,10 +1,11 @@
+import { CelebrateInterface } from './../../../core/interface/celebrate';
 import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { CelebrateService } from '../../core/service/CelebrateService';
-import { CelebrateInterface } from '../../core/interface/celebrate';
+
 import { Observable, map, Subscription } from 'rxjs';
+import { CelebrateService } from '../../../core/service/CelebrateService';
 
 interface Reservacion {
   id: number | string;  // ✅ Permitir string para IDs offline

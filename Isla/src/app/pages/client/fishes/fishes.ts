@@ -1,10 +1,11 @@
+import { FishesService } from './../../../core/service/FishesService';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { FishesService } from '../../core/service/FishesService';
-import { Fish } from '../../core/interface/Fish';
-import { CartService, CartItem } from '../../core/interface/cart.services';
+
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { CartItem, CartService } from '../../../core/interface/cart.services';
+import { Fish } from '../../../core/interface/Fish';
 
 @Component({
   selector: 'app-fishes',

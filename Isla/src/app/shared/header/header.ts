@@ -4,7 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MycartDrawer } from '../mycart-drawer/mycart-drawer';
-import { Home } from "../../pages/home/home"; 
+import { Home } from "../../pages/client/home/home"; 
 
 @Component({
   standalone: true,

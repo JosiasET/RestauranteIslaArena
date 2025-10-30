@@ -1,8 +1,10 @@
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
-import { PromoInterface } from '../../core/interface/PromoInterface';
-import { PromoService } from '../../core/service/PromoService';
+
+
 import { CommonModule } from '@angular/common';
+import { PromoService } from '../../../core/service/PromoService';
+import { PromoInterface } from '../../../core/interface/PromoInterface';
 
 @Component({
   selector: 'app-up-promotion-amd',

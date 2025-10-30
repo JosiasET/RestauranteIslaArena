@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MeseroService } from '../../core/service/WaiterService';
-import { MeseroInterface } from '../../core/interface/waiter';
+
 import { Subscription } from 'rxjs';
+import { MeseroService } from '../../../core/service/WaiterService';
+import { MeseroInterface } from '../../../core/interface/waiter';
 
 @Component({
   selector: 'app-up-createwaiter-amd',

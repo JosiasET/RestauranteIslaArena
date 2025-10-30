@@ -1,9 +1,8 @@
 import { Component, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CelebrateService } from '../../core/service/CelebrateService';
-import { CelebrateInterface } from '../../core/interface/celebrate';
 import { Subscription } from 'rxjs';
+import { CelebrateService } from '../../../core/service/CelebrateService';
 
 @Component({
   selector: 'app-celebrates',

@@ -1,24 +1,30 @@
 import { Routes } from '@angular/router';
 import { Header } from './shared/header/header';
-import { Home } from './pages/home/home';
-import { Drink } from './pages/drink/drink';
-import { Food } from './pages/food/food';
-import { Celebrates } from './pages/celebrates/celebrates';
-import { Promotions } from './pages/promotions/promotions';
+import { Home } from './pages/client/home/home';
+
 import { Login } from './shared/login/login';
 import { Gestoramd } from './shared/gestoramd/gestoramd';
-import { UpResumeAmd } from './pages/up-resume-amd/up-resume-amd';
-import { UpDrinkAmd } from './pages/up-drink-amd/up-drink-amd';
-import { UpFoodAmd } from './pages/up-food-amd/up-food-amd';
-import { UpFishesAmd } from './pages/up-fishes-amd/up-fishes-amd';
-import { UpSalesAmd } from './pages/up-sales-amd/up-sales-amd';
+import { UpResumeAmd } from './pages/admin/up-resume-amd/up-resume-amd';
+
+
 import { CashierCheckout } from './pages/cashier-checkout/cashier-checkout';
-import { UpPromotionAmd } from './pages/up-promotion-amd/up-promotion-amd';
-import { UpCreatewaiterAmd } from './pages/up-createwaiter-amd/up-createwaiter-amd';
-import { UpCelebratesAmd } from './pages/up-celebrates-amd/up-celebrates-amd';
+
 import { Mycart } from './shared/mycart/mycart';
-import { Fishes } from './pages/fishes/fishes';
+
 import { Checkoutpage } from './pages/checkoutpage/checkoutpage';
+import { UpDrinkAmd } from './pages/admin/up-drink-amd/up-drink-amd';
+import { UpCelebratesAmd } from './pages/admin/up-celebrates-amd/up-celebrates-amd';
+import { Fishes } from './pages/client/fishes/fishes';
+import { UpCreatewaiterAmd } from './pages/admin/up-createwaiter-amd/up-createwaiter-amd';
+import { UpPromotionAmd } from './pages/admin/up-promotion-amd/up-promotion-amd';
+import { UpFishesAmd } from './pages/admin/up-fishes-amd/up-fishes-amd';
+import { UpFoodAmd } from './pages/admin/up-food-amd/up-food-amd';
+import { UpSalesAmd } from './pages/admin/up-sales-amd/up-sales-amd';
+import { Drink } from './pages/client/drink/drink';
+import { Food } from './pages/client/food/food';
+import { Celebrates } from './pages/client/celebrates/celebrates';
+import { Promotions } from './pages/client/promotions/promotions';
+
 
 export const routes: Routes = [
   {
@@ -26,7 +32,7 @@ export const routes: Routes = [
     component: Header,
     children: [
       { path: 'Home', component: Home },
-      { path: 'Drink', component: Drink },
+      { path: 'Drink', component: Drink},
       { path: 'fishes', component: Fishes },
       { path: 'Food', component: Food },
       { path: 'celebrate', component: Celebrates },
@@ -49,7 +55,7 @@ export const routes: Routes = [
     { path: 'upfood', component: UpFoodAmd },
     { path: 'upfish', component: UpFishesAmd },
     { path: 'uppromotion', component: UpPromotionAmd },
-    { path: 'celebrae', component: UpCelebratesAmd },
+    { path: 'celebrae', component: UpCelebratesAmd},
     { path: 'cwaiter', component: UpCreatewaiterAmd }
   ]
 },

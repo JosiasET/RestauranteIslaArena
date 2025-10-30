@@ -1,20 +1,22 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FishesService } from '../../core/service/FishesService';
-import { Fish } from '../../core/interface/Fish';
+
 import { Subscription } from 'rxjs';
+import { FoodService } from '../../../core/service/foodService';
+import { foodInterface } from '../../../core/interface/foodInterface';
 
 @Component({
-  selector: 'app-up-fishes-amd',
+  selector: 'app-up-food-amd',
   imports: [CommonModule, FormsModule],
-  templateUrl: './up-fishes-amd.html',
-  styleUrls: ['./up-fishes-amd.css']
+  templateUrl: './up-food-amd.html',
+  styleUrl: './up-food-amd.css' 
 })
-export class UpFishesAmd implements OnInit, OnDestroy {
-  activeSection: string = 'upfishes';
-  todasLasEspecialidades: Fish[] = [];
-  especialidadEditando: Fish | null = null;
+export class UpFoodAmd implements OnInit, OnDestroy {
+  activeSection: String = 'upfood';
+  todosLosPlatillos: foodInterface[] = [];
+  platilloEditando: foodInterface | null = null;
   esModoEdicion: boolean = false;
   isLoading: boolean = true;
   isSubmitting: boolean = false;
@@ -25,7 +27,6 @@ export class UpFishesAmd implements OnInit, OnDestroy {
   descripcion = '';
   descripcion_real = '';
   precio: number = 0;
-  stock: number = 0;
   imageBase64: string = '';
   tiene_tamanos: boolean = false;
 
@@ -36,12 +37,12 @@ export class UpFishesAmd implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
 
   constructor(
-    private fishesService: FishesService,
+    private foodService: FoodService,
     private cdRef: ChangeDetectorRef
-  ) {}
+  ){}
 
   ngOnInit() {
-    console.log('🔄 Inicializando componente UpFishesAmd...');
+    console.log('🔄 Inicializando componente UpFoodAmd...');
     
     // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
     this.isOffline = !navigator.onLine;
@@ -55,23 +56,23 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     });
 
     this.subscription.add(
-      this.fishesService.loading$.subscribe(loading => {
+      this.foodService.loading$.subscribe(loading => {
         this.isLoading = loading;
         this.cdRef.detectChanges();
       })
     );
 
     this.subscription.add(
-      this.fishesService.saucer$.subscribe((especialidades: Fish[]) => {
-        console.log('🔄 Lista de especialidades actualizada:', especialidades.length);
-        this.todasLasEspecialidades = especialidades;
+      this.foodService.saucer$.subscribe((platillos: foodInterface[]) => {
+        console.log('🔄 Lista de platillos actualizada:', platillos.length);
+        this.todosLosPlatillos = platillos;
         this.isLoading = false;
         this.cdRef.detectChanges();
       })
     );
 
-    if (this.todasLasEspecialidades.length === 0) {
-      this.cargarEspecialidadesInicial();
+    if (this.todosLosPlatillos.length === 0) {
+      this.cargarPlatillosInicial();
     }
   }
 
@@ -79,14 +80,14 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  cargarEspecialidadesInicial() {
-    console.log('🔄 Cargando especialidades inicialmente...');
-    this.fishesService.cargarEspecialidades().subscribe({
-      next: (especialidades) => {
-        console.log('✅ Especialidades cargadas exitosamente:', especialidades.length);
+  cargarPlatillosInicial() {
+    console.log('🔄 Cargando platillos inicialmente...');
+    this.foodService.cargarPlatillos().subscribe({
+      next: (platillos) => {
+        console.log('✅ Platillos cargados exitosamente:', platillos.length);
       },
       error: (err) => {
-        console.error('❌ Error cargando especialidades:', err);
+        console.error('❌ Error cargando platillos:', err);
         this.isLoading = false;
         this.cdRef.detectChanges();
       }
@@ -139,57 +140,56 @@ export class UpFishesAmd implements OnInit, OnDestroy {
   }
 
   // ✅ CORREGIDO - Manejar IDs string y number
-  eliminarEspecialidad(especialidad: Fish) {
-    if (!especialidad.id) {
-      console.error('❌ No se puede eliminar: Especialidad sin ID', especialidad);
-      alert('Error: La especialidad no tiene un ID válido');
+  eliminarPlatillo(platillo: foodInterface) {
+    if (!platillo.id) {
+      console.error('❌ No se puede eliminar: Platillo sin ID', platillo);
+      alert('Error: El platillo no tiene un ID válido');
       return;
     }
 
-    if (confirm(`¿Estás seguro de que deseas eliminar "${especialidad.nombre}"?`)) {
+    if (confirm(`¿Estás seguro de que deseas eliminar "${platillo.nombre}"?`)) {
       // ✅ CORRECCIÓN - Manejar correctamente string y number
       let idParaEliminar: number;
       
-      if (typeof especialidad.id === 'string') {
-        idParaEliminar = parseInt(especialidad.id);
+      if (typeof platillo.id === 'string') {
+        idParaEliminar = parseInt(platillo.id);
         if (isNaN(idParaEliminar)) {
           idParaEliminar = 0;
         }
       } else {
-        idParaEliminar = especialidad.id;
+        idParaEliminar = platillo.id;
       }
 
-      console.log('🗑️ Intentando eliminar especialidad ID:', idParaEliminar);
+      console.log('🗑️ Intentando eliminar platillo ID:', idParaEliminar);
       
-      this.fishesService.eliminarEspecialidad(idParaEliminar).subscribe({
+      this.foodService.eliminarPlatillo(idParaEliminar).subscribe({
         next: () => {
           console.log('✅ Eliminación completada');
         },
         error: (err) => {
-          console.error('❌ Error eliminando especialidad:', err);
-          alert('Error al eliminar la especialidad');
+          console.error('❌ Error eliminando platillo:', err);
+          alert('Error al eliminar el platillo');
         }
       });
     }
   }
 
-  editarEspecialidad(especialidad: Fish) {
-    if (!especialidad.id) {
-      console.error('❌ No se puede editar: Especialidad sin ID', especialidad);
-      alert('Error: La especialidad no tiene un ID válido');
+  editarPlatillo(platillo: foodInterface) {
+    if (!platillo.id) {
+      console.error('❌ No se puede editar: Platillo sin ID', platillo);
+      alert('Error: El platillo no tiene un ID válido');
       return;
     }
 
-    console.log('✏️ Editando especialidad ID:', especialidad.id);
-    this.especialidadEditando = especialidad;
-    this.nombre = especialidad.nombre;
-    this.descripcion = especialidad.descripcion;
-    this.descripcion_real = especialidad.descripcion_real || '';
-    this.precio = especialidad.precio;
-    this.stock = especialidad.cantidad || 0;
-    this.imageBase64 = especialidad.imagen;
-    this.tiene_tamanos = especialidad.tiene_tamanos || false;
-    this.tamanos = especialidad.tamanos || [];
+    console.log('✏️ Editando platillo ID:', platillo.id);
+    this.platilloEditando = platillo;
+    this.nombre = platillo.nombre;
+    this.descripcion = platillo.descripcion;
+    this.descripcion_real = platillo.descripcion_real || '';
+    this.precio = platillo.precio;
+    this.imageBase64 = platillo.imagen;
+    this.tiene_tamanos = platillo.tiene_tamanos || false;
+    this.tamanos = platillo.tamanos || [];
     this.esModoEdicion = true;
     
     console.log('📋 Tamaños cargados para edición:', this.tamanos);
@@ -204,8 +204,7 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     }, 100);
   }
 
-  subirEspecialidad() {
-    // Validaciones
+  subirsaucer() {
     if (!this.nombre || !this.descripcion || !this.precio || !this.imageBase64) {
       alert("Por favor, rellene todos los espacios");
       return;
@@ -216,13 +215,6 @@ export class UpFishesAmd implements OnInit, OnDestroy {
       return;
     }
 
-    // Validar stock
-    if (this.stock < 0) {
-      alert("El stock no puede ser negativo");
-      return;
-    }
-
-    // Validar tamaños si están habilitados
     if (this.tiene_tamanos && this.tamanos.length === 0) {
       alert("Debe agregar al menos un tamaño si ha habilitado esta opción");
       return;
@@ -231,42 +223,39 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     this.isSubmitting = true;
     this.cdRef.detectChanges();
 
-    // Crear objeto con ID temporal para nuevas especialidades
-    const especialidadData: Fish = {
-      id: this.esModoEdicion && this.especialidadEditando ? this.especialidadEditando.id : 0,
+    const platilloData: foodInterface = {
+      id: this.esModoEdicion && this.platilloEditando ? this.platilloEditando.id : 0,
       nombre: this.nombre,
       descripcion: this.descripcion,
       descripcion_real: this.descripcion_real,
       precio: Number(this.precio),
-      cantidad: this.stock,
       imagen: this.imageBase64,
       tiene_tamanos: this.tiene_tamanos,
-      tamanos: this.tiene_tamanos ? this.tamanos : undefined,
-      tipos: []
+      tamanos: this.tiene_tamanos ? this.tamanos : undefined
     };
 
-    if (this.esModoEdicion && this.especialidadEditando) {
+    if (this.esModoEdicion && this.platilloEditando) {
       // MODO EDICIÓN
-      if (!this.especialidadEditando.id) {
-        alert('Error: No se puede editar una especialidad sin ID');
+      if (!this.platilloEditando.id) {
+        alert('Error: No se puede editar un platillo sin ID');
         this.isSubmitting = false;
         this.cdRef.detectChanges();
         return;
       }
 
-      console.log('🔄 Actualizando especialidad:', especialidadData);
+      console.log('🔄 Actualizando platillo:', platilloData);
 
-      this.fishesService.actualizarEspecialidad(especialidadData).subscribe({
+      this.foodService.actualizarPlatillo(platilloData).subscribe({
         next: (respuesta) => {
-          console.log('✅ Especialidad actualizada exitosamente');
+          console.log('✅ Platillo actualizado exitosamente');
           this.esModoEdicion = false;
           this.isSubmitting = false;
           
           // ✅ MENSAJE MEJORADO
           if (this.isOffline) {
-            alert("📱 Especialidad actualizada localmente - Se sincronizará cuando haya internet");
+            alert("📱 Platillo actualizado localmente - Se sincronizará cuando haya internet");
           } else {
-            alert("✅ Especialidad actualizada exitosamente en el servidor");
+            alert("✅ Platillo actualizado exitosamente en el servidor");
           }
           
           this.limpiarFormulario();
@@ -274,24 +263,24 @@ export class UpFishesAmd implements OnInit, OnDestroy {
         error: (err) => {
           console.error('❌ Error actualizando:', err);
           this.isSubmitting = false;
-          alert("Error al actualizar la especialidad: " + err.message);
+          alert("Error al actualizar el platillo: " + err.message);
           this.cdRef.detectChanges();
         }
       });
     } else {
       // MODO CREACIÓN
-      console.log('🔄 Subiendo nueva especialidad');
+      console.log('🔄 Subiendo nuevo platillo');
 
-      this.fishesService.agregarEspecialidad(especialidadData).subscribe({
+      this.foodService.agregarPlatillo(platilloData).subscribe({
         next: (respuesta) => {
-          console.log('✅ Especialidad agregada exitosamente');
+          console.log('✅ Platillo agregado exitosamente');
           this.isSubmitting = false;
           
           // ✅ MENSAJE MEJORADO
           if (this.isOffline) {
-            alert("📱 Especialidad guardada localmente - Se subirá automáticamente cuando recuperes internet");
+            alert("📱 Platillo guardado localmente - Se subirá automáticamente cuando recuperes internet");
           } else {
-            alert("✅ Especialidad subida exitosamente al servidor");
+            alert("✅ Platillo subido exitosamente al servidor");
           }
           
           this.limpiarFormulario();
@@ -299,7 +288,7 @@ export class UpFishesAmd implements OnInit, OnDestroy {
         error: (err) => {
           console.error('❌ Error subiendo:', err);
           this.isSubmitting = false;
-          alert("Error al subir la especialidad: " + err.message);
+          alert("Error al subir el platillo: " + err.message);
           this.cdRef.detectChanges();
         }
       });
@@ -318,12 +307,11 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     this.descripcion = '';
     this.descripcion_real = '';
     this.precio = 0;
-    this.stock = 0;
     this.imageBase64 = '';
     this.tiene_tamanos = false;
     this.tamanos = [];
     this.nuevoTamano = { nombre: '', precio: 0 };
-    this.especialidadEditando = null;
+    this.platilloEditando = null;
     this.esModoEdicion = false;
     this.isSubmitting = false;
     
@@ -335,13 +323,13 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     this.cdRef.detectChanges();
   }
 
-  getTotalEspecialidades(): number {
-    return this.todasLasEspecialidades.length;
+  getTotalPlatillos(): number {
+    return this.todosLosPlatillos.length;
   }
 
   forzarRecarga() {
     console.log('🔄 Forzando recarga manual...');
-    this.cargarEspecialidadesInicial();
+    this.cargarPlatillosInicial();
   }
 
   // ✅ MÉTODO PARA MENSAJE OFFLINE
@@ -349,5 +337,6 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     return this.isOffline ? '📱 Modo offline - Los cambios se guardarán localmente' : '🌐 Conectado';
   }
 
-  // ✅ MÉTODO PARA VER SI UNA ESPECIALIDAD ES OFFLINE
+  // ✅ MÉTODO PARA VER SI UN PLATILLO ES OFFLINE
+  
 }
