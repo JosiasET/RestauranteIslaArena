@@ -1,271 +1,177 @@
-/* ===== ESTILOS PARA EL SISTEMA DE LOGIN ===== */
-.contenedor {
+/* Fondo principal */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #ecfeff, #eff6ff, #faf5ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* Tarjeta */
+.card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+/* Logo */
+.logo-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-image: url('/img/fondo3.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  padding: 20px;
-  font-family: 'Arial', sans-serif;
+  margin-bottom: 1rem;
+}
+.logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
-.caja {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  width: 100%;
-  max-width: 450px;
-  padding: 30px;
-  position: relative;
-  overflow: hidden;
-}
-
-.caja::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 5px;
-  background: linear-gradient(90deg, var(--azul-oscuro), var(--azul-claro), var(--acento));
-}
-
-/* Estilos para el título superior */
-.titulo-superior {
+/* Títulos */
+.title {
   text-align: center;
-  margin-bottom: 25px;
+  font-weight: 800;
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+.login-title {
+  background: linear-gradient(to right, #0891b2, #1e3a8a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.register-title {
+  background: linear-gradient(to right, #0891b2, #1e3a8a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.titulo-superior h1 {
-  color: var(--azul-oscuro);
-  font-size: 32px;
-  margin-bottom: 5px;
-  font-weight: 700;
+.subtitle {
+  text-align: center;
+  color: #4b5563;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
 }
 
-.titulo-superior p {
-  color: #666;
-  font-size: 16px;
-  margin: 0;
-  font-weight: normal;
+/* Inputs */
+.form-group {
+  margin-bottom: 1rem;
 }
-
-/* Eliminar los h2 antiguos ya que ahora usamos titulo-superior */
-.login h2, .recuperar h2 {
-  display: none;
-}
-
-label {
+.form-group label {
   display: block;
-  margin-bottom: 8px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--azul-oscuro);
-  font-size: 14px;
+  color: #374151;
+  margin-bottom: 0.25rem;
 }
-
-input {
+.form-group input {
   width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
   transition: all 0.3s ease;
-  box-sizing: border-box;
 }
-
-input:focus {
+.form-group input:focus {
   outline: none;
-  border-color: var(--azul-claro);
-  box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.2);
+  border-color: transparent;
+  box-shadow: 0 0 0 2px #22d3ee;
 }
 
-/* ===== ESTILOS PARA EL INPUT DE CONTRASEÑA CON OJO ===== */
-.password-container {
-  position: relative;
-  margin-bottom: 20px;
+/* Botones */
+.btn {
   width: 100%;
-}
-
-.password-input {
-  width: 100%;
-  padding: 14px 45px 14px 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-  margin-bottom: 0;
-}
-
-.password-input:focus {
-  outline: none;
-  border-color: var(--azul-claro);
-  box-shadow: 0 0 0 3px rgba(0, 168, 232, 0.2);
-}
-
-.toggle-password {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+  padding: 0.6rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 0.5rem;
+  color: white;
   cursor: pointer;
-  font-size: 18px;
+  transition: all 0.3s ease;
+}
+.login-btn {
+  background: linear-gradient(to right, #06b6d4, #2563eb);
+}
+.login-btn:hover {
+  background: linear-gradient(to right, #0891b2, #1e3a8a);
+  transform: translateY(-2px);
+}
+.register-btn {
+  background: linear-gradient(to right,  #0891b2, #1e3a8a);
+}
+.register-btn:hover {
+  background: linear-gradient(to right, #06b6d4, #2563eb);
+  transform: translateY(-2px);
+}
+
+/* Texto pequeño */
+.text-small {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+/* Divider */
+.divider {
+  margin: 1rem 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Enlaces */
+.link {
   background: none;
   border: none;
-  padding: 0;
-  user-select: none;
-  z-index: 2;
-  height: 20px;
+  color: #06b6d4;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.link:hover {
+  color: #0891b2;
+}
+.forgot {
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #06b6d4;
+  margin-top: 0.5rem;
+  text-decoration: none;
+}
+
+/* Checkbox */
+.checkbox {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
 }
 
-.toggle-password:hover {
-  opacity: 0.7;
+/* Beneficios */
+.benefits {
+  background: linear-gradient(to right, #faf5ff, #fdf2f8);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  margin-top: 1rem;
 }
-
-.botones {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 10px;
+.benefits h4 {
+  color: #7e22ce;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
 }
-
-button {
-  padding: 14px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.benefits ul {
+  font-size: 0.75rem;
+  color: #9333ea;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
-
-button:first-child {
-  background-color: var(--azul-medio);
-  color: white;
-}
-
-button:first-child:hover {
-  background-color: var(--azul-oscuro);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-button:last-child {
-  background-color: transparent;
-  color: var(--azul-medio);
-  border: 1px solid var(--azul-medio);
-}
-
-button:last-child:hover {
-  background-color: rgba(0, 116, 183, 0.1);
-}
-
-/* ===== ESTILOS PARA BOTÓN REGRESAR ===== */
-.boton-regresar {
-  text-align: center;
-  margin-top: 10px;
-}
-
-.btn-regresar {
-  background: transparent;
-  color: var(--azul-medio);
-  border: 1px solid var(--azul-medio);
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-  width: 100%;
-  display: block;
-}
-
-.btn-regresar:hover {
-  background-color: rgba(0, 116, 183, 0.1);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-/* ===== ESTILOS PARA EL ENLACE "OLVIDÓ SU CONTRASEÑA" ===== */
-.olvido-contrasena {
-  text-align: center;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e1e5e9;
-}
-
-.olvido-contrasena a {
-  color: var(--azul-medio);
-  text-decoration: none;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.olvido-contrasena a:hover {
-  color: var(--azul-oscuro);
-  text-decoration: underline;
-}
-
-/* Estilos específicos para el formulario de recuperación */
-.recuperar {
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Elemento decorativo marino */
-.caja::after {
-  content: '🐚';
-  position: absolute;
-  bottom: 15px;
-  right: 15px;
-  font-size: 24px;
-  opacity: 0.1;
-}
-
-/* Responsive */
-@media (max-width: 576px) {
-  .caja {
-    padding: 25px 20px;
-  }
-
-  .titulo-superior h1 {
-    font-size: 28px;
-  }
-
-  .titulo-superior p {
-    font-size: 14px;
-  }
-
-  input {
-    padding: 12px 14px;
-  }
-
-  .password-input {
-    padding: 12px 40px 12px 14px;
-  }
-
-  .toggle-password {
-    right: 10px;
-    font-size: 16px;
-  }
-
-  button {
-    padding: 12px;
-  }
-
-  .btn-regresar {
-    padding: 12px;
-    font-size: 16px;
-  }
+.benefits li {
+  margin-bottom: 0.25rem;
 }

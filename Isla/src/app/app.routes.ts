@@ -30,6 +30,7 @@ import { EditHome } from './pages/admin/edit-home/edit-home';
 import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/seguimiento-pedidos';
 import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
 import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
+import { Component } from '@angular/core';
 
 
 
@@ -53,25 +54,34 @@ export const routes: Routes = [
   { path: 'Login', component: Login, pathMatch: 'full' },
 
   {
-  path: 'gestoramd',
-  component: Gestoramd,
-  children: [
-    // Ruta vacía - el componente Gestoramd maneja el dashboard
-    { path: 'upresumen', component: UpResumeAmd },
-    { path: 'upsales', component: UpSalesAmd },
-    { path: 'updrink', component: UpDrinkAmd },
-    { path: 'upfood', component: UpFoodAmd },
-    { path: 'upfish', component: UpFishesAmd },
-    { path: 'uppromotion', component: UpPromotionAmd },
-    { path: 'celebrae', component: UpCelebratesAmd},
-    { path: 'cwaiter', component: UpCreatewaiterAmd },   
-    {path: 'edit-home', component: EditHome}
-    { path: 'cwaiter', component: UpCreatewaiterAmd },
-    {path: 'tracking', component: AdminTrackingComponent },
-    { path: 'upstock', component: UpStockAmdPage }
+    path: 'gestoramd',
+    component: Gestoramd,
+    children: [
+      // Ruta vacía - el componente Gestoramd maneja el dashboard
+      { path: 'upresumen', component: UpResumeAmd },
+      { path: 'upsales', component: UpSalesAmd },
+      { path: 'updrink', component: UpDrinkAmd },
+      { path: 'upfood', component: UpFoodAmd },
+      { path: 'upfish', component: UpFishesAmd },
+      { path: 'uppromotion', component: UpPromotionAmd },
+      { path: 'celebrae', component: UpCelebratesAmd},
+      { path: 'cwaiter', component: UpCreatewaiterAmd },   
+      {path: 'edit-home', component: EditHome},
+      { path: 'cwaiter', component: UpCreatewaiterAmd },
+      {path: 'tracking', component: AdminTrackingComponent },
+      { path: 'upstock', component: UpStockAmdPage }
 
-  ]
-},
+    ]
+  },
+
+  {path: 'home', component: Home,
+    children:[
+      {path:'fishes', component: Fishes},
+      {path:'Drink', component: Drink},
+      {path:'food', component: Food},
+      
+    ]
+  },
 
   // Direct route for cashier checkout
   { path: 'cashier-checkout', component: CashierCheckout }

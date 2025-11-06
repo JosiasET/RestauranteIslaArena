@@ -1,13 +1,68 @@
-<div>
-    <div>
-        <span>HOLA COMO ESTAN</span>
+<div class="container">
+  <h1>Mi Álbum de Imágenes</h1>
+  
+  <!-- Botón para seleccionar imagen -->
+  <div class="controls">
+    <input 
+      #fileInput
+      type="file" 
+      (change)="onFileSelected($event)"
+      accept="image/*"
+      style="display: none"
+    >
+    <button class="btn-select" (click)="seleccionarImagen()">
+      📸 Seleccionar Imagen
+    </button>
+    <p class="info">* La imagen se subirá automáticamente al álbum</p>
+  </div>
+
+  <!-- Contador de imágenes -->
+  <div class="counter">
+    <h3>📊 Estado: {{ imagenes.length }} imágenes en el álbum</h3>
+  </div>
+
+  <!-- Mensaje cuando no hay imágenes -->
+  <div *ngIf="imagenes.length === 0" class="empty">
+    <div class="empty-icon">🖼️</div>
+    <p>No hay imágenes en el álbum.</p>
+    <p>¡Selecciona una imagen para comenzar!</p>
+  </div>
+
+  <!-- GALERÍA DE IMÁGENES - VERSIÓN CORREGIDA -->
+  <div *ngIf="imagenes.length > 0" class="gallery-section">
+    <h2>🎨 Mi Galería de Imágenes</h2>
+    
+    <div class="gallery-grid">
+      <div 
+        *ngFor="let imagen of imagenes; let i = index" 
+        class="image-container"
+      >
+        <div class="image-wrapper">
+          <img 
+            [src]="imagen.src" 
+            [alt]="'Imagen ' + (i + 1)"
+            class="gallery-image"
+            (load)="onImageLoad(i)"
+            (error)="onImageError(i)"
+          >
+        </div>
+        <div class="image-details">
+          <span class="image-name">Imagen {{ i + 1 }}</span>
+          <button class="btn-delete" (click)="eliminarImagen(i)">
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
 
-
-
-     <div>
-        <h4>subir imagenes</h4>
-         <input type="file">
-     </div>
-   
+  <!-- Botón de debug -->
+  <div class="debug-actions">
+    <button class="btn-debug" (click)="actualizarVista()">
+      🔄 Actualizar Vista
+    </button>
+    <button class="btn-debug" (click)="verArrayEnConsola()">
+      📝 Ver Array en Consola
+    </button>
+  </div>
 </div>

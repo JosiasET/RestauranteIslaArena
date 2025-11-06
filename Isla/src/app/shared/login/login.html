@@ -1,75 +1,87 @@
-<div class="contenedor">
-  <div class="caja">
-    <!-- Bloque INICIO DE SESIÓN -->
-    <div class="login" *ngIf="!mostrarRecuperar">
-      <div class="titulo-superior">
-        <h1>Isla Arena</h1>
-        <p>Iniciar sesión</p>
-      </div>
-      
-      <label for="email">Correo electrónico</label>
-      <input type="text" placeholder="ejemplo@gmail.con" [(ngModel)]="correo" id="email">
-
-      <label for="password">Contraseña</label>
-      <div class="password-container">
-        <input 
-          type="{{ mostrarPassword ? 'text' : 'password' }}" 
-          placeholder="contraseña" 
-          [(ngModel)]="contrasena" 
-          id="password"
-          class="password-input">
-        <span class="toggle-password" (click)="togglePassword()">
-          {{ mostrarPassword ? '👁️' : '👁️‍🗨️' }}
-        </span>
-      </div>
-
-      <div class="botones">
-        <button (click)="acept()">Ingresar</button>
-      </div>
-
-      <!-- Botón regresar al home -->
-      <div class="boton-regresar">
-        <button class="btn-regresar" (click)="regresarHome()">
-          Regresar al Inicio
-        </button>
-      </div>
-
-      <!-- Enlace para olvidó contraseña -->
-      <div class="olvido-contrasena">
-        <a href="#" (click)="toggleRecuperar(); $event.preventDefault()">¿Olvidó su contraseña?</a>
-      </div>
+<div class="container">
+  <div *ngIf="visible; else registro" class="card">
+    <!-- LOGIN -->
+    <div class="logo-container">
+      <img src="img/logo.png" alt="Logo" class="logo" />
     </div>
+    <h3 class="title login-title">Bienvenido</h3>
+    <p class="subtitle">Ingresa a tu cuenta</p>
 
-    <!-- Bloque RECUPERAR CONTRASEÑA -->
-    <div class="recuperar" *ngIf="mostrarRecuperar">
-      <div class="titulo-superior">
-        <h1>Isla Arena</h1>
-        <p>Recuperar contraseña</p>
-      </div>
-
-      <label for="email-recovery">Correo electrónico</label>
+    <div class="form-group">
+      <label>Correo Electrónico</label>
       <input
         type="email"
-        id="email-recovery"
-        placeholder="tu@ejemplo.com"
-        required
-        autocomplete="email"
-        aria-label="Correo electrónico"
+        placeholder="tu@email.com"
+        [(ngModel)]="correo"
       />
-
-      <label for="whatsapp">Número de WhatsApp (opcional)</label>
-      <input
-        type="tel"
-        id="whatsapp"
-        placeholder="+521234567890"
-        pattern="\\+?\\d{10,15}"
-        aria-label="Número de WhatsApp"
-      />
-
-      <div class="botones">
-        <button (click)="enviarCodigo()">Enviar código</button>
-        <button (click)="toggleRecuperar()">Regresar</button>
-      </div>
     </div>
+
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input
+        type="password"
+        placeholder="••••••••"
+        [(ngModel)]="password"
+      />
+    </div>
+
+    <button (click)="campos()" class="btn login-btn">Iniciar Sesión</button>
+
+    <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
+
+    <div class="divider"></div>
+
+    <p class="text-small">
+      ¿No tienes una cuenta?
+      <button (click)="toggleView()" class="link">Crear cuenta</button>
+    </p>
   </div>
+
+  <!-- REGISTRO -->
+  <ng-template #registro>
+    <div class="card">
+      <div class="logo-container">
+        <img src="img/logo.png" alt="Logo" class="logo" />
+      </div>
+      <h3 class="title register-title">Únete a Nosotros</h3>
+      <p class="subtitle">Crea tu cuenta</p>
+
+      <div class="form-group">
+        <label>Correo Electrónico</label>
+        <input
+          type="email"
+          placeholder="ejemplo@email.com"
+          [(ngModel)]="correo"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Número de Teléfono</label>
+        <input
+          type="tel"
+          placeholder="99 7108 3128"
+          [(ngModel)]="numero"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input
+          type="password"
+          placeholder="••••••••"
+          [(ngModel)]="password"
+        />
+      </div>
+
+      <button (click)="campos()" class="btn register-btn">Crear Cuenta</button>
+
+      <div class="divider"></div>
+
+      <p class="text-small">
+        ¿Ya tienes una cuenta?
+        <button (click)="toggleView()" class="link">Iniciar sesión</button>
+      </p>
+
+    </div>
+  </ng-template>
 </div>
