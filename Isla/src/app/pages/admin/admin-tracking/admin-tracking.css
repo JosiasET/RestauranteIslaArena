@@ -43,16 +43,16 @@
 }
 
 .filter-btn {
-  border-color: #007bff;
-  background: #007bff;
+  border-color: #ffffff;
+  background: linear-gradient(135deg, #4682b4, #87ceeb);
   color: white;
 
 }
 
 .filter-btn.active {
-  background: #007bff;
+  background: linear-gradient(135deg, #4682b4, #87ceeb);
   color: white;
-  border-color: #007bff;
+  border-color: #ffffff;
 }
 
 
@@ -80,7 +80,7 @@
 
 .refresh-btn {
   padding: 0.75rem;
-  background: #28a745;
+  background: linear-gradient(135deg, #4682b4, #87ceeb);
   color: white;
   border: none;
   border-radius: 50%;
@@ -99,7 +99,7 @@
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: #218838;
+  background: linear-gradient(135deg, #87ceeb, #4682b4);
   transform: scale(1.05);
 }
 

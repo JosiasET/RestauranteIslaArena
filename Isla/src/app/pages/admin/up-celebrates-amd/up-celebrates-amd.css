@@ -3,7 +3,7 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   padding: 30px;
   border-radius: 15px;
-  max-width: 1400px;
+  max-width: 1500px;
   margin: 20px auto;
   font-family: 'Arial', sans-serif;
   box-sizing: border-box;
@@ -30,7 +30,7 @@
   transform: translateX(-50%);
   width: 100px;
   height: 5px;
-  background: linear-gradient(90deg, #0a3d62, #f08a5d);
+  background: linear-gradient(90deg, #0a3d62, #00e5ff);
   border-radius: 3px;
 }
 

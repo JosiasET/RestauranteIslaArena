@@ -169,7 +169,7 @@
 }
 
 .result-card.success {
-  border-left: 5px solid #28a745;
+  border-left: 5px solid #0e00ad;
 }
 
 .result-card.error {
@@ -248,7 +248,7 @@
 }
 
 .btn-print, .btn-retry, .btn-calendar {
-  background: #f08a5d;
+  background: #3498db;
   color: white;
   border: none;
   padding: 12px 25px;
@@ -261,7 +261,7 @@
 }
 
 .btn-print:hover, .btn-retry:hover, .btn-calendar:hover {
-  background: #e07a4d;
+  background: #113cff;
 }
 
 /* Información adicional */
@@ -328,7 +328,7 @@
 
 /* Estilos para el código de reservación */
 .codigo-reserva {
-  background: linear-gradient(135deg, #16cf44 0%, #1a5f8e 100%);
+  background: linear-gradient(135deg, #09c3f2 10%, #1a5f8e 80%);
   color: white; /* ← ESTE ESTÁ BIEN (blanco sobre azul) */
   padding: 1rem;
   border-radius: 8px;
@@ -403,7 +403,7 @@
 }
 
 .btn-calendar {
-  background: #28a745;
+  background: #3498db;
   color: white;
   border: none;
   padding: 12px 25px;
@@ -415,7 +415,7 @@
 }
 
 .btn-calendar:hover {
-  background: #218838;
+  background: #113cff;
 }
 
 /* Mensajes de éxito y error */
