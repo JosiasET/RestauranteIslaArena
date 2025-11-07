@@ -688,4 +688,27 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
   esReservaOffline(reserva: Reservacion): boolean {
     return reserva.offline || false;
   }
+
+  // En up-celebrates-amd.ts - AGREGAR
+sincronizarManual() {
+  this.celebrateService.sincronizarManual().subscribe({
+    next: (resultado) => {
+      alert(`✅ Sincronización manual completada:\n${resultado.exitosas} exitosas\n${resultado.errores} errores`);
+      this.cargarReservaciones();
+    },
+    error: (error) => {
+      alert(`❌ Error en sincronización: ${error.message}`);
+    }
+  });
+}
+
+verDiagnostico() {
+  const diagnostico = this.celebrateService.diagnosticarSincronizacion();
+  alert(`🔍 Diagnóstico:
+Online: ${diagnostico.online ? '✅' : '❌'}
+Pendientes: ${diagnostico.pendientes}
+Sincronizando: ${diagnostico.sincronizando ? '✅' : '❌'}
+Reservas locales: ${diagnostico.celebracionesLocales}
+Reservas offline: ${diagnostico.celebracionesOffline}`);
+}
 }

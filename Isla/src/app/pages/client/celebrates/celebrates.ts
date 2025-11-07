@@ -278,4 +278,23 @@ export class Celebrates implements OnInit, OnDestroy {
   getEstadoConexion(): string {
     return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
   }
+
+  // En el componente celebrate.ts - AGREGAR este método
+sincronizarReservasPendientes() {
+  if (!navigator.onLine) {
+    alert('📱 No hay conexión a internet para sincronizar');
+    return;
+  }
+
+  this.celebrateService.sincronizarManual().subscribe({
+    next: (resultado) => {
+      alert(`✅ Sincronización completada:\n${resultado.exitosas} exitosas\n${resultado.errores} errores`);
+      this.cdRef.detectChanges();
+    },
+    error: (error) => {
+      alert(`❌ Error en sincronización: ${error.message}`);
+    }
+  });
+}
+
 }

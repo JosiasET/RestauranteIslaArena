@@ -47,107 +47,23 @@ export class CelebrateService {
     }
   }
 
-  // ✅ CARGAR CELEBRACIONES (ONLINE/OFFLINE)
-  cargarCelebraciones(): Observable<CelebrateInterface[]> {
-    this.loadingSource.next(true);
-    
-    if (navigator.onLine) {
-      return this.http.get<CelebrateInterface[]>(this.apiUrl).pipe(
-        tap(celebraciones => {
-          console.log('✅ Celebraciones cargadas desde API:', celebraciones.length);
-          // ✅ CORREGIDO - Asegurar que todas tengan syncStatus
-          const celebracionesConSync = celebraciones.map(c => ({
-            ...c,
-            syncStatus: 'synced' as const
-          }));
-          this.celebracionesSource.next(celebracionesConSync);
-          this.loadingSource.next(false);
-          this.guardarCacheCelebraciones(celebracionesConSync);
-        }),
-        catchError(err => {
-          console.error('❌ Error API, cargando desde cache:', err);
-          return this.cargarCelebracionesOffline();
-        })
-      );
-    } else {
-      return this.cargarCelebracionesOffline();
-    }
-  }
-
-  private cargarCelebracionesOffline(): Observable<CelebrateInterface[]> {
-    return new Observable(observer => {
-      try {
-        const cacheKey = 'celebraciones_cache';
-        const cached = localStorage.getItem(cacheKey);
-        
-        if (cached) {
-          const celebracionesCache = JSON.parse(cached);
-          const celebraciones = celebracionesCache.data.map((c: any) => this.normalizarCelebracion(c));
-          
-          console.log('📱 Celebraciones cargadas desde cache:', celebraciones.length);
-          this.celebracionesSource.next(celebraciones);
-          this.loadingSource.next(false);
-          observer.next(celebraciones);
-        } else {
-          console.log('📱 No hay celebraciones en cache');
-          this.celebracionesSource.next([]);
-          this.loadingSource.next(false);
-          observer.next([]);
-        }
-        observer.complete();
-      } catch (error) {
-        console.error('❌ Error cargando cache:', error);
-        this.celebracionesSource.next([]);
-        this.loadingSource.next(false);
-        observer.next([]);
-        observer.complete();
-      }
-    });
-  }
-
-  private normalizarCelebracion(celebracion: any): CelebrateInterface {
-    return {
-      id_celebracion: celebracion.id_celebracion || celebracion.id,
-      nombre_completo: celebracion.nombre_completo,
-      fecha_nacimiento: celebracion.fecha_nacimiento,
-      telefono: celebracion.telefono,
-      fecha_preferida: celebracion.fecha_preferida,
-      hora_preferida: celebracion.hora_preferida,
-      acepta_verificacion: celebracion.acepta_verificacion || false,
-      reservation: celebracion.reservation,
-      cant_people: celebracion.cant_people || 1,
-      ine_verificacion: celebracion.ine_verificacion || false,
-      estado_verificacion: celebracion.estado_verificacion || false,
-      fecha_creacion: celebracion.fecha_creacion || celebracion.created_at,
-      created_at: celebracion.created_at,
-      // ✅ CORREGIDO - Propiedades offline con tipos correctos
-      offline: celebracion.offline || false,
-      pendingSync: celebracion.pendingSync || false,
-      tempId: celebracion.tempId,
-      syncStatus: celebracion.syncStatus || 'synced'
-    };
-  }
-
-  private guardarCacheCelebraciones(celebraciones: CelebrateInterface[]): void {
-    try {
-      const cacheKey = 'celebraciones_cache';
-      const cacheData = {
-        data: celebraciones,
-        timestamp: new Date().getTime()
-      };
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-    } catch (error) {
-      console.error('❌ Error guardando cache:', error);
-    }
-  }
-
-  // ✅ VERIFICAR DISPONIBILIDAD (ONLINE/OFFLINE)
+  // ✅ VERIFICAR DISPONIBILIDAD MEJORADA - INCLUYE OFFLINE
   verificarDisponibilidad(fecha: string, hora: string, personasSolicitadas: number): Observable<{ 
     disponible: boolean; 
     mensaje: string; 
     capacidadRestante: number;
     totalReservado: number;
   }> {
+    // ✅ SIEMPRE calcular incluyendo reservas offline locales
+    const celebracionesLocales = this.celebracionesSource.getValue();
+    const celebracionesEnFechaHora = celebracionesLocales.filter(c => 
+      c.fecha_preferida === fecha && c.hora_preferida === hora
+    );
+    
+    const totalReservadoLocal = celebracionesEnFechaHora.reduce((sum, c) => sum + (c.cant_people || 1), 0);
+    const capacidadRestanteLocal = this.CAPACIDAD_MAXIMA - totalReservadoLocal;
+    const disponibleLocal = capacidadRestanteLocal >= personasSolicitadas;
+
     if (navigator.onLine) {
       return this.http.post<any>(`${this.apiUrl}/verificar-disponibilidad`, {
         fecha_preferida: fecha,
@@ -155,11 +71,21 @@ export class CelebrateService {
         cant_people: personasSolicitadas
       }).pipe(
         map((resultado: any) => {
+          // ✅ COMBINAR resultado del backend con reservas locales offline
+          const totalReservadoCombinado = Math.max(resultado.total_reservado || 0, totalReservadoLocal);
+          const capacidadRestanteCombinada = this.CAPACIDAD_MAXIMA - totalReservadoCombinado;
+          const disponibleCombinado = capacidadRestanteCombinada >= personasSolicitadas;
+
+          let mensaje = resultado.mensaje;
+          if (!disponibleCombinado && disponibleLocal) {
+            mensaje = '⚠️ Capacidad comprometida por reservas pendientes de sincronizar';
+          }
+
           return {
-            disponible: resultado.disponible,
-            mensaje: resultado.mensaje,
-            capacidadRestante: resultado.capacidad_restante,
-            totalReservado: resultado.total_reservado
+            disponible: disponibleCombinado,
+            mensaje: mensaje,
+            capacidadRestante: capacidadRestanteCombinada,
+            totalReservado: totalReservadoCombinado
           };
         }),
         catchError(err => {
@@ -213,13 +139,147 @@ export class CelebrateService {
     });
   }
 
-  // ✅ CREAR CELEBRACIÓN CON VALIDACIÓN (ONLINE/OFFLINE)
+  // ✅ CARGAR CELEBRACIONES (ONLINE/OFFLINE)
+  cargarCelebraciones(): Observable<CelebrateInterface[]> {
+    this.loadingSource.next(true);
+    
+    if (navigator.onLine) {
+      return this.http.get<CelebrateInterface[]>(this.apiUrl).pipe(
+        tap(celebraciones => {
+          console.log('✅ Celebraciones cargadas desde API:', celebraciones.length);
+          
+          // ✅ CARGAR RESERVAS OFFLINE PENDIENTES Y COMBINAR
+          const celebracionesOffline = this.obtenerCelebracionesOffline();
+          const todasCelebraciones = [...celebraciones, ...celebracionesOffline];
+          
+          const celebracionesConSync: CelebrateInterface[] = todasCelebraciones.map(c => ({
+            ...c,
+            syncStatus: c.offline ? 'pending' as const : 'synced' as const
+          }));
+          
+          this.celebracionesSource.next(celebracionesConSync);
+          this.loadingSource.next(false);
+          this.guardarCacheCelebraciones(celebracionesConSync);
+        }),
+        catchError(err => {
+          console.error('❌ Error API, cargando desde cache:', err);
+          return this.cargarCelebracionesOffline();
+        })
+      );
+    } else {
+      return this.cargarCelebracionesOffline();
+    }
+  }
+
+  private cargarCelebracionesOffline(): Observable<CelebrateInterface[]> {
+    return new Observable(observer => {
+      try {
+        const cacheKey = 'celebraciones_cache';
+        const cached = localStorage.getItem(cacheKey);
+        
+        if (cached) {
+          const celebracionesCache = JSON.parse(cached);
+          const celebraciones: CelebrateInterface[] = celebracionesCache.data.map((c: any) => this.normalizarCelebracion(c));
+          
+          console.log('📱 Celebraciones cargadas desde cache:', celebraciones.length);
+          this.celebracionesSource.next(celebraciones);
+          this.loadingSource.next(false);
+          observer.next(celebraciones);
+        } else {
+          console.log('📱 No hay celebraciones en cache');
+          this.celebracionesSource.next([]);
+          this.loadingSource.next(false);
+          observer.next([]);
+        }
+        observer.complete();
+      } catch (error) {
+        console.error('❌ Error cargando cache:', error);
+        this.celebracionesSource.next([]);
+        this.loadingSource.next(false);
+        observer.next([]);
+        observer.complete();
+      }
+    });
+  }
+
+  private obtenerCelebracionesOffline(): CelebrateInterface[] {
+    try {
+      const cacheKey = 'celebraciones_cache';
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const celebracionesCache = JSON.parse(cached);
+        return celebracionesCache.data
+          .filter((c: any) => c.offline)
+          .map((c: any) => this.normalizarCelebracion(c));
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  private normalizarCelebracion(celebracion: any): CelebrateInterface {
+    return {
+      id_celebracion: celebracion.id_celebracion || celebracion.id,
+      nombre_completo: celebracion.nombre_completo,
+      fecha_nacimiento: celebracion.fecha_nacimiento,
+      telefono: celebracion.telefono,
+      fecha_preferida: celebracion.fecha_preferida,
+      hora_preferida: celebracion.hora_preferida,
+      acepta_verificacion: celebracion.acepta_verificacion || false,
+      reservation: celebracion.reservation,
+      cant_people: celebracion.cant_people || 1,
+      ine_verificacion: celebracion.ine_verificacion || false,
+      estado_verificacion: celebracion.estado_verificacion || false,
+      fecha_creacion: celebracion.fecha_creacion || celebracion.created_at,
+      created_at: celebracion.created_at,
+      offline: celebracion.offline || false,
+      pendingSync: celebracion.pendingSync || false,
+      tempId: celebracion.tempId,
+      syncStatus: celebracion.syncStatus || 'synced'
+    };
+  }
+
+  private guardarCacheCelebraciones(celebraciones: CelebrateInterface[]): void {
+    try {
+      const cacheKey = 'celebraciones_cache';
+      const cacheData = {
+        data: celebraciones,
+        timestamp: new Date().getTime()
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('❌ Error guardando cache:', error);
+    }
+  }
+
+  // ✅ CREAR CELEBRACIÓN CON VALIDACIÓN MEJORADA
   crearCelebracionConValidacion(data: CelebrateInterface): Observable<{ 
     success: boolean; 
     message: string; 
     data?: any;
     capacidad_restante?: number;
   }> {
+    // ✅ PRIMERO verificar disponibilidad local incluyendo offline
+    const celebracionesLocales = this.celebracionesSource.getValue();
+    const celebracionesEnFechaHora = celebracionesLocales.filter(c => 
+      c.fecha_preferida === data.fecha_preferida && c.hora_preferida === data.hora_preferida
+    );
+    
+    const totalReservadoLocal = celebracionesEnFechaHora.reduce((sum, c) => sum + (c.cant_people || 1), 0);
+    const capacidadRestanteCalculada = this.CAPACIDAD_MAXIMA - totalReservadoLocal;
+    const disponibleLocal = capacidadRestanteCalculada >= (data.cant_people || 1);
+
+    if (!disponibleLocal) {
+      return new Observable(observer => {
+        observer.next({
+          success: false,
+          message: '❌ Capacidad llena considerando reservas pendientes'
+        });
+        observer.complete();
+      });
+    }
+
     if (navigator.onLine) {
       console.log('📤 Enviando datos al backend:', data);
       
@@ -245,15 +305,21 @@ export class CelebrateService {
         }),
         catchError((error: HttpErrorResponse) => {
           console.error('❌ Error del backend, guardando offline:', error);
-          return this.crearCelebracionOffline(data);
+          
+          // Si es error de capacidad, no guardar offline
+          if (error.status === 400 && error.error?.error?.includes('Capacidad llena')) {
+            return throwError(() => new Error('Capacidad llena para este horario'));
+          }
+          
+          return this.crearCelebracionOffline(data, capacidadRestanteCalculada);
         })
       );
     } else {
-      return this.crearCelebracionOffline(data);
+      return this.crearCelebracionOffline(data, capacidadRestanteCalculada);
     }
   }
 
-  private crearCelebracionOffline(data: CelebrateInterface): Observable<{ 
+  private crearCelebracionOffline(data: CelebrateInterface, capacidadRestanteLocal: number): Observable<{ 
     success: boolean; 
     message: string; 
     data?: any;
@@ -271,7 +337,7 @@ export class CelebrateService {
           id_celebracion: tempId,
           reservation: reservationCode,
           offline: true,
-          syncStatus: 'pending' as const // ✅ CORREGIDO - Tipo específico
+          syncStatus: 'pending' as const
         };
 
         const celebracionesActuales = this.celebracionesSource.getValue();
@@ -286,7 +352,7 @@ export class CelebrateService {
           success: true,
           message: `✅ Reserva guardada localmente - Código: ${reservationCode}\nSe sincronizará automáticamente cuando recuperes internet`,
           data: celebracionOffline,
-          capacidad_restante: this.CAPACIDAD_MAXIMA
+          capacidad_restante: capacidadRestanteLocal
         });
         observer.complete();
       } catch (error) {
@@ -307,7 +373,7 @@ export class CelebrateService {
     return this.celebraciones$;
   }
 
-  // ✅ ACTUALIZAR VERIFICACIÓN (ONLINE/OFFLINE)
+  // ✅ ACTUALIZAR VERIFICACIÓN
   actualizarVerificacion(id: number, data: { ine_verificacion: boolean, estado_verificacion: boolean }): Observable<any> {
     if (navigator.onLine) {
       return this.http.put(`${this.apiUrl}/${id}/verificacion`, data).pipe(
@@ -319,7 +385,7 @@ export class CelebrateService {
           this.celebracionesSource.next(actualizadas);
           this.guardarCacheCelebraciones(actualizadas);
         }),
-        catchError(err => {
+        catchError((err: any) => {
           console.error('❌ Error API, guardando offline:', err);
           return this.actualizarVerificacionOffline(id, data);
         })
@@ -339,7 +405,7 @@ export class CelebrateService {
           const celebracionActualizada: CelebrateInterface = { 
             ...celebracion, 
             ...data,
-            syncStatus: 'pending' as const // ✅ CORREGIDO - Tipo específico
+            syncStatus: 'pending' as const
           };
           
           const actualizadas = celebraciones.map(c => 
@@ -362,7 +428,7 @@ export class CelebrateService {
     });
   }
 
-  // ✅ ELIMINAR CELEBRACIÓN (ONLINE/OFFLINE)
+  // ✅ ELIMINAR CELEBRACIÓN
   eliminarCelebracion(id: number): Observable<any> {
     if (navigator.onLine) {
       return this.http.delete(`${this.apiUrl}/${id}`).pipe(
@@ -372,7 +438,7 @@ export class CelebrateService {
           this.celebracionesSource.next(filtradas);
           this.guardarCacheCelebraciones(filtradas);
         }),
-        catchError(err => {
+        catchError((err: any) => {
           console.error('❌ Error API, marcando para eliminar offline:', err);
           return this.eliminarCelebracionOffline(id);
         })
@@ -402,59 +468,6 @@ export class CelebrateService {
     });
   }
 
-  // ✅ AGREGAR OPERACIÓN PENDIENTE
-  private agregarPendiente(operation: 'CREATE' | 'UPDATE' | 'DELETE', data: any, isNew: boolean = false): void {
-    try {
-      const pendientes = this.obtenerPendientes();
-      
-      if (isNew) {
-        const existeDuplicadoActivo = pendientes.some(p => 
-          p.operation === operation && 
-          p.status !== 'processed' &&
-          this.sonDatosSimilares(p.data, data)
-        );
-        
-        if (existeDuplicadoActivo) {
-          console.log('⚠️ Operación duplicada activa ignorada:', operation);
-          return;
-        }
-      }
-
-      pendientes.push({
-        operation,
-        data,
-        timestamp: new Date().getTime(),
-        id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-        status: 'pending',
-        attempts: 0
-      });
-      
-      localStorage.setItem('celebraciones_pendientes', JSON.stringify(pendientes));
-      console.log('📝 Operación pendiente agregada:', operation);
-    } catch (error) {
-      console.error('❌ Error guardando operación pendiente:', error);
-    }
-  }
-
-  private sonDatosSimilares(dato1: any, dato2: any): boolean {
-    if (dato1.id_celebracion && dato2.id_celebracion) {
-      return dato1.id_celebracion === dato2.id_celebracion;
-    }
-    if (dato1.reservation && dato2.reservation) {
-      return dato1.reservation === dato2.reservation;
-    }
-    return false;
-  }
-
-  private obtenerPendientes(): any[] {
-    try {
-      const pendientes = localStorage.getItem('celebraciones_pendientes');
-      return pendientes ? JSON.parse(pendientes) : [];
-    } catch (error) {
-      return [];
-    }
-  }
-
   // ✅ SINCRONIZACIÓN MEJORADA
   private sincronizarCelebracionesOffline(): void {
     if (this.isSyncing) {
@@ -476,17 +489,6 @@ export class CelebrateService {
     this.procesarPendientes(pendientes);
   }
 
-  private marcarPendientesComoProcessing(pendientes: any[]): void {
-    const todasPendientes = this.obtenerPendientes();
-    const actualizadas = todasPendientes.map(p => {
-      if (pendientes.some(pend => pend.id === p.id)) {
-        return { ...p, status: 'processing' };
-      }
-      return p;
-    });
-    localStorage.setItem('celebraciones_pendientes', JSON.stringify(actualizadas));
-  }
-
   private procesarPendientes(pendientes: any[]): void {
     let procesadas = 0;
     let exitosas = 0;
@@ -495,7 +497,7 @@ export class CelebrateService {
     pendientes.forEach(pendiente => {
       switch (pendiente.operation) {
         case 'CREATE':
-          this.procesarCreate(pendiente, (resultado) => {
+          this.procesarCreate(pendiente, (resultado: string) => {
             procesadas++;
             if (resultado === 'exitoso') exitosas++;
             if (resultado === 'error') errores++;
@@ -504,7 +506,7 @@ export class CelebrateService {
           break;
 
         case 'UPDATE':
-          this.procesarUpdate(pendiente, (resultado) => {
+          this.procesarUpdate(pendiente, (resultado: string) => {
             procesadas++;
             if (resultado === 'exitoso') exitosas++;
             if (resultado === 'error') errores++;
@@ -513,7 +515,7 @@ export class CelebrateService {
           break;
 
         case 'DELETE':
-          this.procesarDelete(pendiente, (resultado) => {
+          this.procesarDelete(pendiente, (resultado: string) => {
             procesadas++;
             if (resultado === 'exitoso') exitosas++;
             if (resultado === 'error') errores++;
@@ -527,7 +529,16 @@ export class CelebrateService {
   private procesarCreate(pendiente: any, callback: (resultado: string) => void): void {
     const celebracionPendiente = pendiente.data;
     
-    this.http.post(this.apiUrl, celebracionPendiente).subscribe({
+    // ✅ PREPARAR DATOS - quitar propiedades offline
+    const datosParaBackend = { ...celebracionPendiente };
+    delete datosParaBackend.offline;
+    delete datosParaBackend.syncStatus;
+    delete datosParaBackend.tempId;
+    delete datosParaBackend.id_celebracion;
+
+    console.log('🔄 Sincronizando CREATE:', datosParaBackend.reservation);
+    
+    this.http.post(this.apiUrl, datosParaBackend).subscribe({
       next: (response: any) => {
         this.marcarPendienteComoProcesada(pendiente.id, 'exitoso');
         
@@ -537,14 +548,14 @@ export class CelebrateService {
             ? { 
                 ...this.normalizarCelebracion(response.data), 
                 offline: false, 
-                syncStatus: 'synced' as const // ✅ CORREGIDO - Tipo específico
+                syncStatus: 'synced' as const
               }
             : c
         );
         this.celebracionesSource.next(actualizadas);
         this.guardarCacheCelebraciones(actualizadas);
         
-        console.log('✅ Celebración sincronizada exitosamente:', celebracionPendiente.reservation);
+        console.log('✅ Celebración sincronizada exitosamente:', response.data.reservation);
         callback('exitoso');
       },
       error: (err) => {
@@ -599,6 +610,60 @@ export class CelebrateService {
     });
   }
 
+  // ✅ MÉTODOS AUXILIARES
+  private agregarPendiente(operation: 'CREATE' | 'UPDATE' | 'DELETE', data: any, isNew: boolean = false): void {
+    try {
+      const pendientes = this.obtenerPendientes();
+      
+      if (isNew) {
+        const existeDuplicadoActivo = pendientes.some(p => 
+          p.operation === operation && 
+          p.status !== 'processed' &&
+          this.sonDatosSimilares(p.data, data)
+        );
+        
+        if (existeDuplicadoActivo) {
+          console.log('⚠️ Operación duplicada activa ignorada:', operation);
+          return;
+        }
+      }
+
+      pendientes.push({
+        operation,
+        data,
+        timestamp: new Date().getTime(),
+        id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+        status: 'pending',
+        attempts: 0
+      });
+      
+      localStorage.setItem('celebraciones_pendientes', JSON.stringify(pendientes));
+      console.log('📝 Operación pendiente agregada:', operation);
+    } catch (error) {
+      console.error('❌ Error guardando operación pendiente:', error);
+    }
+  }
+
+  private obtenerPendientes(): any[] {
+    try {
+      const pendientes = localStorage.getItem('celebraciones_pendientes');
+      return pendientes ? JSON.parse(pendientes) : [];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  private marcarPendientesComoProcessing(pendientes: any[]): void {
+    const todasPendientes = this.obtenerPendientes();
+    const actualizadas = todasPendientes.map(p => {
+      if (pendientes.some(pend => pend.id === p.id)) {
+        return { ...p, status: 'processing' };
+      }
+      return p;
+    });
+    localStorage.setItem('celebraciones_pendientes', JSON.stringify(actualizadas));
+  }
+
   private marcarPendienteComoProcesada(id: string, resultado: string): void {
     const pendientes = this.obtenerPendientes();
     const actualizadas = pendientes.map(p => 
@@ -647,35 +712,102 @@ export class CelebrateService {
     console.log('🧹 Pendientes procesadas limpiadas');
   }
 
+  private sonDatosSimilares(dato1: any, dato2: any): boolean {
+    if (dato1.id_celebracion && dato2.id_celebracion) {
+      return dato1.id_celebracion === dato2.id_celebracion;
+    }
+    if (dato1.reservation && dato2.reservation) {
+      return dato1.reservation === dato2.reservation;
+    }
+    return false;
+  }
+
+  // ✅ MÉTODO PARA SINCRONIZACIÓN MANUAL
+  sincronizarManual(): Observable<{exitosas: number, errores: number}> {
+    return new Observable(observer => {
+      if (!navigator.onLine) {
+        observer.error(new Error('No hay conexión a internet'));
+        return;
+      }
+
+      const pendientes = this.obtenerPendientes().filter(p => p.status === 'pending');
+      if (pendientes.length === 0) {
+        observer.next({exitosas: 0, errores: 0});
+        observer.complete();
+        return;
+      }
+
+      let procesadas = 0;
+      let exitosas = 0;
+      let errores = 0;
+
+      pendientes.forEach(pendiente => {
+        switch (pendiente.operation) {
+          case 'CREATE':
+            this.procesarCreate(pendiente, (resultado: string) => {
+              procesadas++;
+              if (resultado === 'exitoso') exitosas++;
+              if (resultado === 'error') errores++;
+              
+              if (procesadas === pendientes.length) {
+                observer.next({exitosas, errores});
+                observer.complete();
+              }
+            });
+            break;
+          case 'UPDATE':
+            this.procesarUpdate(pendiente, (resultado: string) => {
+              procesadas++;
+              if (resultado === 'exitoso') exitosas++;
+              if (resultado === 'error') errores++;
+              
+              if (procesadas === pendientes.length) {
+                observer.next({exitosas, errores});
+                observer.complete();
+              }
+            });
+            break;
+          case 'DELETE':
+            this.procesarDelete(pendiente, (resultado: string) => {
+              procesadas++;
+              if (resultado === 'exitoso') exitosas++;
+              if (resultado === 'error') errores++;
+              
+              if (procesadas === pendientes.length) {
+                observer.next({exitosas, errores});
+                observer.complete();
+              }
+            });
+            break;
+        }
+      });
+    });
+  }
+
+  // ✅ MÉTODO DE DIAGNÓSTICO
+  diagnosticarSincronizacion(): {
+    online: boolean;
+    pendientes: number;
+    sincronizando: boolean;
+    celebracionesLocales: number;
+    celebracionesOffline: number;
+  } {
+    const pendientes = this.obtenerPendientes().filter(p => p.status === 'pending');
+    const celebraciones = this.celebracionesSource.getValue();
+    const celebracionesOffline = celebraciones.filter(c => c.offline);
+    
+    return {
+      online: navigator.onLine,
+      pendientes: pendientes.length,
+      sincronizando: this.isSyncing,
+      celebracionesLocales: celebraciones.length,
+      celebracionesOffline: celebracionesOffline.length
+    };
+  }
+
   // ✅ MÉTODO PARA LIMPIAR MANUALMENTE (DEBUG)
   limpiarPendientesManual(): void {
     localStorage.removeItem('celebraciones_pendientes');
     console.log('🧹 Pendientes limpiadas manualmente');
-  }
-
-  // OBTENER RESUMEN DE CAPACIDAD
-  obtenerResumenCapacidad(fecha: string, hora: string): Observable<{
-    capacidadMaxima: number;
-    totalReservado: number;
-    capacidadRestante: number;
-    disponible: boolean;
-    mensaje: string;
-    detalle: string;
-  }> {
-    return this.verificarDisponibilidad(fecha, hora, 0).pipe(
-      map((resultado) => {
-        return {
-          capacidadMaxima: this.CAPACIDAD_MAXIMA,
-          totalReservado: resultado.totalReservado,
-          capacidadRestante: resultado.capacidadRestante,
-          disponible: resultado.disponible,
-          mensaje: resultado.mensaje,
-          detalle: `Capacidad: ${resultado.totalReservado}/${this.CAPACIDAD_MAXIMA} personas`
-        };
-      }),
-      catchError((error) => {
-        return throwError(() => new Error('Error al obtener capacidad'));
-      })
-    );
   }
 }
