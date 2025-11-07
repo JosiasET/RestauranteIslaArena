@@ -18,17 +18,19 @@ export class Login {
   private passwordRegex: RegExp =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
 
-  // ✅ Expresión regular para validar formato de correo
-  // Ejemplo válido: usuario@dominio.com
+
   private emailRegex: RegExp =
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  private  number: RegExp =
+    /^\+?[1-9]\d{6,14}$/;
 
   toggleView() {
     this.visible = !this.visible;
   }
 
   regresarHome() {
-    this.router.navigate(['/']); // Redirección al home
+    this.router.navigate(['/']); 
   }
 
   enviarCodigo() {
@@ -55,6 +57,10 @@ export class Login {
         'La contraseña debe tener al menos una mayúscula, un número, un carácter especial y mínimo 8 caracteres'
       );
       return;
+    }
+
+    if(!this.number.test(this.numero)){
+      alert ('ingrese un numero de telefono valido')
     }
 
    
