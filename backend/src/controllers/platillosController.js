@@ -1,13 +1,33 @@
 const db = require('../config/database');
-const { processImage, formatImageResponse } = require('../utils/imageUtils');
+
+// Funciones para imagen (si no tienes imageUtils)
+const processImage = (imagen) => {
+  if (imagen && imagen.startsWith('data:image')) {
+    return Buffer.from(imagen.split(',')[1], 'base64');
+  }
+  return null;
+};
+
+const formatImageResponse = (rows) => {
+  return rows.map(row => {
+    if (row.image) {
+      row.image = `data:image/jpeg;base64,${row.image.toString('base64')}`;
+    }
+    return row;
+  });
+};
 
 function normalizarIDs(rows) {
   return rows.map(p => ({
     ...p,
-    id: p.id_producto,
-    // SOLO procesar los campos que existen en la tabla
-    tamanos: p.tamanos ? (typeof p.tamanos === 'string' ? JSON.parse(p.tamanos) : p.tamanos) : [],
-    tiene_tamanos: p.tiene_tamanos || false
+    id: p.id_product, // ✅ Usamos id_product
+    nombre: p.name,
+    descripcion: p.subcategory, // ✅ subcategory como descripción
+    descripcion_real: p.description, // ✅ real_description como descripción_real
+    precio: p.price,
+    imagen: p.image,
+    tiene_tamanos: p.has_sizes || false,
+    tamanos: p.sizes ? (typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes) : []
   }));
 }
 
@@ -26,13 +46,13 @@ const platillosController = {
       const subcategoria = descripcion;
       const descripcionGeneral = descripcion_real || null;
       
-      // SOLO tamanos (no tipos)
       const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
 
       const result = await db.query(
-        `INSERT INTO Productos
-         (nombre, descripcion, subcategoria, precio, categoria, imagen, tiene_tamanos, tamanos)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+        `INSERT INTO products 
+         (name, description, subcategory, price, category, image, has_sizes, sizes)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+         RETURNING *`,
         [
           nombre, 
           descripcionGeneral, 
@@ -57,7 +77,7 @@ const platillosController = {
   obtenerPlatillos: async (req, res) => {
     try {
       const result = await db.query(
-        "SELECT * FROM Productos WHERE categoria='Platillo' ORDER BY id_producto DESC"
+        "SELECT * FROM products WHERE category='Platillo' ORDER BY id_product DESC"
       );
       const platillos = normalizarIDs(formatImageResponse(result.rows));
       res.json(platillos);
@@ -77,15 +97,14 @@ const platillosController = {
       const subcategoria = descripcion;
       const descripcionGeneral = descripcion_real || null;
       
-      // SOLO tamanos (no tipos)
       const tamanosJSON = tamanos ? JSON.stringify(tamanos) : null;
 
       let sql, values;
       if (buffer) {
-        sql = `UPDATE Productos
-               SET nombre=$1, descripcion=$2, subcategoria=$3, precio=$4, imagen=$5, 
-                   tiene_tamanos=$6, tamanos=$7
-               WHERE id_producto=$8 RETURNING *`;
+        sql = `UPDATE products
+               SET name=$1,description=$2, subcategory=$3, price=$4, image=$5, 
+                   has_sizes=$6, sizes=$7
+               WHERE id_product=$8 RETURNING *`;
         values = [
           nombre, 
           descripcionGeneral, 
@@ -97,10 +116,10 @@ const platillosController = {
           id
         ];
       } else {
-        sql = `UPDATE Productos
-               SET nombre=$1, descripcion=$2, subcategoria=$3, precio=$4,
-                   tiene_tamanos=$5, tamanos=$6
-               WHERE id_producto=$7 RETURNING *`;
+        sql = `UPDATE products
+               SET name=$1, description=$2, subcategory=$3, price=$4,
+                   has_sizes=$5, sizes=$6
+               WHERE id_product=$7 RETURNING *`;
         values = [
           nombre, 
           descripcionGeneral, 
@@ -130,7 +149,7 @@ const platillosController = {
     const { id } = req.params;
     try {
       const result = await db.query(
-        "DELETE FROM Productos WHERE id_producto=$1 RETURNING *",
+        "DELETE FROM products WHERE id_product=$1 RETURNING *",
         [id]
       );
       if (result.rows.length === 0) {

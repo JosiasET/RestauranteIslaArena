@@ -1,16 +1,19 @@
-// bebidasRoutes.js - AGREGAR NUEVAS RUTAS
 const express = require('express');
 const router = express.Router();
-const productosController = require('../controllers/productosController');
+const bebidasController = require('../controllers/bebidasController');
 
-// ✅ CRUD para bebidas (usa la tabla Productos)
-router.post('/', productosController.crearProducto);
-router.get('/', productosController.obtenerBebidas);
-router.put('/:id', productosController.actualizarProducto);
-router.delete('/:id', productosController.eliminarProducto);
+// ✅ CRUD para bebidas (usa la tabla products)
+router.post('/', bebidasController.crearBebida);
+router.get('/', bebidasController.obtenerBebidas);
+router.put('/:id', bebidasController.actualizarBebida);
+router.delete('/:id', bebidasController.eliminarBebida);
 
-// ✅ NUEVAS RUTAS PARA STOCK DE BEBIDAS
-router.get('/stock', productosController.obtenerBebidasConStock);
-router.put('/stock/:id', productosController.actualizarStockBebida);
+// ✅ RUTAS PARA STOCK DE BEBIDAS
+router.get('/stock', bebidasController.obtenerBebidasConStock);
+router.put('/stock/:id', bebidasController.actualizarStockBebida);
+
+// ✅ RUTAS GENERALES PARA STOCK (opcional)
+router.get('/stock/todos', bebidasController.obtenerProductosConStock);
+router.put('/stock/producto/:id', bebidasController.actualizarStock);
 
 module.exports = router;
