@@ -11,104 +11,153 @@
     <button class="filter-btn" (click)="filterByStatus('pendientes')">⏳ Pendientes ({{ stats.pendientes }})</button>
     <button class="filter-btn" (click)="filterByStatus('en_proceso')">👨‍🍳 En Proceso ({{ stats.en_proceso }})</button>
     <button class="filter-btn" (click)="filterByStatus('entregados')">✅ Entregados ({{ stats.entregados }})</button>
-  </div>
-
-  <!-- Barra de búsqueda -->
-  <div class="search-controls">
-    <div class="search-box">
-      <input 
-        type="text" 
-        [(ngModel)]="searchTerm" 
-        (input)="filterOrders()"
-        placeholder="🔍 Buscar pedido..."
-        class="search-input"
-      >
-    </div>
-    <button class="refresh-btn" (click)="loadOrders()" [disabled]="loading">
-      {{ loading ? '🔄' : '🔄' }}
+    
+    <!-- ✅ NUEVO: Botón para ver finalizados -->
+    <button class="filter-btn finalizados-btn" 
+            (click)="setActiveView('completed')"
+            [class.active]="activeView === 'completed'">
+      🏁 Finalizados ({{ stats.finalizados }})
     </button>
   </div>
 
-  <!-- Grid de pedidos tipo barra -->
-  <div class="orders-grid">
-    
+  <!-- ✅ NUEVA SECCIÓN: Vista de pedidos finalizados (solo lista simple) -->
+  <div *ngIf="activeView === 'completed'" class="completed-orders-section">
+    <div class="completed-header">
+      <h2>📋 Historial de Pedidos Finalizados</h2>
+      <p>Respaldo de pedidos completados - Solo consulta</p>
+    </div>
+
     <!-- Loading -->
     <div *ngIf="loading" class="loading-state">
       <div class="spinner"></div>
-      <p>Cargando pedidos...</p>
+      <p>Cargando pedidos finalizados...</p>
     </div>
 
-    <!-- Empty State -->
-    <div *ngIf="!loading && filteredOrders.length === 0" class="empty-state">
-      <div class="empty-icon">📦</div>
-      <h3>No hay pedidos</h3>
-      <p>No se encontraron pedidos con los filtros actuales.</p>
-    </div>
-
-    <!-- Tarjetas de pedido -->
-    <div *ngFor="let order of filteredOrders" 
-         class="order-card" 
-         [class]="getOrderCardClass(order)"
-         (click)="openOrderDetails(order)">
-      
-      <!-- Header de la tarjeta -->
-      <div class="card-header">
-        <div class="order-code">{{ order.tracking_code }}</div>
-        <div class="order-time">{{ getTimeAgo(order.order_date) }}</div>
-      </div>
-
-      <!-- Cliente -->
-      <div class="customer-info">
-        <div class="customer-name">👤 {{ order.customer_name }}</div>
-        <div class="customer-phone">📞 {{ order.customer_phone || 'N/A' }}</div>
-      </div>
-
-      <!-- Estado -->
-      <div class="order-status">
-        <span [class]="'status-badge ' + getStatusBadgeClass(order.status)">
-          {{ getStatusText(order.status) }}
-        </span>
-      </div>
-
-      <!-- Información de pago -->
-      <div class="payment-info">
-        <div class="payment-method">{{ getPaymentMethodText(order.payment_method) }}</div>
-        <div class="payment-status" [class]="order.payment_verified ? 'verified' : 'pending'">
-          {{ order.payment_verified ? '✅' : '⏳' }}
+    <!-- Lista simple de pedidos finalizados -->
+    <div *ngIf="!loading" class="completed-orders-list">
+      <div *ngFor="let order of completedOrders" class="completed-order-item">
+        <div class="completed-order-info">
+          <div class="completed-order-code">{{ order.tracking_code }}</div>
+          <div class="completed-order-customer">{{ order.customer_name }}</div>
+          <div class="completed-order-date">{{ order.order_date | date:'medium' }}</div>
+          <div class="completed-order-total">${{ order.total_amount }}</div>
+        </div>
+        <div class="completed-order-actions">
+          <button class="btn-view-details" (click)="openOrderDetails(order)">
+            👁️ Ver Detalles
+          </button>
         </div>
       </div>
 
-      <!-- Total y cambio -->
-      <div class="amount-info">
-        <div class="total-amount">💰 ${{ order.total_amount }}</div>
-        
-        <!-- Mostrar información de efectivo si aplica -->
-        <div *ngIf="order.payment_method === 'efectivo'" class="cash-info">
-          <div *ngIf="order.delivery_address?.cashAmount" class="cash-details">
-            <div class="cash-amount">💵 Paga con: ${{ order.delivery_address?.cashAmount }}</div>
-            <div class="change-amount" 
-                 [class.exact]="getChangeAmount(order) === 0"
-                 [class.positive]="getChangeAmount(order) > 0"
-                 [class.negative]="getChangeAmount(order) < 0">
-              🔄 Cambio: ${{ getChangeAmount(order) | number:'1.2-2' }}
+      <!-- Empty state para finalizados -->
+      <div *ngIf="completedOrders.length === 0" class="empty-completed">
+        <div class="empty-icon">📭</div>
+        <h3>No hay pedidos finalizados</h3>
+        <p>Los pedidos marcados como "Finalizado" aparecerán aquí</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- La sección original de pedidos activos (solo mostrar en vista activa) -->
+  <div *ngIf="activeView === 'active'" class="active-orders-section">
+    <!-- Barra de búsqueda -->
+    <div class="search-controls">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="filterOrders()"
+          placeholder="🔍 Buscar pedido..."
+          class="search-input"
+        >
+      </div>
+      <button class="refresh-btn" (click)="loadOrders()" [disabled]="loading">
+        {{ loading ? '🔄' : '🔄' }}
+      </button>
+    </div>
+
+    <!-- Grid de pedidos tipo barra -->
+    <div class="orders-grid">
+      
+      <!-- Loading (SOLO cuando está cargando) -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando pedidos...</p>
+      </div>
+
+      <!-- Empty State (SOLO cuando NO está cargando y NO hay pedidos) -->
+      <div *ngIf="!loading && filteredOrders.length === 0" class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>No hay pedidos</h3>
+        <p>No se encontraron pedidos con los filtros actuales.</p>
+      </div>
+
+      <!-- Tarjetas de pedido (SOLO cuando NO está cargando y SÍ hay pedidos) -->
+      <div *ngIf="!loading && filteredOrders.length > 0">
+        <div *ngFor="let order of filteredOrders" 
+             class="order-card" 
+             [class]="getOrderCardClass(order)"
+             (click)="openOrderDetails(order)">
+          
+          <!-- Header de la tarjeta -->
+          <div class="card-header">
+            <div class="order-code">{{ order.tracking_code }}</div>
+            <div class="order-time">{{ getTimeAgo(order.order_date) }}</div>
+          </div>
+
+          <!-- Cliente -->
+          <div class="customer-info">
+            <div class="customer-name">👤 {{ order.customer_name }}</div>
+            <div class="customer-phone">📞 {{ order.customer_phone || 'N/A' }}</div>
+          </div>
+
+          <!-- Estado -->
+          <div class="order-status">
+            <span [class]="'status-badge ' + getStatusBadgeClass(order.status)">
+              {{ getStatusText(order.status) }}
+            </span>
+          </div>
+
+          <!-- Información de pago -->
+          <div class="payment-info">
+            <div class="payment-method">{{ getPaymentMethodText(order.payment_method) }}</div>
+            <div class="payment-status" [class]="order.payment_verified ? 'verified' : 'pending'">
+              {{ order.payment_verified ? '✅' : '⏳' }}
             </div>
           </div>
-          <div *ngIf="!order.delivery_address?.cashAmount" class="cash-warning">
-            ⚠️ No especificó con cuánto paga
+
+          <!-- Total y cambio -->
+          <div class="amount-info">
+            <div class="total-amount">💰 ${{ order.total_amount }}</div>
+            
+            <!-- Mostrar información de efectivo si aplica -->
+            <div *ngIf="order.payment_method === 'efectivo'" class="cash-info">
+              <div *ngIf="order.delivery_address?.cashAmount" class="cash-details">
+                <div class="cash-amount">💵 Paga con: ${{ order.delivery_address?.cashAmount }}</div>
+                <div class="change-amount" 
+                    [class.exact]="getChangeAmount(order) === 0"
+                    [class.positive]="getChangeAmount(order) > 0"
+                    [class.negative]="getChangeAmount(order) < 0">
+                  🔄 Cambio: ${{ getChangeAmount(order) | number:'1.2-2' }}
+                </div>
+              </div>
+              <div *ngIf="!order.delivery_address?.cashAmount" class="cash-warning">
+                ⚠️ No especificó con cuánto paga
+              </div>
+            </div>
+          </div>
+
+          <!-- Productos (resumen) -->
+          <div class="products-preview">
+            <div *ngFor="let item of order.order_items.slice(0, 2)" class="product-preview">
+              {{ item.nombre }} x{{ item.cantidad }}
+            </div>
+            <div *ngIf="order.order_items.length > 2" class="more-items">
+              +{{ (order.order_items.length - 2) }} más
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Productos (resumen) -->
-      <div class="products-preview">
-        <div *ngFor="let item of order.order_items.slice(0, 2)" class="product-preview">
-          {{ item.nombre }} x{{ item.cantidad }}
-        </div>
-        <div *ngIf="order.order_items.length > 2" class="more-items">
-          +{{ (order.order_items.length - 2) }} más
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -238,7 +287,6 @@
             </button>
           </div>
         </div>
-
       </div>
     </div>
   </div>

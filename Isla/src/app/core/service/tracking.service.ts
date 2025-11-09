@@ -2,8 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, catchError, of, map, throwError } from 'rxjs';
 
+// En tracking.service.ts - ACTUALIZAR la interfaz
 export interface OrderTracking {
-  id?: number;
+  id?: number;           // Este es el order_id del backend
+  order_id?: number;     // ✅ AGREGAR esta propiedad por si acaso
   tracking_code: string;
   customer_name: string;
   customer_phone?: string;
@@ -594,4 +596,105 @@ export class TrackingService {
       }
     });
   }
+  // En tracking.service.ts - AGREGAR este método
+createCompleteOrder(orderPayload: any): Observable<any> {
+  if (navigator.onLine) {
+    return this.http.post<any>(`${this.apiUrl}/complete`, orderPayload).pipe(
+      tap(response => {
+        console.log('✅ Pedido completo creado en API:', response.tracking_code);
+        // Actualizar cache local
+        const currentOrders = this.ordersSource.getValue();
+        this.ordersSource.next([response.order, ...currentOrders]);
+        this.guardarCachePedidos([response.order, ...currentOrders]);
+      }),
+      catchError(err => {
+        console.error('❌ Error API, guardando offline:', err);
+        return this.crearPedidoCompletoOffline(orderPayload);
+      })
+    );
+  } else {
+    return this.crearPedidoCompletoOffline(orderPayload);
+  }
+}
+
+private crearPedidoCompletoOffline(orderPayload: any): Observable<any> {
+  return new Observable(observer => {
+    try {
+      const tempTrackingCode = 'OFFLINE-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+      
+      const pedidoOffline = {
+        ...orderPayload.order_data,
+        tracking_code: tempTrackingCode,
+        id: 'offline_' + Date.now(),
+        customer_name: `${orderPayload.user_data.first_name} ${orderPayload.user_data.last_name}`,
+        customer_phone: orderPayload.user_data.phone,
+        customer_email: orderPayload.user_data.email,
+        status: 'pedido_recibido',
+        payment_verified: false,
+        order_date: new Date().toISOString(),
+        status_updated_at: new Date().toISOString()
+      };
+
+      // Guardar en pendientes
+      this.agregarPendiente('CREATE_COMPLETE', { orderPayload, pedidoOffline }, true);
+
+      // Actualizar cache local
+      const currentOrders = this.ordersSource.getValue();
+      this.ordersSource.next([pedidoOffline, ...currentOrders]);
+      this.guardarCachePedidos([pedidoOffline, ...currentOrders]);
+
+      console.log('📱 Pedido completo guardado offline:', tempTrackingCode);
+      observer.next({ order: pedidoOffline, tracking_code: tempTrackingCode });
+      observer.complete();
+    } catch (error) {
+      observer.error(error);
+    }
+  });
+}
+
+    // Agregar este método al servicio
+getCompletedOrders(): Observable<OrderTracking[]> {
+  this.loadingSource.next(true);
+  
+  if (navigator.onLine) {
+    return this.http.get<OrderTracking[]>(`${this.apiUrl}/completed`).pipe(
+      tap(orders => {
+        console.log('✅ Pedidos finalizados cargados desde API:', orders.length);
+        this.loadingSource.next(false);
+      }),
+      catchError(err => {
+        console.error('❌ Error API, cargando finalizados desde cache:', err);
+        return this.cargarFinalizadosOffline();
+      })
+    );
+  } else {
+    return this.cargarFinalizadosOffline();
+  }
+}
+
+private cargarFinalizadosOffline(): Observable<OrderTracking[]> {
+  return new Observable(observer => {
+    try {
+      const cacheKey = 'pedidos_cache';
+      const cached = localStorage.getItem(cacheKey);
+      
+      if (cached) {
+        const pedidosCache = JSON.parse(cached);
+        const finalizados = pedidosCache.data.filter((p: OrderTracking) => 
+          p.status === 'finalizado'
+        );
+        console.log('📱 Pedidos finalizados desde cache:', finalizados.length);
+        observer.next(finalizados);
+      } else {
+        console.log('📱 No hay pedidos finalizados en cache');
+        observer.next([]);
+      }
+      observer.complete();
+    } catch (error) {
+      console.error('❌ Error cargando finalizados desde cache:', error);
+      observer.next([]);
+      observer.complete();
+    }
+  });
+}
 }

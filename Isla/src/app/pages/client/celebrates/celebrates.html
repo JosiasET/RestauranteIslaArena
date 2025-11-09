@@ -22,11 +22,21 @@
         <h3>Registra tu información</h3>
         <form (ngSubmit)="onSubmit()" #cumpleForm="ngForm">
           
-          <div class="form-group">
-            <label for="nombre">Nombre completo *</label>
-            <input type="text" id="nombre" name="nombre" 
-                   [(ngModel)]="nombre" required 
-                   placeholder="Como aparece en tu INE">
+          <!-- NOMBRE DIVIDIDO EN FIRST_NAME Y LAST_NAME -->
+          <div class="form-row">
+            <div class="form-group half">
+              <label for="firstName">Nombre *</label>
+              <input type="text" id="firstName" name="firstName" 
+                     [(ngModel)]="firstName" required 
+                     placeholder="Ej: María">
+            </div>
+
+            <div class="form-group half">
+              <label for="lastName">Apellidos *</label>
+              <input type="text" id="lastName" name="lastName"
+                     [(ngModel)]="lastName" required
+                     placeholder="Ej: González López">
+            </div>
           </div>
 
           <div class="form-group">
@@ -58,7 +68,7 @@
               <option value="">Selecciona una hora</option>
               <option value="10:00">10:00 AM</option>
               <option value="11:00">11:00 AM</option>
-              <option value="12:00">12:00 AM</option>
+              <option value="12:00">12:00 PM</option>
               <option value="13:00">1:00 PM</option>
               <option value="14:00">2:00 PM</option>
               <option value="15:00">3:00 PM</option>
@@ -68,7 +78,6 @@
             </select>
           </div>
 
-          <!-- NUEVO CAMPO: NÚMERO DE PERSONAS -->
           <div class="form-group">
             <label for="personas">Número de personas *</label>
             <select id="personas" name="personas" [(ngModel)]="personas" required>
@@ -98,7 +107,6 @@
             {{ loading ? '⏳ Verificando...' : '🎉 ¡Reservar mi regalo!' }}
           </button>
 
-          <!-- Botón para forzar actualización si es necesario -->
           <button type="button" *ngIf="loading" (click)="forzarActualizacion()" 
                   style="margin-top: 10px; background: #f39c12; color: white; border: none; padding: 10px; border-radius: 5px; width: 100%;">
             🔄 Forzar Actualización
@@ -113,7 +121,7 @@
         
         <div *ngIf="esSuCumpleanios" class="success-content">
           <div class="celebration-animation">🎉🎂🥳</div>
-          <h2>¡FELICIDADES {{ nombre | uppercase }}!</h2>
+          <h2>¡FELICIDADES {{ firstName | uppercase }} {{ lastName | uppercase }}!</h2>
           <p>¡Tu reservación para tu cumpleaños ha sido confirmada!</p>
           
           <div class="reserva-info">

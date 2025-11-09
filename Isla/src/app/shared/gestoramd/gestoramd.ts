@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterOutlet, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { StockService } from '../../core/service/Stock.service';
 
 @Component({
   standalone: true,
@@ -31,35 +30,45 @@ export class Gestoramd implements OnInit {
   ngOnInit() {
     // Inicializar con la ruta actual
     this.currentRoute = this.router.url;
+    console.log('🔄 Ruta inicial:', this.currentRoute);
     
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
-        this.currentRoute = event.urlAfterRedirects;
-        console.log('Ruta actual:', this.currentRoute); // Para debug
+        this.currentRoute = event.urlAfterRedirects || event.url;
+        console.log('📍 Ruta cambiada:', this.currentRoute);
       });
   }
 
-  // Ir al gestor principal (ruta vacía)
+  // Mostrar dashboard solo en rutas específicas del dashboard
+  mostrarDashboardPrincipal(): boolean {
+    if (!this.currentRoute) return true;
+    
+    const rutaLimpia = this.currentRoute.split('?')[0].replace(/\/+$/, '');
+    
+    // Mostrar dashboard SOLO en estas rutas:
+    const rutasDashboard = [
+      '/gestoramd',
+      '/gestoramd/',
+      '/gestoramd/dashboard'
+    ];
+    
+    const mostrar = rutasDashboard.includes(rutaLimpia);
+    console.log('📊 Mostrar dashboard:', mostrar, '- Ruta:', rutaLimpia);
+    
+    return mostrar;
+  }
+
+  // Navegar al dashboard principal
   irAlGestorPrincipal() {
-    this.router.navigate(['/gestoramd']);
+    console.log('🏠 Navegando al dashboard principal');
+    this.router.navigate(['/gestoramd/dashboard']);
   }
 
   // Navegar a otras secciones
   navegarA(ruta: string) {
+    console.log('🚀 Navegando a:', ruta);
     this.router.navigate(['/gestoramd', ruta]);
-  }
-
-  // Mostrar dashboard solo en la ruta principal (/gestoramd)
-  mostrarDashboardPrincipal(): boolean {
-    const esRutaPrincipal = 
-      this.currentRoute === '/gestoramd' || 
-      this.currentRoute === '/gestoramd/' ||
-      this.currentRoute === '/gestoramd' ||
-      this.currentRoute.endsWith('/gestoramd');
-    
-    console.log('Mostrar dashboard:', esRutaPrincipal); // Para debug
-    return esRutaPrincipal;
   }
 
   cerrarSesion() {

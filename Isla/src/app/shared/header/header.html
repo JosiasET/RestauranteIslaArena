@@ -37,7 +37,8 @@
       <!-- Carrito -->
       <div class="action-btn cart-btn" (click)="goToCart()">
         <img src="img/carrito.png" alt="Carrito">
-        <span class="cart-count" *ngIf="cartItemCount > 0">{{cartItemCount}}</span>
+        <!-- CORREGIDO: Usar *ngIf en lugar de class -->
+        <span class="cart-count" class="cartItemCount > 0">{{cartItemCount}}</span>
       </div>
 
       <!-- BOTÓN DE MENÚ (solo en móvil) -->
@@ -49,6 +50,7 @@
 </div>
 
 <!-- VENTANA FLOTANTE DE BÚSQUEDA -->
+<!-- CORREGIDO: Usar *ngIf en lugar de class duplicada -->
 <div *ngIf="showOrderSearch" class="order-search-overlay" (click)="closeOrderSearch()">
   <div class="order-search-modal" (click)="$event.stopPropagation()">
     <div class="search-modal-header">
@@ -58,18 +60,19 @@
     
     <div class="search-modal-body">
       <div class="search-input-container">
-        <input 
+          <input 
           type="text" 
           [(ngModel)]="orderSearchTerm"
-          (input)="searchOrder()"
-          placeholder="Ingresa código de seguimiento o nombre del cliente..."
-          class="search-modal-input"
-          #searchInput
+            (keyup)="searchOrder()" 
+    placeholder="Ingresa código de seguimiento o nombre del cliente..."
+    class="search-modal-input"
+    #searchInput
         >
         <span class="search-modal-icon">🔍</span>
       </div>
 
       <!-- Loading -->
+      <!-- CORREGIDO: Usar *ngIf correctamente -->
       <div *ngIf="orderSearchLoading" class="search-loading">
         <div class="search-spinner"></div>
         <p>Buscando pedido...</p>

@@ -7,15 +7,22 @@
       {{ mostrarFormulario ? '❌ Cancelar' : '➕ Nueva Reservación' }}
     </button>
   </div>
-
+  
   <!-- Formulario de nueva reserva -->
-  <div *ngIf="mostrarFormulario" class="formulario-reserva">
+  <div class="mostrarFormulario" class="formulario-reserva">
     <h3>Crear Nueva Reservación</h3>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Nombre Completo *</label>
-        <input type="text" [(ngModel)]="nuevaReserva.nombre_completo" class="form-input" placeholder="Ingrese nombre completo">
-      </div>
+    <div class="form-group">
+      <label>Nombre *</label>
+      <input type="text" [(ngModel)]="nuevaReserva.firstName" class="form-input" 
+             placeholder="Ingrese nombre (ej: María)">
+    </div>
+    
+    <div class="form-group">
+      <label>Apellidos *</label>
+      <input type="text" [(ngModel)]="nuevaReserva.lastName" class="form-input" 
+             placeholder="Ingrese apellidos (ej: González López)">
+    </div>
+    
       
       <div class="form-group">
         <label>Fecha de Nacimiento *</label>
@@ -233,7 +240,7 @@
         </div>
 
         <!-- Historial de acciones -->
-        <div class="historial" *ngIf="reservaSeleccionada.historial?.length">
+        <div class="historial" *ngIf="reservaSeleccionada.historial.length">
           <h4>📋 Historial de la Reservación</h4>
           <div *ngFor="let evento of reservaSeleccionada.historial" class="evento-historial">
             <span class="fecha-evento">{{ evento.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
@@ -250,4 +257,3 @@
     <h3>No hay reservaciones</h3>
     <p>No se encontraron reservaciones con los filtros aplicados.</p>
   </div>
-</div>

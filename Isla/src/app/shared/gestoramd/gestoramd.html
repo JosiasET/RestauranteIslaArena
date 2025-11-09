@@ -3,7 +3,7 @@
     <!-- Panel lateral -->
     <div class="admin-sidebar">
       <div class="sidebar-header">
-        <!-- LOGO COMO BOTÓN -->
+        <!-- LOGO COMO BOTÓN - Navega al dashboard -->
         <div class="logo" (click)="irAlGestorPrincipal()" style="cursor: pointer;">
           <i class="waves">🌊</i>
           <h3 class="letra">Gestor</h3>
@@ -17,9 +17,9 @@
         </div>
       </div>
         
-      <nav class="sidebar-nav">
-
-        <a routerLink="upresumen" routerLinkActive="active">
+     <nav class="sidebar-nav">
+        <!-- Cambiar upresumen por dashboard -->
+        <a routerLink="dashboard" routerLinkActive="active">
           <div class="nav-icon">📊</div>
           <span class="nav-text">Resumen</span>
         </a>
@@ -47,24 +47,18 @@
           <div class="nav-icon">👨‍💼</div>
           <span class="nav-text">Crear Mesero</span>
         </a>
-
         <a routerLink="edit-home" routerLinkActive="active">
           <div class="nav-icon">🏦</div>
           <span class="nav-text">Editar Home</span>
         </a>
-
         <a routerLink="tracking" routerLinkActive="active">
           <div class="nav-icon">📦</div>
           <span class="nav-text">Seguimiento de Pedidos</span>
         </a>
-
-        <!-- En el sidebar-nav, agregar este enlace después de los demás: -->
         <a routerLink="upstock" routerLinkActive="active">
           <div class="nav-icon">📦</div>
           <span class="nav-text">Gestión de Stock</span>
-
         </a>
-        
       </nav>
 
       <div class="sidebar-footer">
@@ -100,6 +94,14 @@
         
         <!-- DASHBOARD PRINCIPAL - Se muestra solo cuando no hay ruta hija activa -->
         <div *ngIf="mostrarDashboardPrincipal()" class="dashboard-container">
+          
+          <!-- Botón de DEBUG (remover en producción) -->
+          <div style="background: #f8f9fa; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+            <button (click)="irAlGestorPrincipal()" style="padding: 5px 10px; margin-right: 10px;">
+              🔄 Forzar Dashboard
+            </button>
+            <small>Ruta actual: {{currentRoute}}</small>
+          </div>
           
           <!-- ESTADÍSTICAS PRINCIPALES -->
           <div class="stats-grid">
@@ -185,14 +187,20 @@
                 <p>Monitorear ventas activas</p>
                 <span class="action-badge">{{contadores.ventas}} hoy</span>
               </div>
-            </div>
 
-            <!-- En quick-actions-grid, agregar esta tarjeta: -->
-            <div class="quick-action-card" (click)="navegarA('upstock')">
-              <div class="action-icon">📦</div>
-              <h4>Gestión de Stock</h4>
-              <p>Administrar inventario de productos</p>
-              <span class="action-badge">{{contadores.stock}} productos</span>
+              <div class="quick-action-card" (click)="navegarA('tracking')">
+                <div class="action-icon">📦</div>
+                <h4>Seguimiento de Pedidos</h4>
+                <p>Gestionar órdenes activas</p>
+                <span class="action-badge">18 pedidos</span>
+              </div>
+
+              <div class="quick-action-card" (click)="navegarA('upstock')">
+                <div class="action-icon">📦</div>
+                <h4>Gestión de Stock</h4>
+                <p>Administrar inventario de productos</p>
+                <span class="action-badge">{{contadores.stock}} productos</span>
+              </div>
             </div>
           </div>
 

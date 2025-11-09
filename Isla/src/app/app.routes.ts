@@ -1,16 +1,11 @@
 import { Routes } from '@angular/router';
 import { Header } from './shared/header/header';
 import { Home } from './pages/client/home/home';
-
 import { Login } from './shared/login/login';
 import { Gestoramd } from './shared/gestoramd/gestoramd';
 import { UpResumeAmd } from './pages/admin/up-resume-amd/up-resume-amd';
-
-
 import { CashierCheckout } from './pages/cashier-checkout/cashier-checkout';
-
 import { Mycart } from './shared/mycart/mycart';
-
 import { Checkoutpage } from './pages/checkoutpage/checkoutpage';
 import { UpDrinkAmd } from './pages/admin/up-drink-amd/up-drink-amd';
 import { UpCelebratesAmd } from './pages/admin/up-celebrates-amd/up-celebrates-amd';
@@ -24,15 +19,10 @@ import { Drink } from './pages/client/drink/drink';
 import { Food } from './pages/client/food/food';
 import { Celebrates } from './pages/client/celebrates/celebrates';
 import { Promotions } from './pages/client/promotions/promotions';
-
 import { EditHome } from './pages/admin/edit-home/edit-home';
-
 import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/seguimiento-pedidos';
 import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
 import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
-import { Component } from '@angular/core';
-
-
 
 export const routes: Routes = [
   {
@@ -57,7 +47,9 @@ export const routes: Routes = [
     path: 'gestoramd',
     component: Gestoramd,
     children: [
-      // Ruta vacía - el componente Gestoramd maneja el dashboard
+      // ✅ AGREGAR RUTA VACÍA - Esto es crucial
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: UpResumeAmd }, // O el componente que quieras para dashboard
       { path: 'upresumen', component: UpResumeAmd },
       { path: 'upsales', component: UpSalesAmd },
       { path: 'updrink', component: UpDrinkAmd },
@@ -66,20 +58,19 @@ export const routes: Routes = [
       { path: 'uppromotion', component: UpPromotionAmd },
       { path: 'celebrae', component: UpCelebratesAmd},
       { path: 'cwaiter', component: UpCreatewaiterAmd },   
-      {path: 'edit-home', component: EditHome},
-      { path: 'cwaiter', component: UpCreatewaiterAmd },
-      {path: 'tracking', component: AdminTrackingComponent },
+      { path: 'edit-home', component: EditHome},
+      { path: 'tracking', component: AdminTrackingComponent },
       { path: 'upstock', component: UpStockAmdPage }
-
     ]
   },
 
-  {path: 'home', component: Home,
-    children:[
-      {path:'fishes', component: Fishes},
-      {path:'Drink', component: Drink},
-      {path:'food', component: Food},
-      
+  {
+    path: 'home', 
+    component: Home,
+    children: [
+      { path: 'fishes', component: Fishes },
+      { path: 'Drink', component: Drink },
+      { path: 'food', component: Food },
     ]
   },
 

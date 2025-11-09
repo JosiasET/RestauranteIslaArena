@@ -670,3 +670,354 @@
 .modal-content .status-controls {
   color: #333;
 }
+
+/* === ESTILOS MEJORADOS PARA VISIBILIDAD === */
+
+/* Mejorar contraste en el modal */
+.modal-content {
+  background: white;
+  color: #2c3e50 !important; /* ← Color oscuro para mejor contraste */
+}
+
+.modal-body {
+  color: #2c3e50 !important;
+}
+
+/* Textos en detalle del pedido */
+.detail-item span {
+  color: #2c3e50 !important;
+  font-weight: 500;
+}
+
+.detail-item label {
+  color: #34495e !important;
+  font-weight: 600;
+}
+
+/* Productos en modal */
+.products-list-detailed {
+  background: #ffffff;
+  border: 2px solid #e9ecef;
+}
+
+.product-item-detailed {
+  background: #f8f9fa;
+  margin: 0.25rem 0;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+}
+
+.product-name {
+  color: #2c3e50 !important;
+  font-weight: 600;
+}
+
+.product-price {
+  color: #27ae60 !important;
+  font-weight: bold;
+}
+
+.products-total {
+  background: #2c3e50 !important;
+  color: white !important;
+  font-size: 1.2rem;
+}
+
+/* Información de pago más visible */
+.payment-info {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+/* Efectivo más destacado */
+.cash-info {
+  background: #fff3cd !important;
+  border-left: 4px solid #f39c12 !important;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+.cash-amount {
+  color: #e67e22 !important;
+  font-weight: bold;
+}
+
+.change-amount.positive {
+  color: #27ae60 !important;
+  font-weight: bold;
+  background: #d5f4e6;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+.change-amount.negative {
+  color: #e74c3c !important;
+  font-weight: bold;
+  background: #fadbd8;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+/* Botones de estado más visibles */
+.status-btn {
+  background: #ecf0f1;
+  border: 2px solid #bdc3c7;
+  color: #2c3e50;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.status-btn:hover {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+  transform: translateY(-2px);
+}
+
+.status-btn.active {
+  background: #2980b9;
+  color: white;
+  border-color: #2980b9;
+  box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
+}
+
+/* Toggle de pago más visible */
+.payment-toggle {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.payment-toggle.verified {
+  background: #27ae60;
+  color: white;
+}
+
+.payment-toggle.pending {
+  background: #e67e22;
+  color: white;
+}
+
+.payment-toggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Dirección más legible */
+.address-details {
+  background: #e8f4fd;
+  border-left: 4px solid #3498db;
+  padding: 1rem;
+  border-radius: 8px;
+  color: #2c3e50 !important;
+}
+
+.address-details p {
+  margin: 0.5rem 0;
+  color: #2c3e50 !important;
+}
+
+/* === MEJORAS EN LA GRILLA PRINCIPAL === */
+
+.order-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  border-color: #3498db;
+}
+
+/* Estados con colores más vibrantes */
+.order-card.received { border-left-color: #f39c12; background: #fef9e7; }
+.order-card.verified { border-left-color: #3498db; background: #ebf5fb; }
+.order-card.preparing { border-left-color: #27ae60; background: #eafaf1; }
+.order-card.shipping { border-left-color: #9b59b6; background: #f4ecf7; }
+.order-card.delivered { border-left-color: #2ecc71; background: #eafaf1; }
+.order-card.completed { border-left-color: #95a5a6; background: #f8f9fa; }
+
+/* Badges de estado más visibles */
+.status-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge-received { background: #f39c12; color: white; }
+.status-badge-verified { background: #3498db; color: white; }
+.status-badge-preparing { background: #27ae60; color: white; }
+.status-badge-shipping { background: #9b59b6; color: white; }
+.status-badge-delivered { background: #2ecc71; color: white; }
+.status-badge-completed { background: #7f8c8d; color: white; }
+
+/* Información de pago en tarjetas */
+.payment-info {
+  background: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 6px;
+  margin: 0.5rem 0;
+}
+
+/* Loading state mejorado */
+.loading-state {
+  background: #f8f9fa;
+  border: 2px dashed #bdc3c7;
+  border-radius: 12px;
+  padding: 3rem;
+}
+
+.loading-state p {
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+}
+
+/* Empty state mejorado */
+.empty-state {
+  background: #f8f9fa;
+  border: 2px dashed #bdc3c7;
+  border-radius: 12px;
+  padding: 3rem;
+}
+
+.empty-state h3 {
+  color: #7f8c8d;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.empty-state p {
+  color: #95a5a6;
+}
+
+/* Estilos para la vista de finalizados */
+.completed-orders-section {
+  margin-top: 1rem;
+}
+
+.completed-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.completed-header h2 {
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.completed-header p {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.completed-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.completed-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #6c757d;
+  transition: all 0.3s ease;
+}
+
+.completed-order-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.completed-order-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.completed-order-code {
+  font-weight: bold;
+  color: #495057;
+  background: white;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.completed-order-customer {
+  color: #495057;
+  font-weight: 500;
+}
+
+.completed-order-date {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.completed-order-total {
+  color: #28a745;
+  font-weight: bold;
+  background: #d4edda;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+.btn-view-details {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.3s ease;
+}
+
+.btn-view-details:hover {
+  background: #5a6268;
+}
+
+.empty-completed {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+}
+
+.empty-completed .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Botón de finalizados en los filtros */
+.finalizados-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.finalizados-btn.active {
+  background: #495057;
+}
+
+.finalizados-btn:hover:not(.active) {
+  background: #5a6268;
+}
