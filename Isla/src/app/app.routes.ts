@@ -26,6 +26,8 @@ import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
 
 import { Component } from '@angular/core';
 import { GestorUsuario } from './shared/gestor-usuario/gestor-usuario';
+
+
 export const routes: Routes = [
   {
     path: '',
@@ -77,7 +79,10 @@ export const routes: Routes = [
   },
   { path: 'Drink', component: Drink},
 
-  // Direct route for cashier checkout
+  { path: 'Drink', component: Drink},
+
+
+ 
   { path: 'cashier-checkout', component: CashierCheckout },
   {path:'gestorU' , component: GestorUsuario, 
     children:

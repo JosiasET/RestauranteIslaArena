@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
+
 import { Router } from '@angular/router';
+import { MeseroInterface } from '../../core/interface/waiter';
+import { MeseroService } from '../../core/service/WaiterService';
 
 @Component({
   selector: 'app-login',
@@ -10,71 +13,57 @@ import { Router } from '@angular/router';
   styleUrl: './login.css'
 })
 export class Login {
-  constructor(private router: Router) { }
-  correo: string = '';
-  numero: string = '';
-  password: string = '';
-  visible: boolean = true;
-  private passwordRegex: RegExp =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-
-
-  private emailRegex: RegExp =
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-  private  number: RegExp =
-    /^\+?[1-9]\d{6,14}$/;
-
-  toggleView() {
-    this.visible = !this.visible;
-  }
-
-  regresarHome() {
-    
-  }
-
-  enviarCodigo() {
-    console.log('Enviando código...');
-  }
-
-  login(){
  
-    if(this.correo == null && this.password== null ){
-        alert('llene los campos')
-    }else{
-        this.router.navigate(['/gestorU']); 
-    }
+  usuario: string = '';
+  password: string = '';
+  isLoading: boolean = false;
+  isOffline: boolean = false;
+
+  constructor(
+    private router: Router,
+    private meseroService: MeseroService
+  ) {}
+
+  ngOnInit() {
+    this.isOffline = !navigator.onLine;
+    window.addEventListener('online', () => this.isOffline = false);
+    window.addEventListener('offline', () => this.isOffline = true);
   }
-  campos() {
-   
-    if (!this.correo) {
-      alert('Por favor, ingrese su correo electrónico');
-      return;
-    }
-    if (!this.emailRegex.test(this.correo)) {
-      alert('Por favor, ingrese un correo electrónico válido (ej: usuario@correo.com)');
+
+  login() {
+    if (!this.usuario || !this.password) {
+      alert('Por favor, completa todos los campos');
       return;
     }
 
-    if (!this.password) {
-      alert('Por favor, ingrese su contraseña');
-      return;
-    }
-    if (!this.passwordRegex.test(this.password)) {
-      alert(
-        'La contraseña debe tener al menos una mayúscula, un número, un carácter especial y mínimo 8 caracteres'
-      );
-      return;
-    }
+    this.isLoading = true;
 
-    if(!this.number.test(this.numero)){
-      alert ('ingrese un numero de telefono valido')
-    }
+    this.meseroService.loginMesero(this.usuario, this.password).subscribe({
+      next: (mesero: MeseroInterface | null) => {
+        this.isLoading = false;
+        if (mesero) {
+          console.log('✅ Login exitoso:', mesero);
 
-   
-    alert('Formulario enviado correctamente');
+          // Guardar datos en localStorage
+          localStorage.setItem('usuarioActivo', JSON.stringify(mesero));
 
-  
+          if (this.isOffline) {
+            alert(`📱 Bienvenido ${mesero.nombre} (modo offline)`);
+          } else {
+            alert(`✅ Bienvenido ${mesero.nombre}`);
+          }
 
+          // Redirigir al panel principal
+          this.router.navigate(['/gestorU']);
+        } else {
+          alert('❌ Usuario o contraseña incorrectos');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error en login', error);
+        this.isLoading = false;
+        alert('Ocurrió un error al iniciar sesión');
+      }
+    });
   }
 }
