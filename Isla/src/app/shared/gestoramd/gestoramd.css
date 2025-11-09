@@ -79,6 +79,8 @@
 .sidebar-nav {
   flex: 1;
   padding: 15px 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-nav a {
@@ -443,6 +445,26 @@
   margin-top: 4px;
 }
 
+/* Logout para móvil (oculto en desktop) */
+.logout-nav-item {
+  display: none;
+  align-items: center;
+  padding: 14px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.logout-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  padding-left: 25px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .stats-grid {
@@ -464,8 +486,7 @@
   }
 }
 
-/* En tu archivo gestoramd.css */
-
+/* Logo styles */
 .logo {
   cursor: pointer;
   transition: all 0.3s ease;
@@ -496,7 +517,6 @@
   color: white;
 }
 
-/* Efecto de pulso al hacer hover */
 .logo:hover .waves {
   animation: wave-pulse 1s infinite;
 }
@@ -505,4 +525,103 @@
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
+}
+
+/* ===== ESTILOS RESPONSIVE ===== */
+
+/* 1. Botón hamburguesa */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px 12px;
+  margin-right: 15px;
+  color: #005792;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+  background: #f0f8ff;
+}
+
+/* 2. Overlay para móviles */
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.mobile-overlay.active {
+  display: block;
+}
+
+/* 3. Sidebar móvil */
+@media (max-width: 768px) {
+  .admin-layout {
+    position: relative;
+  }
+  
+  .admin-sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    transition: left 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .admin-sidebar.mobile-open {
+    left: 0;
+  }
+  
+  .admin-content {
+    width: 100%;
+  }
+  
+  .mobile-menu-btn {
+    display: block;
+  }
+  
+  /* SOLO EN MÓVIL: agregar scroll */
+  .sidebar-nav {
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+  }
+  
+  /* Estilos de scroll SOLO para móvil */
+  .sidebar-nav::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+  }
+  
+  .sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Ocultar el footer original en móvil */
+  .sidebar-footer {
+    display: none;
+  }
+  
+  /* Mostrar logout en nav para móvil */
+  .logout-nav-item {
+    display: flex;
+  }
 }
