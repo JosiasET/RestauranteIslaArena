@@ -1,16 +1,11 @@
 import { Routes } from '@angular/router';
 import { Header } from './shared/header/header';
 import { Home } from './pages/client/home/home';
-
 import { Login } from './shared/login/login';
 import { Gestoramd } from './shared/gestoramd/gestoramd';
 import { UpResumeAmd } from './pages/admin/up-resume-amd/up-resume-amd';
-
-
 import { CashierCheckout } from './pages/cashier-checkout/cashier-checkout';
-
 import { Mycart } from './shared/mycart/mycart';
-
 import { Checkoutpage } from './pages/checkoutpage/checkoutpage';
 import { UpDrinkAmd } from './pages/admin/up-drink-amd/up-drink-amd';
 import { UpCelebratesAmd } from './pages/admin/up-celebrates-amd/up-celebrates-amd';
