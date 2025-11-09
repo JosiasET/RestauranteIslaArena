@@ -364,7 +364,8 @@
 .footer {
   background: linear-gradient(135deg, #0a3d62 0%, #1a5f8e 100%);
   color: white;
-  padding: 2rem 1rem;
+  width: 100%;
+  padding: 2rem 0rem;
   margin-top: 5rem;
 }
 
