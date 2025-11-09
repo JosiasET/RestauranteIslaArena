@@ -23,13 +23,20 @@ import { EditHome } from './pages/admin/edit-home/edit-home';
 import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/seguimiento-pedidos';
 import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
 import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
+<<<<<<< HEAD
+=======
+import { Component } from '@angular/core';
+import { GestorUsuario } from './shared/gestor-usuario/gestor-usuario';
+
+
+>>>>>>> 955cbce7960e166d21af940c863435e1f5219b42
 
 export const routes: Routes = [
   {
     path: '',
     component: Header,
     children: [
-      { path: 'Home', component: Home },
+      { path: 'Home', component: Home},
       { path: 'Drink', component: Drink},
       { path: 'fishes', component: Fishes },
       { path: 'Food', component: Food },
@@ -64,6 +71,7 @@ export const routes: Routes = [
     ]
   },
 
+<<<<<<< HEAD
   {
     path: 'home', 
     component: Home,
@@ -73,7 +81,18 @@ export const routes: Routes = [
       { path: 'food', component: Food },
     ]
   },
+=======
+  { path: 'Drink', component: Drink},
+>>>>>>> 955cbce7960e166d21af940c863435e1f5219b42
 
   // Direct route for cashier checkout
-  { path: 'cashier-checkout', component: CashierCheckout }
+  { path: 'cashier-checkout', component: CashierCheckout },
+  {path:'gestorU' , component: GestorUsuario, 
+    children:
+      [
+        {path: 'tracking', component: AdminTrackingComponent },
+        { path: 'upsales', component: UpSalesAmd },
+        { path: 'celebrae', component: UpCelebratesAmd}
+      ]
+  }
 ];
