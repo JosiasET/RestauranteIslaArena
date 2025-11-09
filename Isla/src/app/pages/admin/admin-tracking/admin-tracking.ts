@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { TrackingService, OrderTracking } from '../../../core/service/tracking.service';
 
 @Component({
@@ -10,23 +11,25 @@ import { TrackingService, OrderTracking } from '../../../core/service/tracking.s
   templateUrl: './admin-tracking.html',
   styleUrls: ['./admin-tracking.css']
 })
-export class AdminTrackingComponent implements OnInit {
+export class AdminTrackingComponent implements OnInit, OnDestroy {
   orders: OrderTracking[] = [];
   filteredOrders: OrderTracking[] = [];
-  loading: boolean = false;
+  completedOrders: OrderTracking[] = []; // ✅ NUEVO: Pedidos finalizados
+  loading: boolean = true;
   searchTerm: string = '';
   selectedOrder: OrderTracking | null = null;
   currentFilter: string = '';
 
   // Estadísticas
-  stats = {
+ stats = {
     total: 0,
     pendientes: 0,
     en_proceso: 0,
-    entregados: 0
+    entregados: 0,
+    finalizados: 0 // ✅ NUEVO
   };
 
-  // Opciones de estado para los botones - CORREGIDO
+  // Opciones de estado para los botones
   statusOptions = [
     { value: 'pedido_recibido', label: 'Recibido', icon: '📥' },
     { value: 'pago_verificado', label: 'Pago Verificado', icon: '💳' },
@@ -36,28 +39,83 @@ export class AdminTrackingComponent implements OnInit {
     { value: 'finalizado', label: 'Finalizado', icon: '🏁' }
   ];
 
-  constructor(private trackingService: TrackingService) {}
+  activeView: 'active' | 'completed' = 'active';
+
+  private subscription: Subscription = new Subscription();
+
+  constructor(
+    private trackingService: TrackingService,
+    private cdRef: ChangeDetectorRef // ← AGREGAR ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     console.log('✅ AdminTrackingComponent inicializado');
+    
+    // ✅ SUSCRIBIRSE AL ESTADO DE LOADING (como el Stock)
+    this.subscription.add(
+      this.trackingService.loading$.subscribe(loading => {
+        this.loading = loading;
+        this.cdRef.detectChanges(); // ← FORZAR ACTUALIZACIÓN
+      })
+    );
+
+    // ✅ SUSCRIBIRSE A LOS PEDIDOS (como el Stock)
+    this.subscription.add(
+      this.trackingService.orders$.subscribe((orders: OrderTracking[]) => {
+        console.log('📦 Pedidos recibidos via Observable:', orders.length);
+        this.orders = orders;
+        this.filteredOrders = [...orders];
+        this.calculateStats();
+        this.cdRef.detectChanges(); // ← FORZAR ACTUALIZACIÓN
+      })
+    );
+
+    // ✅ CARGAR PEDIDOS INICIALES
     this.loadOrders();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   loadOrders() {
     console.log('🔄 Cargando pedidos...');
     this.loading = true;
+    
+    // ✅ CARGAR PEDIDOS ACTIVOS
     this.trackingService.getAllOrders().subscribe({
       next: (orders: OrderTracking[]) => {
-        console.log('📦 Pedidos cargados:', orders.length);
+        console.log('📦 Pedidos activos cargados:', orders.length);
         this.orders = orders;
-        this.filteredOrders = orders;
+        this.filteredOrders = [...orders];
         this.calculateStats();
-        this.loading = false;
+        
+        // ✅ CARGAR PEDIDOS FINALIZADOS
+        this.loadCompletedOrders();
       },
       error: (error: any) => {
         console.error('❌ Error loading orders:', error);
+        alert('Error al cargar los pedidos: ' + error.message);
         this.loading = false;
-        alert('Error al cargar los pedidos');
+      }
+    });
+  }
+
+  // ✅ NUEVO: Cargar pedidos finalizados
+  loadCompletedOrders() {
+    this.trackingService.getCompletedOrders().subscribe({
+      next: (orders: OrderTracking[]) => {
+        console.log('📦 Pedidos finalizados cargados:', orders.length);
+        this.completedOrders = orders;
+        this.stats.finalizados = orders.length;
+        this.loading = false;
+        this.cdRef.detectChanges();
+      },
+      error: (error: any) => {
+        console.error('❌ Error loading completed orders:', error);
+        this.completedOrders = [];
+        this.loading = false;
+        this.cdRef.detectChanges();
       }
     });
   }
@@ -71,8 +129,25 @@ export class AdminTrackingComponent implements OnInit {
       order.status === 'en_preparacion' || order.status === 'en_camino'
     ).length;
     this.stats.entregados = this.orders.filter(order => 
-      order.status === 'entregado' || order.status === 'finalizado'
+      order.status === 'entregado'
     ).length;
+    // finalizados se calcula en loadCompletedOrders
+    
+    this.cdRef.detectChanges();
+  }
+
+  // ✅ NUEVO: Cambiar entre vistas
+  setActiveView(view: 'active' | 'completed') {
+    this.activeView = view;
+    this.selectedOrder = null;
+    this.searchTerm = '';
+    this.currentFilter = '';
+    this.cdRef.detectChanges();
+  }
+
+  // ✅ NUEVO: Verificar si estamos en vista activos
+  isActiveView(): boolean {
+    return this.activeView === 'active';
   }
 
   filterOrders() {
@@ -94,6 +169,7 @@ export class AdminTrackingComponent implements OnInit {
     }
 
     this.filteredOrders = filtered;
+    this.cdRef.detectChanges(); // ← ACTUALIZAR FILTROS
   }
 
   filterByStatus(filter: string) {
@@ -104,10 +180,10 @@ export class AdminTrackingComponent implements OnInit {
   applyCurrentFilter() {
     if (!this.currentFilter) {
       this.filteredOrders = this.orders;
-      return;
+    } else {
+      this.filteredOrders = this.applyStatusFilter(this.orders, this.currentFilter);
     }
-
-    this.filteredOrders = this.applyStatusFilter(this.orders, this.currentFilter);
+    this.cdRef.detectChanges(); // ← ACTUALIZAR FILTROS
   }
 
   applyStatusFilter(orders: OrderTracking[], filter: string): OrderTracking[] {
@@ -132,41 +208,56 @@ export class AdminTrackingComponent implements OnInit {
   openOrderDetails(order: OrderTracking) {
     this.selectedOrder = order;
     console.log('📋 Abriendo detalles del pedido:', order.tracking_code);
+    this.cdRef.detectChanges(); // ← ACTUALIZAR MODAL
   }
 
   closeOrderDetails() {
     this.selectedOrder = null;
+    this.cdRef.detectChanges(); // ← ACTUALIZAR MODAL
   }
 
   updateOrderStatus(order: OrderTracking, newStatus: string) {
-    console.log('🔄 Actualizando estado:', order.tracking_code, '->', newStatus);
-    
-    this.trackingService.updateOrderStatus(order.id!, newStatus, order.payment_verified).subscribe({
-      next: (updatedOrder: OrderTracking) => {
-        console.log('✅ Estado actualizado:', updatedOrder);
-        
-        // Actualizar el pedido en la lista
-        const index = this.orders.findIndex(o => o.id === order.id);
-        if (index !== -1) {
-          this.orders[index] = updatedOrder;
-          this.filterOrders();
-          this.calculateStats();
-        }
-
-        // Si el pedido seleccionado es el mismo, actualizarlo también
-        if (this.selectedOrder && this.selectedOrder.id === order.id) {
-          this.selectedOrder = updatedOrder;
-        }
-
-        // Mostrar notificación
-        this.showNotification(`Estado actualizado a: ${this.getStatusText(newStatus)}`);
-      },
-      error: (error: any) => {
-        console.error('❌ Error updating order:', error);
-        alert('Error al actualizar el estado del pedido');
-      }
-    });
+  // ✅ USAR order_id si id no está disponible
+  const orderId = order.id || order.order_id;
+  
+  if (!orderId) {
+    console.error('❌ No se puede encontrar ID del pedido:', order);
+    alert('Error: No se puede identificar el pedido');
+    return;
   }
+
+  console.log('🔄 Actualizando estado:', {
+    orderId: orderId,
+    trackingCode: order.tracking_code,
+    currentStatus: order.status,
+    newStatus: newStatus
+  });
+
+  this.trackingService.updateOrderStatus(orderId, newStatus, order.payment_verified).subscribe({
+    next: (updatedOrder: OrderTracking) => {
+      console.log('✅ Estado actualizado exitosamente:', updatedOrder);
+      
+      // Actualización manual inmediata
+      const index = this.orders.findIndex(o => (o.id === orderId) || (o.order_id === orderId));
+      if (index !== -1) {
+        this.orders[index] = updatedOrder;
+        this.filteredOrders = [...this.orders];
+        this.calculateStats();
+        this.cdRef.detectChanges();
+      }
+
+      if (this.selectedOrder && (this.selectedOrder.id === orderId || this.selectedOrder.order_id === orderId)) {
+        this.selectedOrder = updatedOrder;
+      }
+
+      this.showNotification(`Estado actualizado a: ${this.getStatusText(newStatus)}`);
+    },
+    error: (error: any) => {
+      console.error('❌ Error actualizando estado:', error);
+      alert('Error al actualizar el estado del pedido: ' + error.message);
+    } 
+  });
+}
 
   togglePaymentStatus(order: OrderTracking) {
     const newPaymentStatus = !order.payment_verified;
@@ -175,21 +266,8 @@ export class AdminTrackingComponent implements OnInit {
     this.trackingService.updatePaymentStatus(order.id!, newPaymentStatus).subscribe({
       next: (updatedOrder: OrderTracking) => {
         console.log('✅ Pago actualizado:', updatedOrder);
-        
-        // Actualizar el pedido en la lista
-        const index = this.orders.findIndex(o => o.id === order.id);
-        if (index !== -1) {
-          this.orders[index] = updatedOrder;
-          this.filterOrders();
-        }
-
-        // Si el pedido seleccionado es el mismo, actualizarlo también
-        if (this.selectedOrder && this.selectedOrder.id === order.id) {
-          this.selectedOrder = updatedOrder;
-        }
-
-        // Mostrar notificación
         this.showNotification(`Pago ${newPaymentStatus ? 'verificado' : 'marcado como pendiente'}`);
+        // El BehaviorSubject ya actualiza automáticamente la lista
       },
       error: (error: any) => {
         console.error('❌ Error updating payment:', error);
@@ -197,6 +275,8 @@ export class AdminTrackingComponent implements OnInit {
       }
     });
   }
+
+  // ... (los demás métodos getOrderCardClass, getStatusBadgeClass, etc. se mantienen igual)
 
   getOrderCardClass(order: OrderTracking): string {
     const statusClassMap: { [key: string]: string } = {
@@ -261,7 +341,6 @@ export class AdminTrackingComponent implements OnInit {
     return date.toLocaleDateString();
   }
 
-  // ✅ MÉTODO PARA CALCULAR EL CAMBIO
   getChangeAmount(order: OrderTracking): number {
     if (order.payment_method === 'efectivo' && order.delivery_address?.cashAmount) {
       const cashAmount = order.delivery_address.cashAmount;
@@ -272,7 +351,6 @@ export class AdminTrackingComponent implements OnInit {
   }
 
   showNotification(message: string) {
-    // Crear notificación temporal
     const notification = document.createElement('div');
     notification.style.cssText = `
       position: fixed;
@@ -289,7 +367,6 @@ export class AdminTrackingComponent implements OnInit {
     notification.textContent = message;
     document.body.appendChild(notification);
 
-    // Remover después de 3 segundos
     setTimeout(() => {
       if (document.body.contains(notification)) {
         document.body.removeChild(notification);

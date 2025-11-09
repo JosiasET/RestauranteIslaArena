@@ -634,4 +634,114 @@
     gap: 10px;
     align-items: center;
   }
+  /* Agrega esto en up-stock-amd.css */
+
+/* Estilos para la nueva columna de tipo de unidad */
+.unit-type-cell {
+  text-align: center;
+}
+
+.unit-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.unit-badge.kg {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.unit-badge.unidades {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #e1bee7;
+}
+
+/* Mejoras para la actualización rápida */
+.quick-update {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stock-input {
+  width: 80px;
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.unit-symbol {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+  min-width: 25px;
+}
+
+/* Información de unidades en el footer */
+.unit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 0;
+}
+
+.unit-info-item {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Mejoras en los botones de acciones */
+.action-buttons {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  min-width: 45px;
+}
+
+/* Estadísticas mejoradas */
+.header-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.stat-number {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.stock-bajo-alert {
+  background: #fff3cd;
+  border-color: #ffeaa7;
+}
+
+.stock-bajo-alert .stat-number {
+  color: #856404;
+}
 }

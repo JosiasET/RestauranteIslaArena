@@ -19,16 +19,17 @@ import { Drink } from './pages/client/drink/drink';
 import { Food } from './pages/client/food/food';
 import { Celebrates } from './pages/client/celebrates/celebrates';
 import { Promotions } from './pages/client/promotions/promotions';
-
 import { EditHome } from './pages/admin/edit-home/edit-home';
-
 import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/seguimiento-pedidos';
 import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
 import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
+<<<<<<< HEAD
+=======
 import { Component } from '@angular/core';
 import { GestorUsuario } from './shared/gestor-usuario/gestor-usuario';
 
 
+>>>>>>> 955cbce7960e166d21af940c863435e1f5219b42
 
 export const routes: Routes = [
   {
@@ -53,7 +54,9 @@ export const routes: Routes = [
     path: 'gestoramd',
     component: Gestoramd,
     children: [
-      // Ruta vacía - el componente Gestoramd maneja el dashboard
+      // ✅ AGREGAR RUTA VACÍA - Esto es crucial
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: UpResumeAmd }, // O el componente que quieras para dashboard
       { path: 'upresumen', component: UpResumeAmd },
       { path: 'upsales', component: UpSalesAmd },
       { path: 'updrink', component: UpDrinkAmd },
@@ -62,15 +65,25 @@ export const routes: Routes = [
       { path: 'uppromotion', component: UpPromotionAmd },
       { path: 'celebrae', component: UpCelebratesAmd},
       { path: 'cwaiter', component: UpCreatewaiterAmd },   
-      {path: 'edit-home', component: EditHome},
-      { path: 'cwaiter', component: UpCreatewaiterAmd },
-      {path: 'tracking', component: AdminTrackingComponent },
+      { path: 'edit-home', component: EditHome},
+      { path: 'tracking', component: AdminTrackingComponent },
       { path: 'upstock', component: UpStockAmdPage }
-
     ]
   },
 
+<<<<<<< HEAD
+  {
+    path: 'home', 
+    component: Home,
+    children: [
+      { path: 'fishes', component: Fishes },
+      { path: 'Drink', component: Drink },
+      { path: 'food', component: Food },
+    ]
+  },
+=======
   { path: 'Drink', component: Drink},
+>>>>>>> 955cbce7960e166d21af940c863435e1f5219b42
 
   // Direct route for cashier checkout
   { path: 'cashier-checkout', component: CashierCheckout },

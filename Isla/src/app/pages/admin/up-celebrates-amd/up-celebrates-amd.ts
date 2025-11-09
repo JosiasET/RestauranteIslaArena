@@ -8,7 +8,7 @@ import { Observable, map, Subscription } from 'rxjs';
 import { CelebrateService } from '../../../core/service/CelebrateService';
 
 interface Reservacion {
-  id: number | string;  // ✅ Permitir string para IDs offline
+  id: number | string;
   codigo: string;
   nombre: string;
   fechaNacimiento: string;
@@ -21,11 +21,12 @@ interface Reservacion {
   historial: HistorialEvento[];
   id_celebracion?: number | string;
   reservation?: string;
+  reservation_code?: string; // ✅ AGREGAR ESTA PROPIEDAD
   cant_people?: number;
   ine_verificacion?: boolean;
   estado_verificacion?: boolean;
   acepta_verificacion?: boolean;
-  offline?: boolean; // ✅ NUEVA PROPIEDAD
+  offline?: boolean;
 }
 
 interface HistorialEvento {
@@ -61,17 +62,18 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
   reservaciones: Reservacion[] = [];
   reservacionesFiltradas: Reservacion[] = [];
   reservaSeleccionada: Reservacion | null = null;
-  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
+  isOffline: boolean = false;
   
   // Filtros
   fechaFiltro: string = '';
   estadoFiltro: string = 'todas';
   busqueda: string = '';
 
-  // Formulario nueva reserva
+  // Formulario nueva reserva - DIVIDIDO EN NOMBRE Y APELLIDO
   mostrarFormulario: boolean = false;
   nuevaReserva: any = {
-    nombre_completo: '',
+    firstName: '',           // ✅ NUEVO - Nombre
+    lastName: '',            // ✅ NUEVO - Apellido
     fecha_nacimiento: '',
     telefono: '',
     fecha_preferida: '',
@@ -79,6 +81,7 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
     acepta_verificacion: false,
     cant_people: 1
   };
+
 
   estadisticas: Estadisticas = {
     hoy: 0,
@@ -155,8 +158,8 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
         return {
           disponible: resultado.disponible,
           mensaje: resultado.mensaje,
-          capacidadActual: resultado.capacidadRestante,
-          franjaOcupada: resultado.totalReservado > 0
+          capacidadActual: resultado.capacidad_restante,
+          franjaOcupada: resultado.total_reservado > 0
         };
       })
     );
@@ -230,44 +233,49 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
   }
 
   private celebracionToReservacion(celeb: CelebrateInterface): Reservacion {
-    const codigo = celeb.reservation || this.generarCodigoReserva();
-    
-    let estado: 'pendiente' | 'confirmada' | 'cumplida' | 'cancelada' = 'pendiente';
-    if (celeb.estado_verificacion) {
-      estado = 'cumplida';
-    } else if (celeb.ine_verificacion) {
-      estado = 'confirmada';
-    }
-    
-    const reservacion: Reservacion = {
-      id: celeb.id_celebracion || Date.now(),
-      id_celebracion: celeb.id_celebracion,
-      codigo: codigo,
-      nombre: celeb.nombre_completo || 'Nombre no disponible',
-      fechaNacimiento: celeb.fecha_nacimiento || '2000-01-01',
-      telefono: celeb.telefono || 'Sin teléfono',
-      fechaReserva: celeb.fecha_preferida || new Date().toISOString().split('T')[0],
-      horaReserva: celeb.hora_preferida || '12:00',
-      estado: estado,
-      ineVerificada: celeb.ine_verificacion || false,
-      fechaCreacion: celeb.fecha_creacion || new Date().toISOString(),
-      historial: [
-        { 
-          fecha: new Date(celeb.fecha_creacion || new Date()), 
-          accion: `Reservación creada para ${celeb.cant_people || 1} persona(s)`,
-          usuario: 'Sistema'
-        }
-      ],
-      reservation: celeb.reservation,
-      cant_people: celeb.cant_people || 1,
-      ine_verificacion: celeb.ine_verificacion || false,
-      estado_verificacion: celeb.estado_verificacion || false,
-      acepta_verificacion: celeb.acepta_verificacion || false,
-      offline: celeb.offline || false // ✅ NUEVA PROPIEDAD
-    };
-    
-    return reservacion;
+  const codigo = celeb.reservation_code || celeb.reservation || this.generarCodigoReserva();
+  
+  let estado: 'pendiente' | 'confirmada' | 'cumplida' | 'cancelada' = 'pendiente';
+  if (celeb.estado_verificacion || celeb.verification_status) {
+    estado = 'cumplida';
+  } else if (celeb.ine_verificacion || celeb.ine_verified) {
+    estado = 'confirmada';
   }
+  
+  // USAR first_name y last_name si están disponibles
+  const nombreCompleto = celeb.nombre_completo || 
+                        (celeb.first_name && celeb.last_name ? `${celeb.first_name} ${celeb.last_name}` : 'Nombre no disponible');
+  
+  const reservacion: Reservacion = {
+    id: celeb.celebration_id || celeb.id_celebracion || Date.now(),
+    id_celebracion: celeb.celebration_id || celeb.id_celebracion,
+    codigo: codigo,
+    nombre: nombreCompleto,
+    fechaNacimiento: celeb.fecha_nacimiento || '2000-01-01',
+    telefono: celeb.telefono || 'Sin teléfono',
+    fechaReserva: celeb.fecha_preferida || new Date().toISOString().split('T')[0],
+    horaReserva: celeb.hora_preferida || '12:00',
+    estado: estado,
+    ineVerificada: celeb.ine_verificacion || celeb.ine_verified || false,
+    fechaCreacion: celeb.fecha_creacion || celeb.created_at || new Date().toISOString(),
+    historial: [
+      { 
+        fecha: new Date(celeb.fecha_creacion || celeb.created_at || new Date()), 
+        accion: `Reservación creada para ${celeb.cant_people || celeb.people_count || 1} persona(s)`,
+        usuario: 'Sistema'
+      }
+    ],
+    reservation: celeb.reservation,
+    reservation_code: celeb.reservation_code, // ✅ AHORA SÍ EXISTE EN LA INTERFACE
+    cant_people: celeb.cant_people || celeb.people_count || 1,
+    ine_verificacion: celeb.ine_verificacion || celeb.ine_verified || false,
+    estado_verificacion: celeb.estado_verificacion || celeb.verification_status || false,
+    acepta_verificacion: celeb.acepta_verificacion || false,
+    offline: celeb.offline || false
+  };
+  
+  return reservacion;
+}
 
   private generarCodigoReserva(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -323,8 +331,12 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
 
     this.cargando = true;
     
+    const nombreCompleto = `${this.nuevaReserva.firstName} ${this.nuevaReserva.lastName}`.trim();
+    
     const reservacion: CelebrateInterface = {
-      nombre_completo: this.nuevaReserva.nombre_completo,
+      first_name: this.nuevaReserva.firstName,      // ✅ Enviar separado
+      last_name: this.nuevaReserva.lastName,        // ✅ Enviar separado
+      nombre_completo: nombreCompleto,              // ✅ También enviar completo
       fecha_nacimiento: this.nuevaReserva.fecha_nacimiento,
       telefono: this.nuevaReserva.telefono,
       fecha_preferida: this.nuevaReserva.fecha_preferida,
@@ -335,17 +347,16 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
       estado_verificacion: false
     };
 
-    this.celebrateService.crearCelebracionConValidacion(reservacion).subscribe({
+     this.celebrateService.crearCelebracionConValidacion(reservacion).subscribe({
       next: (resultado: any) => {
         if (resultado.success) {
           this.mostrarFormulario = false;
           this.limpiarFormulario();
           
-          // ✅ MENSAJE MEJORADO
           if (this.isOffline) {
             alert(`📱 ${resultado.message}\n\nEsta reserva se sincronizará automáticamente cuando recuperes internet.`);
           } else {
-            alert(`✅ ${resultado.message}\n\nCódigo: ${resultado.data.reservation}\nPersonas: ${reservacion.cant_people}\nCapacidad restante: ${resultado.capacidad_restante}`);
+            alert(`✅ ${resultado.message}\n\nCódigo: ${resultado.data.reservation_code}\nPersonas: ${reservacion.cant_people}\nCapacidad restante: ${resultado.capacidad_restante}`);
           }
         }
         this.cargando = false;
@@ -361,10 +372,15 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
   }
 
   private validarFormulario(): boolean {
-    const { nombre_completo, fecha_nacimiento, telefono, fecha_preferida, hora_preferida, cant_people } = this.nuevaReserva;
+    const { firstName, lastName, fecha_nacimiento, telefono, fecha_preferida, hora_preferida, cant_people } = this.nuevaReserva;
     
-    if (!nombre_completo?.trim()) {
-      alert('El nombre completo es requerido');
+    // ✅ VALIDAR NOMBRE Y APELLIDO SEPARADOS
+    if (!firstName?.trim()) {
+      alert('El nombre es requerido');
+      return false;
+    }
+    if (!lastName?.trim()) {
+      alert('El apellido es requerido');
       return false;
     }
     if (!fecha_nacimiento) {
@@ -411,7 +427,8 @@ export class UpCelebratesAmd implements OnInit, OnDestroy {
 
   private limpiarFormulario() {
     this.nuevaReserva = {
-      nombre_completo: '',
+      firstName: '',           // ✅ Limpiar separado
+      lastName: '',            // ✅ Limpiar separado
       fecha_nacimiento: '',
       telefono: '',
       fecha_preferida: '',

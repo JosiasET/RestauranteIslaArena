@@ -1,4 +1,3 @@
-// src/app/pages/admin/up-stock-amd/up-stock-amd.page.ts
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,11 +7,12 @@ import { StockService, ProductoStock } from '../../../core/service/Stock.service
 @Component({
   selector: 'app-up-stock-amd',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe], // ✅ Agregar DatePipe
+  imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './up-stock-amd.html',
   styleUrls: ['./up-stock-amd.css']
+
 })
-export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre a UpStockAmdPage
+export class UpStockAmdPage implements OnInit, OnDestroy {
   productos: ProductoStock[] = [];
   productosFiltrados: ProductoStock[] = [];
   isLoading: boolean = false;
@@ -22,11 +22,16 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
   terminoBusqueda: string = '';
   categoriaFiltro: string = '';
   stockBajoFiltro: boolean = false;
+  tipoUnidadFiltro: string = '';
   
-  // Estadísticas
-  totalProductos: number = 0;
-  totalStock: number = 0;
-  productosStockBajo: number = 0;
+  // Estadísticas - SEPARADAS por tipo de unidad
+  stats = {
+    totalProductos: 0,
+    totalUnidades: 0,
+    totalKilos: 0,
+    productosStockBajo: 0
+  };
+  
   today: Date = new Date();
 
   private subscription: Subscription = new Subscription();
@@ -39,7 +44,6 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
   ngOnInit() {
     console.log('🔄 Inicializando módulo de stock...');
     
-    // Suscribirse al estado de loading
     this.subscription.add(
       this.stockService.loading$.subscribe(loading => {
         this.isLoading = loading;
@@ -47,7 +51,6 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
       })
     );
 
-    // Suscribirse a los productos
     this.subscription.add(
       this.stockService.productos$.subscribe((productos: ProductoStock[]) => {
         this.productos = productos;
@@ -59,7 +62,6 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
       })
     );
 
-    // Cargar productos iniciales
     this.cargarProductos();
   }
 
@@ -74,6 +76,36 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
         alert('Error al cargar los productos: ' + err.message);
       }
     });
+  }
+
+  // ✅ NUEVO: Determinar tipo de unidad del producto
+  getTipoUnidad(producto: ProductoStock): string {
+    // Si el producto es marisco o especialidad, usa kg
+    if (producto.categoria.toLowerCase().includes('especialidad') || 
+        producto.categoria.toLowerCase().includes('marisco') ||
+        producto.nombre.toLowerCase().includes('kg') ||
+        producto.nombre.toLowerCase().includes('kilo')) {
+      return 'kg';
+    }
+    // Por defecto, unidades
+    return 'unidades';
+  }
+
+  // ✅ NUEVO: Obtener el incremento adecuado según el tipo de producto
+  getIncrementoAdecuado(producto: ProductoStock): number {
+    const tipoUnidad = this.getTipoUnidad(producto);
+    return tipoUnidad === 'kg' ? 0.5 : 1; // 0.5 kg para mariscos, 1 unidad para bebidas
+  }
+
+  // ✅ NUEVO: Formatear cantidad para mostrar
+  formatearCantidad(producto: ProductoStock): string {
+    const cantidad = producto.cantidad_productos;
+    const tipoUnidad = this.getTipoUnidad(producto);
+    
+    if (tipoUnidad === 'kg') {
+      return `${cantidad} kg`;
+    }
+    return `${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}`;
   }
 
   // Actualizar stock de un producto
@@ -105,14 +137,16 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
     });
   }
 
-  // Incrementar stock
-  incrementarStock(producto: ProductoStock, incremento: number = 1) {
+  // Incrementar stock con incrementos adecuados
+  incrementarStock(producto: ProductoStock, incrementoPersonalizado?: number) {
+    const incremento = incrementoPersonalizado || this.getIncrementoAdecuado(producto);
     const nuevaCantidad = producto.cantidad_productos + incremento;
     this.actualizarStock(producto, nuevaCantidad);
   }
 
-  // Decrementar stock
-  decrementarStock(producto: ProductoStock, decremento: number = 1) {
+  // Decrementar stock con decrementos adecuados
+  decrementarStock(producto: ProductoStock, decrementoPersonalizado?: number) {
+    const decremento = decrementoPersonalizado || this.getIncrementoAdecuado(producto);
     const nuevaCantidad = Math.max(0, producto.cantidad_productos - decremento);
     this.actualizarStock(producto, nuevaCantidad);
   }
@@ -133,9 +167,20 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
       );
     }
 
-    // Filtro por stock bajo
+    // ✅ NUEVO: Filtro por tipo de unidad
+    if (this.tipoUnidadFiltro) {
+      productosFiltrados = productosFiltrados.filter(p => 
+        this.getTipoUnidad(p) === this.tipoUnidadFiltro
+      );
+    }
+
+    // Filtro por stock bajo (ajustado por tipo de producto)
     if (this.stockBajoFiltro) {
-      productosFiltrados = productosFiltrados.filter(p => p.cantidad_productos <= 10);
+      productosFiltrados = productosFiltrados.filter(p => {
+        const tipoUnidad = this.getTipoUnidad(p);
+        const limiteStockBajo = tipoUnidad === 'kg' ? 5 : 10; // 5 kg o 10 unidades
+        return p.cantidad_productos <= limiteStockBajo;
+      });
     }
 
     this.productosFiltrados = productosFiltrados;
@@ -145,24 +190,53 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
   limpiarFiltros() {
     this.terminoBusqueda = '';
     this.categoriaFiltro = '';
+    this.tipoUnidadFiltro = '';
     this.stockBajoFiltro = false;
     this.productosFiltrados = [...this.productos];
     this.stockService.obtenerProductosConStock().subscribe();
   }
 
-  // Calcular estadísticas
+  // ✅ CORREGIDO: Calcular estadísticas separadas
   calcularEstadisticas() {
-    this.totalProductos = this.productos.length;
-    this.totalStock = this.productos.reduce((sum, p) => sum + p.cantidad_productos, 0);
-    this.productosStockBajo = this.productos.filter(p => p.cantidad_productos <= 10).length;
+    this.stats.totalProductos = this.productos.length;
+    
+    // Separar totales por tipo de unidad
+    this.stats.totalUnidades = 0;
+    this.stats.totalKilos = 0;
+    
+    this.productos.forEach(producto => {
+      const tipoUnidad = this.getTipoUnidad(producto);
+      if (tipoUnidad === 'kg') {
+        this.stats.totalKilos += producto.cantidad_productos;
+      } else {
+        this.stats.totalUnidades += producto.cantidad_productos;
+      }
+    });
+
+    // Calcular productos con stock bajo (con límites diferentes)
+    this.stats.productosStockBajo = this.productos.filter(p => {
+      const tipoUnidad = this.getTipoUnidad(p);
+      const limiteStockBajo = tipoUnidad === 'kg' ? 5 : 10;
+      return p.cantidad_productos <= limiteStockBajo;
+    }).length;
   }
 
-  // Obtener clase CSS para el stock
-  getStockClass(cantidad: number): string {
+  // ✅ ACTUALIZADO: Obtener clase CSS para el stock (considerando tipo de producto)
+  getStockClass(producto: ProductoStock): string {
+    const cantidad = producto.cantidad_productos;
+    const tipoUnidad = this.getTipoUnidad(producto);
+    
     if (cantidad === 0) return 'stock-cero';
-    if (cantidad <= 5) return 'stock-bajo';
-    if (cantidad <= 10) return 'stock-medio';
-    return 'stock-alto';
+    
+    if (tipoUnidad === 'kg') {
+      if (cantidad <= 2) return 'stock-bajo';
+      if (cantidad <= 5) return 'stock-medio';
+      return 'stock-alto';
+    } else {
+      if (cantidad <= 5) return 'stock-bajo';
+      if (cantidad <= 10) return 'stock-medio';
+      return 'stock-alto';
+    }
   }
 
   // Obtener icono según categoría
@@ -170,7 +244,31 @@ export class UpStockAmdPage implements OnInit, OnDestroy { // ✅ Cambiar nombre
     switch (categoria.toLowerCase()) {
       case 'bebida': return '🥤';
       case 'especialidad': return '🐟';
+      case 'marisco': return '🦐';
       default: return '📦';
     }
   }
+
+  // ✅ NUEVO: Obtener texto para botones de incremento
+  getTextoIncremento(producto: ProductoStock): string {
+    const incremento = this.getIncrementoAdecuado(producto);
+    const tipoUnidad = this.getTipoUnidad(producto);
+    
+    if (tipoUnidad === 'kg') {
+      return incremento === 0.5 ? '+0.5' : `+${incremento}`;
+    }
+    return `+${incremento}`;
+  }
+
+  // ✅ NUEVO: Obtener texto para botones de decremento
+  getTextoDecremento(producto: ProductoStock): string {
+    const decremento = this.getIncrementoAdecuado(producto);
+    const tipoUnidad = this.getTipoUnidad(producto);
+    
+    if (tipoUnidad === 'kg') {
+      return decremento === 0.5 ? '-0.5' : `-${decremento}`;
+    }
+    return `-${decremento}`;
+  }
+  
 }

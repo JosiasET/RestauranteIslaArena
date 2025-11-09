@@ -27,43 +27,20 @@ export class CelebrateService {
 
   private setupOnlineListener() {
     window.addEventListener('online', () => {
-      console.log('🌐 Internet recuperado - Preparando sincronización de celebraciones...');
+      console.log('🌐 Internet recuperado - Preparando sincronización...');
       setTimeout(() => {
         this.sincronizarCelebracionesOffline();
       }, 3000);
     });
   }
 
-  private handleError(error: HttpErrorResponse) {
-    console.error('❌ Error en CelebrateService:', error);
-    
-    if (error.error instanceof ErrorEvent) {
-      return throwError(() => new Error(`Error: ${error.error.message}`));
-    } else {
-      if (error.status === 400) {
-        return throwError(() => new Error(error.error.error || 'Error de validación'));
-      }
-      return throwError(() => new Error(`Error ${error.status}: ${error.message}`));
-    }
-  }
-
-  // ✅ VERIFICAR DISPONIBILIDAD MEJORADA - INCLUYE OFFLINE
+  // ✅ VERIFICAR DISPONIBILIDAD CON NUEVA ESTRUCTURA
   verificarDisponibilidad(fecha: string, hora: string, personasSolicitadas: number): Observable<{ 
     disponible: boolean; 
     mensaje: string; 
-    capacidadRestante: number;
-    totalReservado: number;
+    capacidad_restante: number;
+    total_reservado: number;
   }> {
-    // ✅ SIEMPRE calcular incluyendo reservas offline locales
-    const celebracionesLocales = this.celebracionesSource.getValue();
-    const celebracionesEnFechaHora = celebracionesLocales.filter(c => 
-      c.fecha_preferida === fecha && c.hora_preferida === hora
-    );
-    
-    const totalReservadoLocal = celebracionesEnFechaHora.reduce((sum, c) => sum + (c.cant_people || 1), 0);
-    const capacidadRestanteLocal = this.CAPACIDAD_MAXIMA - totalReservadoLocal;
-    const disponibleLocal = capacidadRestanteLocal >= personasSolicitadas;
-
     if (navigator.onLine) {
       return this.http.post<any>(`${this.apiUrl}/verificar-disponibilidad`, {
         fecha_preferida: fecha,
@@ -71,21 +48,11 @@ export class CelebrateService {
         cant_people: personasSolicitadas
       }).pipe(
         map((resultado: any) => {
-          // ✅ COMBINAR resultado del backend con reservas locales offline
-          const totalReservadoCombinado = Math.max(resultado.total_reservado || 0, totalReservadoLocal);
-          const capacidadRestanteCombinada = this.CAPACIDAD_MAXIMA - totalReservadoCombinado;
-          const disponibleCombinado = capacidadRestanteCombinada >= personasSolicitadas;
-
-          let mensaje = resultado.mensaje;
-          if (!disponibleCombinado && disponibleLocal) {
-            mensaje = '⚠️ Capacidad comprometida por reservas pendientes de sincronizar';
-          }
-
           return {
-            disponible: disponibleCombinado,
-            mensaje: mensaje,
-            capacidadRestante: capacidadRestanteCombinada,
-            totalReservado: totalReservadoCombinado
+            disponible: resultado.disponible,
+            mensaje: resultado.mensaje,
+            capacidad_restante: resultado.capacidad_restante,
+            total_reservado: resultado.total_reservado
           };
         }),
         catchError(err => {
@@ -101,17 +68,15 @@ export class CelebrateService {
   private verificarDisponibilidadOffline(fecha: string, hora: string, personasSolicitadas: number): Observable<{ 
     disponible: boolean; 
     mensaje: string; 
-    capacidadRestante: number;
-    totalReservado: number;
+    capacidad_restante: number;
+    total_reservado: number;
   }> {
     return new Observable(observer => {
       try {
         const celebraciones = this.celebracionesSource.getValue();
-        const celebracionesEnFechaHora = celebraciones.filter(c => 
-          c.fecha_preferida === fecha && c.hora_preferida === hora
-        );
+        const celebracionesEnFranja = this.filtrarPorFranjaHoraria(celebraciones, fecha, hora);
         
-        const totalReservado = celebracionesEnFechaHora.reduce((sum, c) => sum + (c.cant_people || 1), 0);
+        const totalReservado = celebracionesEnFranja.reduce((sum, c) => sum + (c.cant_people || 1), 0);
         const capacidadRestante = this.CAPACIDAD_MAXIMA - totalReservado;
         const disponible = capacidadRestante >= personasSolicitadas;
         
@@ -122,8 +87,8 @@ export class CelebrateService {
         observer.next({
           disponible,
           mensaje,
-          capacidadRestante,
-          totalReservado
+          capacidad_restante: capacidadRestante,
+          total_reservado: totalReservado
         });
         observer.complete();
       } catch (error) {
@@ -131,15 +96,31 @@ export class CelebrateService {
         observer.next({
           disponible: true,
           mensaje: '📱 Verificación offline - Capacidad disponible',
-          capacidadRestante: this.CAPACIDAD_MAXIMA,
-          totalReservado: 0
+          capacidad_restante: this.CAPACIDAD_MAXIMA,
+          total_reservado: 0
         });
         observer.complete();
       }
     });
   }
 
-  // ✅ CARGAR CELEBRACIONES (ONLINE/OFFLINE)
+  // ✅ FILTRAR POR FRANJA HORARIA (3 horas)
+  private filtrarPorFranjaHoraria(celebraciones: CelebrateInterface[], fecha: string, hora: string): CelebrateInterface[] {
+    return celebraciones.filter(c => {
+      if (c.fecha_preferida !== fecha) return false;
+      
+      const horaReserva = parseInt(c.hora_preferida.split(':')[0]);
+      const horaConsulta = parseInt(hora.split(':')[0]);
+      
+      // Misma franja de 3 horas
+      const franjaReserva = Math.floor(horaReserva / 3);
+      const franjaConsulta = Math.floor(horaConsulta / 3);
+      
+      return franjaReserva === franjaConsulta;
+    });
+  }
+
+  // ✅ CARGAR CELEBRACIONES
   cargarCelebraciones(): Observable<CelebrateInterface[]> {
     this.loadingSource.next(true);
     
@@ -148,7 +129,6 @@ export class CelebrateService {
         tap(celebraciones => {
           console.log('✅ Celebraciones cargadas desde API:', celebraciones.length);
           
-          // ✅ CARGAR RESERVAS OFFLINE PENDIENTES Y COMBINAR
           const celebracionesOffline = this.obtenerCelebracionesOffline();
           const todasCelebraciones = [...celebraciones, ...celebracionesOffline];
           
@@ -220,19 +200,26 @@ export class CelebrateService {
 
   private normalizarCelebracion(celebracion: any): CelebrateInterface {
     return {
-      id_celebracion: celebracion.id_celebracion || celebracion.id,
-      nombre_completo: celebracion.nombre_completo,
+      id_celebracion: celebracion.celebration_id || celebracion.id_celebracion,
+      nombre_completo: celebracion.first_name ? `${celebracion.first_name} ${celebracion.last_name}` : celebracion.nombre_completo,
       fecha_nacimiento: celebracion.fecha_nacimiento,
-      telefono: celebracion.telefono,
-      fecha_preferida: celebracion.fecha_preferida,
-      hora_preferida: celebracion.hora_preferida,
+      telefono: celebracion.phone || celebracion.telefono,
+      email: celebracion.email,
+      fecha_preferida: celebracion.fecha_preferida || celebracion.preferred_date,
+      hora_preferida: celebracion.hora_preferida || celebracion.preferred_time,
       acepta_verificacion: celebracion.acepta_verificacion || false,
-      reservation: celebracion.reservation,
-      cant_people: celebracion.cant_people || 1,
-      ine_verificacion: celebracion.ine_verificacion || false,
-      estado_verificacion: celebracion.estado_verificacion || false,
+      reservation: celebracion.reservation_code || celebracion.reservation,
+      cant_people: celebracion.cant_people || celebracion.people_count || 1,
+      ine_verificacion: celebracion.ine_verificacion || celebracion.ine_verified || false,
+      estado_verificacion: celebracion.estado_verificacion || celebracion.verification_status || false,
       fecha_creacion: celebracion.fecha_creacion || celebracion.created_at,
       created_at: celebracion.created_at,
+      // Campos de dirección
+      address: celebracion.address,
+      city: celebracion.city,
+      state: celebracion.state,
+      postal_code: celebracion.postal_code,
+      // Campos offline
       offline: celebracion.offline || false,
       pendingSync: celebracion.pendingSync || false,
       tempId: celebracion.tempId,
@@ -253,20 +240,18 @@ export class CelebrateService {
     }
   }
 
-  // ✅ CREAR CELEBRACIÓN CON VALIDACIÓN MEJORADA
+  // ✅ CREAR CELEBRACIÓN CON NUEVA ESTRUCTURA
   crearCelebracionConValidacion(data: CelebrateInterface): Observable<{ 
     success: boolean; 
     message: string; 
     data?: any;
     capacidad_restante?: number;
   }> {
-    // ✅ PRIMERO verificar disponibilidad local incluyendo offline
+    // Verificar disponibilidad local incluyendo offline
     const celebracionesLocales = this.celebracionesSource.getValue();
-    const celebracionesEnFechaHora = celebracionesLocales.filter(c => 
-      c.fecha_preferida === data.fecha_preferida && c.hora_preferida === data.hora_preferida
-    );
+    const celebracionesEnFranja = this.filtrarPorFranjaHoraria(celebracionesLocales, data.fecha_preferida, data.hora_preferida);
     
-    const totalReservadoLocal = celebracionesEnFechaHora.reduce((sum, c) => sum + (c.cant_people || 1), 0);
+    const totalReservadoLocal = celebracionesEnFranja.reduce((sum, c) => sum + (c.cant_people || 1), 0);
     const capacidadRestanteCalculada = this.CAPACIDAD_MAXIMA - totalReservadoLocal;
     const disponibleLocal = capacidadRestanteCalculada >= (data.cant_people || 1);
 
@@ -306,7 +291,6 @@ export class CelebrateService {
         catchError((error: HttpErrorResponse) => {
           console.error('❌ Error del backend, guardando offline:', error);
           
-          // Si es error de capacidad, no guardar offline
           if (error.status === 400 && error.error?.error?.includes('Capacidad llena')) {
             return throwError(() => new Error('Capacidad llena para este horario'));
           }
@@ -362,16 +346,6 @@ export class CelebrateService {
     });
   }
 
-  // ✅ MÉTODO ORIGINAL (mantener para compatibilidad)
-  crearCelebracion(data: CelebrateInterface): Observable<any> {
-    return this.http.post(this.apiUrl, data).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  obtenerCelebraciones(): Observable<CelebrateInterface[]> {
-    return this.celebraciones$;
-  }
 
   // ✅ ACTUALIZAR VERIFICACIÓN
   actualizarVerificacion(id: number, data: { ine_verificacion: boolean, estado_verificacion: boolean }): Observable<any> {

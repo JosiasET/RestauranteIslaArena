@@ -12,19 +12,22 @@ import { CelebrateService } from '../../../core/service/CelebrateService';
   styleUrls: ['./celebrates.css']
 })
 export class Celebrates implements OnInit, OnDestroy {
-  nombre: string = '';
+  // CAMPOS EXACTOS QUE PIDES AL CLIENTE
+  firstName: string = '';
+  lastName: string = '';
   fechaNacimiento: string = '';
   telefono: string = '';
   fechaReserva: string = '';
   horaReserva: string = '';
   personas: number = 1;
   aceptoTerminos: boolean = false;
+  
   formularioEnviado: boolean = false;
   esSuCumpleanios: boolean = false;
   loading: boolean = false;
   codigoReserva: string = '';
   minDate: string;
-  isOffline: boolean = false; // ✅ NUEVA PROPIEDAD
+  isOffline: boolean = false;
 
   // CONFIGURACIÓN DE CAPACIDAD
   readonly CAPACIDAD_MAXIMA = 30;
@@ -49,7 +52,6 @@ export class Celebrates implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
     this.isOffline = !navigator.onLine;
     window.addEventListener('online', () => {
       this.isOffline = false;
@@ -65,7 +67,6 @@ export class Celebrates implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  // GENERAR HORARIOS DISPONIBLES
   generarHorariosDisponibles() {
     this.horariosDisponibles = [];
     const [horaApertura, minutoApertura] = this.HORARIO_APERTURA.split(':').map(Number);
@@ -80,7 +81,6 @@ export class Celebrates implements OnInit, OnDestroy {
     }
   }
 
-  // VERIFICAR DISPONIBILIDAD EN TIEMPO REAL
   verificarDisponibilidad() {
     if (!this.fechaReserva || !this.horaReserva || !this.personas) {
       this.capacidadMensaje = 'Seleccione fecha, hora y número de personas';
@@ -96,7 +96,6 @@ export class Celebrates implements OnInit, OnDestroy {
       return;
     }
 
-    // Verificar que la hora permita la estancia completa
     const horaReservaNum = parseInt(this.horaReserva.split(':')[0]);
     const horaCierreNum = parseInt(this.HORARIO_CIERRE.split(':')[0]);
     
@@ -107,7 +106,6 @@ export class Celebrates implements OnInit, OnDestroy {
       return;
     }
 
-    // USAR EL SERVICIO ACTUALIZADO
     this.celebrateService.verificarDisponibilidad(
       this.fechaReserva, 
       this.horaReserva, 
@@ -115,7 +113,7 @@ export class Celebrates implements OnInit, OnDestroy {
     ).subscribe({
       next: (resultado) => {
         this.capacidadMensaje = resultado.mensaje;
-        this.capacidadDetalle = `Capacidad: ${resultado.totalReservado}/${this.CAPACIDAD_MAXIMA} personas`;
+        this.capacidadDetalle = `Capacidad: ${resultado.total_reservado}/${this.CAPACIDAD_MAXIMA} personas`;
         this.capacidadDisponible = resultado.disponible;
         this.cdRef.detectChanges();
       },
@@ -131,15 +129,6 @@ export class Celebrates implements OnInit, OnDestroy {
     });
   }
 
-  verificarCumpleanios(): boolean {
-    if (!this.fechaNacimiento || !this.fechaReserva) return false;
-    
-    const fechaReserva = new Date(this.fechaReserva);
-    const cumpleanios = new Date(this.fechaNacimiento);
-    
-    return fechaReserva >= new Date();
-  }
-
   esFechaCumpleaniosExacta(): boolean {
     if (!this.fechaNacimiento || !this.fechaReserva) return false;
     
@@ -150,39 +139,21 @@ export class Celebrates implements OnInit, OnDestroy {
            fechaReserva.getDate() === cumpleanios.getDate();
   }
 
-  formatearFecha(fecha: string): string {
-    const opciones: Intl.DateTimeFormatOptions = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    };
-    return new Date(fecha).toLocaleDateString('es-ES', opciones);
-  }
-
-  formatearHora(hora: string): string {
-    const [horas, minutos] = hora.split(':');
-    const horaNum = parseInt(horas);
-    const periodo = horaNum >= 12 ? 'PM' : 'AM';
-    const hora12 = horaNum % 12 || 12;
-    return `${hora12}:${minutos} ${periodo}`;
-  }
-
-  // MÉTODO ONSUBMIT CORREGIDO
   onSubmit() {
     this.loading = true;
 
-    // VALIDAR CAMPOS REQUERIDOS
-    if (!this.nombre || !this.fechaNacimiento || !this.telefono || 
+    // VALIDAR CAMPOS REQUERIDOS EXACTOS
+    if (!this.firstName || !this.lastName || !this.fechaNacimiento || !this.telefono || 
         !this.fechaReserva || !this.horaReserva || !this.aceptoTerminos) {
       alert('❌ Complete todos los campos obligatorios');
       this.loading = false;
       return;
     }
 
-    // USAR EL SERVICIO CON VALIDACIÓN EN BACKEND
-    this.celebrateService.crearCelebracionConValidacion({
-      nombre_completo: this.nombre,
+    // PREPARAR DATOS EXACTOS PARA EL CLIENTE
+    const reservaData = {
+      firstName: this.firstName,
+      lastName: this.lastName,
       fecha_nacimiento: this.fechaNacimiento,
       telefono: this.telefono,
       fecha_preferida: this.fechaReserva,
@@ -191,15 +162,15 @@ export class Celebrates implements OnInit, OnDestroy {
       cant_people: this.personas,
       ine_verificacion: false,
       estado_verificacion: false
-    }).subscribe({
+    };
+
+    this.celebrateService.crearCelebracionConValidacion(reservaData).subscribe({
       next: (resultado: any) => {
         if (resultado.success) {
-          // RESERVA EXITOSA
-          this.codigoReserva = resultado.data.reservation;
+          this.codigoReserva = resultado.data.reservation_code;
           this.esSuCumpleanios = this.esFechaCumpleaniosExacta();
           this.formularioEnviado = true;
           
-          // ✅ MENSAJE MEJORADO
           if (this.isOffline) {
             alert(`📱 ${resultado.message}\n\nEsta reserva se sincronizará automáticamente cuando recuperes internet.`);
           } else {
@@ -239,7 +210,8 @@ export class Celebrates implements OnInit, OnDestroy {
   reiniciarFormulario() {
     this.formularioEnviado = false;
     this.esSuCumpleanios = false;
-    this.nombre = '';
+    this.firstName = '';
+    this.lastName = '';
     this.fechaNacimiento = '';
     this.telefono = '';
     this.fechaReserva = '';
@@ -269,32 +241,50 @@ export class Celebrates implements OnInit, OnDestroy {
     }
   }
 
-  forzarActualizacion() {
-    this.cdRef.detectChanges();
-    console.log("🔄 Vista forzada a actualizar");
-  }
-
-  // ✅ MÉTODO PARA MOSTRAR ESTADO OFFLINE
   getEstadoConexion(): string {
     return this.isOffline ? '📱 Modo offline' : '🌐 En línea';
   }
 
-  // En el componente celebrate.ts - AGREGAR este método
-sincronizarReservasPendientes() {
-  if (!navigator.onLine) {
-    alert('📱 No hay conexión a internet para sincronizar');
-    return;
-  }
-
-  this.celebrateService.sincronizarManual().subscribe({
-    next: (resultado) => {
-      alert(`✅ Sincronización completada:\n${resultado.exitosas} exitosas\n${resultado.errores} errores`);
-      this.cdRef.detectChanges();
-    },
-    error: (error) => {
-      alert(`❌ Error en sincronización: ${error.message}`);
+  sincronizarReservasPendientes() {
+    if (!navigator.onLine) {
+      alert('📱 No hay conexión a internet para sincronizar');
+      return;
     }
-  });
+
+    this.celebrateService.sincronizarManual().subscribe({
+      next: (resultado) => {
+        alert(`✅ Sincronización completada:\n${resultado.exitosas} exitosas\n${resultado.errores} errores`);
+        this.cdRef.detectChanges();
+      },
+      error: (error) => {
+        alert(`❌ Error en sincronización: ${error.message}`);
+      }
+    });
+  }
+  // En celebrates.ts, agrega estos métodos al final de la clase:
+
+// ✅ AGREGAR ESTOS MÉTODOS FALTANTES
+formatearFecha(fecha: string): string {
+  const opciones: Intl.DateTimeFormatOptions = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  };
+  return new Date(fecha).toLocaleDateString('es-ES', opciones);
 }
 
+formatearHora(hora: string): string {
+  const [horas, minutos] = hora.split(':');
+  const horaNum = parseInt(horas);
+  const periodo = horaNum >= 12 ? 'PM' : 'AM';
+  const hora12 = horaNum % 12 || 12;
+  return `${hora12}:${minutos} ${periodo}`;
+}
+
+// ✅ AGREGAR ESTE MÉTODO TAMBIÉN
+forzarActualizacion() {
+  this.cdRef.detectChanges();
+  console.log("🔄 Vista forzada a actualizar");
+}
 }

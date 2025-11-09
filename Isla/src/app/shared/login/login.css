@@ -1,7 +1,7 @@
 /* Fondo principal */
 .container {
   min-height: 100vh;
-  background: transparent;
+  background: linear-gradient(to bottom right, #ecfeff, #eff6ff, #faf5ff);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,7 +80,7 @@
 .form-group input:focus {
   outline: none;
   border-color: transparent;
-  box-shadow: 0 0 0 2px #edefef;
+  box-shadow: 0 0 0 2px #22d3ee;
 }
 
 /* Botones */

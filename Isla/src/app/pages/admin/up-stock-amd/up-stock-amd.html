@@ -9,15 +9,19 @@
     
     <div class="header-stats">
       <div class="stat-item">
-        <span class="stat-number">{{totalProductos}}</span>
+        <span class="stat-number">{{stats.totalProductos}}</span>
         <span class="stat-label">Productos</span>
       </div>
       <div class="stat-item">
-        <span class="stat-number">{{totalStock}}</span>
-        <span class="stat-label">Total Stock</span>
+        <span class="stat-number">{{stats.totalUnidades}}</span>
+        <span class="stat-label">Total Unidades</span>
       </div>
-      <div class="stat-item stock-bajo-alert" *ngIf="productosStockBajo > 0">
-        <span class="stat-number">{{productosStockBajo}}</span>
+      <div class="stat-item">
+        <span class="stat-number">{{stats.totalKilos | number:'1.1-1'}}</span>
+        <span class="stat-label">Total Kilos</span>
+      </div>
+      <div class="stat-item stock-bajo-alert" class="stats.productosStockBajo > 0">
+        <span class="stat-number">{{stats.productosStockBajo}}</span>
         <span class="stat-label">Stock Bajo</span>
       </div>
     </div>
@@ -39,6 +43,14 @@
         <option value="">Todas las categorías</option>
         <option value="Bebida">Bebidas</option>
         <option value="Especialidad">Especialidades</option>
+        <option value="Marisco">Mariscos</option>
+      </select>
+
+      <!-- NUEVO: Filtro por tipo de unidad -->
+      <select [(ngModel)]="tipoUnidadFiltro" (change)="aplicarFiltros()" class="filter-select">
+        <option value="">Todos los tipos</option>
+        <option value="unidades">Por Unidades</option>
+        <option value="kg">Por Kilos</option>
       </select>
 
       <label class="checkbox-label">
@@ -46,7 +58,7 @@
           type="checkbox" 
           [(ngModel)]="stockBajoFiltro" 
           (change)="aplicarFiltros()">
-        Mostrar solo stock bajo (≤10)
+        Mostrar solo stock bajo
       </label>
 
       <button (click)="limpiarFiltros()" class="btn btn-secondary">
@@ -68,14 +80,15 @@
             <th>Producto</th>
             <th>Categoría</th>
             <th>Stock Actual</th>
+            <th>Tipo</th>
             <th>Acciones</th>
             <th>Actualización Rápida</th>
           </tr>
         </thead>
         <tbody>
           <!-- LOADING STATE -->
-          <tr *ngIf="isLoading">
-            <td colspan="5" class="loading-row">
+          <tr class="isLoading">
+            <td colspan="6" class="loading-row">
               <div class="loading-spinner">🔄</div>
               Cargando productos...
             </td>
@@ -83,15 +96,15 @@
 
           <!-- NO PRODUCTS STATE -->
           <tr *ngIf="!isLoading && productosFiltrados.length === 0">
-            <td colspan="5" class="no-products">
+            <td colspan="6" class="no-products">
               📭 No se encontraron productos
             </td>
           </tr>
 
           <!-- PRODUCTOS -->
           <tr *ngFor="let producto of productosFiltrados" 
-              [class.stock-bajo-row]="producto.cantidad_productos <= 10"
-              [class.stock-cero-row]="producto.cantidad_productos === 0">
+              [class.stock-bajo-row]="getStockClass(producto) === 'stock-bajo'"
+              [class.stock-cero-row]="getStockClass(producto) === 'stock-cero'">
             
             <!-- INFORMACIÓN DEL PRODUCTO -->
             <td class="product-info">
@@ -115,10 +128,17 @@
 
             <!-- STOCK ACTUAL -->
             <td class="stock-cell">
-              <span class="stock-badge" [class]="getStockClass(producto.cantidad_productos)">
-                {{producto.cantidad_productos}}
+              <span class="stock-badge" [class]="getStockClass(producto)">
+                {{formatearCantidad(producto)}}
                 <span *ngIf="producto.cantidad_productos === 0" class="stock-alert">⚠️</span>
-                <span *ngIf="producto.cantidad_productos > 0 && producto.cantidad_productos <= 5" class="stock-alert">🔻</span>
+                <span *ngIf="getStockClass(producto) === 'stock-bajo' && producto.cantidad_productos > 0" class="stock-alert">🔻</span>
+              </span>
+            </td>
+
+            <!-- TIPO DE UNIDAD -->
+            <td class="unit-type-cell">
+              <span class="unit-badge" [class]="getTipoUnidad(producto)">
+                {{getTipoUnidad(producto) === 'kg' ? '⚖️ Por Peso' : '📦 Por Unidad'}}
               </span>
             </td>
 
@@ -126,27 +146,28 @@
             <td class="actions-cell">
               <div class="action-buttons">
                 <button 
-                  (click)="decrementarStock(producto, 1)" 
+                  (click)="decrementarStock(producto)" 
                   [disabled]="isUpdating || producto.cantidad_productos === 0"
                   class="btn btn-danger btn-sm"
-                  title="Quitar 1 unidad">
-                  ➖
+                  [title]="'Quitar ' + getTextoDecremento(producto)">
+                  {{getTextoDecremento(producto)}}
                 </button>
                 
                 <button 
-                  (click)="incrementarStock(producto, 1)" 
+                  (click)="incrementarStock(producto)" 
                   [disabled]="isUpdating"
                   class="btn btn-success btn-sm"
-                  title="Agregar 1 unidad">
-                  ➕
+                  [title]="'Agregar ' + getTextoIncremento(producto)">
+                  {{getTextoIncremento(producto)}}
                 </button>
 
+                <!-- Botones adicionales para incrementos más grandes -->
                 <button 
-                  (click)="incrementarStock(producto, 5)" 
+                  (click)="incrementarStock(producto, getTipoUnidad(producto) === 'kg' ? 2 : 5)" 
                   [disabled]="isUpdating"
                   class="btn btn-success btn-sm"
-                  title="Agregar 5 unidades">
-                  +5
+                  [title]="'Agregar ' + (getTipoUnidad(producto) === 'kg' ? '2 kg' : '5 unidades')">
+                  {{getTipoUnidad(producto) === 'kg' ? '+2' : '+5'}}
                 </button>
               </div>
             </td>
@@ -159,8 +180,12 @@
                   [value]="producto.cantidad_productos"
                   #stockInput
                   min="0"
+                  step="{{getTipoUnidad(producto) === 'kg' ? '0.1' : '1'}}"
                   class="stock-input"
                   (keyup.enter)="actualizarStock(producto, stockInput.valueAsNumber)">
+                <span class="unit-symbol">
+                  {{getTipoUnidad(producto) === 'kg' ? 'kg' : 'ud'}}
+                </span>
                 <button 
                   (click)="actualizarStock(producto, stockInput.valueAsNumber)"
                   [disabled]="isUpdating"
@@ -180,19 +205,28 @@
     <div class="legend">
       <div class="legend-item">
         <span class="legend-color stock-alto"></span>
-        <span>Stock suficiente (>10)</span>
+        <span>Stock suficiente</span>
       </div>
       <div class="legend-item">
         <span class="legend-color stock-medio"></span>
-        <span>Stock medio (6-10)</span>
+        <span>Stock medio</span>
       </div>
       <div class="legend-item">
         <span class="legend-color stock-bajo"></span>
-        <span>Stock bajo (1-5)</span>
+        <span>Stock bajo</span>
       </div>
       <div class="legend-item">
         <span class="legend-color stock-cero"></span>
-        <span>Sin stock (0)</span>
+        <span>Sin stock</span>
+      </div>
+    </div>
+
+    <div class="unit-info">
+      <div class="unit-info-item">
+        <strong>⚖️ Productos por Peso:</strong> Se miden en kilogramos (kg)
+      </div>
+      <div class="unit-info-item">
+        <strong>📦 Productos por Unidad:</strong> Se miden en unidades
       </div>
     </div>
     

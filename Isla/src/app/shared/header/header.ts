@@ -114,25 +114,36 @@ export class Header {
     return;
   }
 
+  // ✅ AGREGAR: Solo buscar si el término tiene al menos 3 caracteres
+  if (this.orderSearchTerm.trim().length < 3) {
+    this.searchedOrder = null;
+    this.orderSearchError = '';
+    return;
+  }
+
   this.orderSearchLoading = true;
   this.orderSearchError = '';
   this.searchedOrder = null;
 
-  // ✅ BUSCAR AUTOMÁTICAMENTE AL ESCRIBIR (con debounce)
-  this.trackingService.getOrderByCode(this.orderSearchTerm).subscribe({
-    next: (order: OrderTracking) => {
-      this.searchedOrder = order;
-      this.orderSearchLoading = false;
-    },
-    error: (error: any) => {
-      console.error('Error buscando pedido:', error);
-      this.orderSearchError = 'Pedido no encontrado';
-      this.orderSearchLoading = false;
-      this.searchedOrder = null;
-    }
-  });
-}
+  console.log('🔍 Buscando pedido:', this.orderSearchTerm);
 
+  // ✅ USAR timeout para evitar muchas llamadas mientras escribe
+  setTimeout(() => {
+    this.trackingService.getOrderByCode(this.orderSearchTerm).subscribe({
+      next: (order: OrderTracking) => {
+        console.log('✅ Pedido encontrado:', order.tracking_code);
+        this.searchedOrder = order;
+        this.orderSearchLoading = false;
+      },
+      error: (error: any) => {
+        console.error('❌ Error buscando pedido:', error);
+        this.orderSearchError = 'Pedido no encontrado';
+        this.orderSearchLoading = false;
+        this.searchedOrder = null;
+      }
+    });
+  }, 500); // Esperar 500ms después de que el usuario deje de escribir
+}
   // Métodos auxiliares para mostrar estados
   getStatusBadgeClass(status: string): string {
     const statusClasses: { [key: string]: string } = {

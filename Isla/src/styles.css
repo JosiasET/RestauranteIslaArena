@@ -13,6 +13,7 @@ html {
 body {
   font-family: Arial, Helvetica, sans-serif;
   color: #ffffff;
+  background-color: #fff;
   line-height: 1.6;
 }
 
@@ -26,6 +27,7 @@ body {
 
 /* ======== TIPOGRAFÍA ======== */
 h1, h2, h3, h4, h5, h6 {
+  color: #fffefe;
   margin-bottom: 0.5em;
   line-height: 1.2;
 }
