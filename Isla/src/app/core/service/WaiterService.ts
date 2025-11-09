@@ -584,4 +584,53 @@ private procesarCreateConVerificacion(pendiente: any, meserosServidor: any[], ca
     localStorage.removeItem('meseros_pendientes');
     console.log('🧹 Pendientes limpiadas manualmente');
   }
+
+
+  // ✅ LOGIN DE MESERO (ONLINE Y OFFLINE)
+loginMesero(usuario: string, contrasena: string): Observable<MeseroInterface | null> {
+  if (navigator.onLine) {
+    // 🔹 Buscar usuario directamente en la API
+    return this.http.get<MeseroInterface[]>(this.apiUrl).pipe(
+      map(meseros => {
+        const encontrado = meseros.find(
+          m => m.usuario === usuario && m.contrasena === contrasena && m.activo
+        );
+        return encontrado ? this.normalizarMesero(encontrado) : null;
+      }),
+      catchError(err => {
+        console.error('❌ Error verificando login online, probando cache local', err);
+        // Si falla el backend, intentar login offline
+        return this.loginMeseroOffline(usuario, contrasena);
+      })
+    );
+  } else {
+    // 🔹 Modo sin conexión
+    return this.loginMeseroOffline(usuario, contrasena);
+  }
+}
+
+// ✅ LOGIN USANDO CACHE LOCAL
+private loginMeseroOffline(usuario: string, contrasena: string): Observable<MeseroInterface | null> {
+  try {
+    const cacheKey = 'meseros_cache';
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const meserosCache = JSON.parse(cached).data || [];
+      const mesero = meserosCache.find(
+        (m: MeseroInterface) => 
+          m.usuario === usuario && m.contrasena === contrasena && m.activo
+      );
+      if (mesero) {
+        console.log('📱 Login offline exitoso:', mesero.usuario);
+        return of(this.normalizarMesero(mesero));
+      }
+    }
+    console.warn('📱 Login offline fallido: usuario no encontrado');
+    return of(null);
+  } catch (error) {
+    console.error('❌ Error en login offline:', error);
+    return of(null);
+  }
+}
+
 }

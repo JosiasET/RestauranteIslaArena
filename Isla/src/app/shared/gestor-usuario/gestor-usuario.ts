@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink, RouterOutlet } from "@angular/router";
 
 @Component({
@@ -7,10 +7,19 @@ import { RouterLink, RouterOutlet } from "@angular/router";
   templateUrl: './gestor-usuario.html',
   styleUrl: './gestor-usuario.css'
 })
-export class GestorUsuario {
-
-  nombre : string = 'EMIR RUBISSELL AKE CAB'
+export class GestorUsuario  implements OnInit {
+  nombre: string = '';
   menuAbierto = false;
+ ngOnInit() {
+    const usuarioGuardado = localStorage.getItem('usuarioActivo');
+    if (usuarioGuardado) {
+      const usuario = JSON.parse(usuarioGuardado);
+      this.nombre = `${usuario.nombre} ${usuario.apellido}`;
+    } else {
+      this.nombre = 'Usuario no identificado';
+    }
+  }
+
   toggleMenu() {
     this.menuAbierto = !this.menuAbierto;
   }
