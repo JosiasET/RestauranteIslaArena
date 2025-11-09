@@ -24,7 +24,7 @@
       />
     </div>
 
-    <button (click)="campos()" class="btn login-btn">Iniciar Sesión</button>
+    <button (click)=" login()" class="btn login-btn">Iniciar Sesión</button>
 
     <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
 
@@ -67,7 +67,6 @@
         <label>Contraseña</label>
         <input
           type="password"
-          placeholder="••••••••"
           [(ngModel)]="password"
         />
       </div>

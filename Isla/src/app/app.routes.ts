@@ -31,6 +31,7 @@ import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/
 import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
 import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
 import { Component } from '@angular/core';
+import { GestorUsuario } from './shared/gestor-usuario/gestor-usuario';
 
 
 
@@ -39,7 +40,7 @@ export const routes: Routes = [
     path: '',
     component: Header,
     children: [
-      { path: 'Home', component: Home },
+      { path: 'Home', component: Home},
       { path: 'Drink', component: Drink},
       { path: 'fishes', component: Fishes },
       { path: 'Food', component: Food },
@@ -74,15 +75,16 @@ export const routes: Routes = [
     ]
   },
 
-  {path: 'home', component: Home,
-    children:[
-      {path:'fishes', component: Fishes},
-      {path:'Drink', component: Drink},
-      {path:'food', component: Food},
-      
-    ]
-  },
+  { path: 'Drink', component: Drink},
 
   // Direct route for cashier checkout
-  { path: 'cashier-checkout', component: CashierCheckout }
+  { path: 'cashier-checkout', component: CashierCheckout },
+  {path:'gestorU' , component: GestorUsuario, 
+    children:
+      [
+        {path: 'tracking', component: AdminTrackingComponent },
+        { path: 'upsales', component: UpSalesAmd },
+        { path: 'celebrae', component: UpCelebratesAmd}
+      ]
+  }
 ];

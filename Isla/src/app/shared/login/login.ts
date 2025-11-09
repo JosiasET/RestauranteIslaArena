@@ -30,13 +30,21 @@ export class Login {
   }
 
   regresarHome() {
-    this.router.navigate(['/']); 
+    
   }
 
   enviarCodigo() {
     console.log('Enviando código...');
   }
 
+  login(){
+ 
+    if(this.correo == null && this.password== null ){
+        alert('llene los campos')
+    }else{
+        this.router.navigate(['/gestorU']); 
+    }
+  }
   campos() {
    
     if (!this.correo) {
@@ -65,5 +73,8 @@ export class Login {
 
    
     alert('Formulario enviado correctamente');
+
+  
+
   }
 }

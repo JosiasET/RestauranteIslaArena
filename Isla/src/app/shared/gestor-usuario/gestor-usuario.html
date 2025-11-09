@@ -1,0 +1,30 @@
+<!-- En tu archivo .component.html -->
+<div class="layout-container">
+  <!-- Sección principal para el contenido de rutas hijas -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Panel lateral derecho unificado -->
+  <aside class="sidebar">
+    <div class="sidebar-content">
+      <!-- Sección de perfil -->
+      <div class="profile-section">
+        <div class="profile-image">
+          <img src="https://i.pinimg.com/736x/f9/63/69/f96369fd909e2d895c0db3ba4053f19b.jpg" alt="Perfil">
+        </div>
+        <h1>Bienvenido {{nombre}}</h1>
+        <h2>¿QUÉ ES LO QUE VAMOS A ORGANIZAR HOY?</h2>
+      </div>
+
+      <!-- Sección de navegación -->
+      <div class="navigation-section">
+        <nav class="nav-links">
+          <a routerLink="upsales" routerLinkActive="active">Realizar orden</a>
+          <a routerLink="celebrae" routerLinkActive="active">Festejar</a>
+          <a routerLink="tracking" routerLinkActive="active">Seguimiento de pedido</a>
+        </nav>
+      </div>
+    </div>
+  </aside>
+</div>
