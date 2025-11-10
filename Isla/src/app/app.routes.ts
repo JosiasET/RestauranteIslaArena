@@ -23,7 +23,6 @@ import { EditHome } from './pages/admin/edit-home/edit-home';
 import { SeguimientoPedidosComponent } from './pages/client/seguimiento-pedidos/seguimiento-pedidos';
 import { AdminTrackingComponent } from './pages/admin/admin-tracking/admin-tracking';
 import { UpStockAmdPage } from './pages/admin/up-stock-amd/up-stock-amd';
-
 import { Component } from '@angular/core';
 import { GestorUsuario } from './shared/gestor-usuario/gestor-usuario';
 
@@ -51,9 +50,10 @@ export const routes: Routes = [
     path: 'gestoramd',
     component: Gestoramd,
     children: [
-      // ✅ AGREGAR RUTA VACÍA - Esto es crucial
+  
+
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: UpResumeAmd }, // O el componente que quieras para dashboard
+     // { path: 'dashboard', component: UpResumeAmd }, // O el componente que quieras para dashboard
       { path: 'upresumen', component: UpResumeAmd },
       { path: 'upsales', component: UpSalesAmd },
       { path: 'updrink', component: UpDrinkAmd },
