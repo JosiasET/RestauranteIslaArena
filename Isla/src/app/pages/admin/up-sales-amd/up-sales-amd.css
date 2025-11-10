@@ -728,3 +728,30 @@
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
+
+/* ✅ ESTILOS PARA STOCK EN MODAL */
+.stock-info-amd {
+  background: #e8f5e8;
+  border: 1px solid #4caf50;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 15px;
+}
+
+.stock-text {
+  color: #2e7d32;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* ✅ ESTILO PARA BOTÓN DESHABILITADO */
+.btn-cantidad-amd:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-cantidad-amd:disabled:hover {
+  background-color: #ccc;
+  transform: none;
+}

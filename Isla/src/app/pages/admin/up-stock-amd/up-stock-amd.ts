@@ -179,9 +179,7 @@ ngOnInit() {
     }
     return `${cantidad} ${cantidad === 1 ? 'unidad' : 'unidades'}`;
   }
-  // Incrementar stock
-  // En up-stock-amd.ts - CORREGIR MÉTODOS DE INCREMENTO
-  // En up-stock-amd.ts - MEJORAR métodos para especialidades
+
   incrementarStock(producto: ProductoStock, incrementoPersonalizado?: number) {
     // ✅ CORREGIDO: Asegurar que cantidad_productos sea número
     let cantidadActual = producto.cantidad_productos;

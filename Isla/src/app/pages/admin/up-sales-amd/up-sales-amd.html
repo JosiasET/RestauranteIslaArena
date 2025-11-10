@@ -8,7 +8,7 @@
       <option *ngFor="let table of tables" [value]="table">{{table}}</option>
     </select>
     
-    <!-- ✅ CORREGIDO: Solo mostrar usuario del mesero -->
+    <!-- Selector de Meseros Reales -->
     <select [(ngModel)]="selectedWaiter" class="form-input">
       <option value="">Seleccionar Mesero</option>
       <option *ngFor="let waiter of waiters" [value]="waiter.id">
@@ -126,7 +126,7 @@
   </div>
 </div>
 
-<!-- MODAL PARA SELECCIÓN DE TAMAÑOS - SIN IMAGEN -->
+<!-- MODAL PARA SELECCIÓN DE TAMAÑOS - CON VALIDACIÓN DE STOCK -->
 <div *ngIf="showProductModal && selectedProduct" class="modal-overlay-amd" (click)="closeProductModal()">
   <div class="modal-content-amd" (click)="$event.stopPropagation()">
     
@@ -137,6 +137,11 @@
 
     <div class="modal-body-amd">
       
+      <!-- ✅ NUEVO: Mostrar stock disponible -->
+      <div class="stock-info-amd" *ngIf="getStockDisponible()">
+        <span class="stock-text">{{ getStockDisponible() }}</span>
+      </div>
+
       <!-- Selección de tamaños (SOLO PARA FOOD) -->
       <div *ngIf="productHasSizes(selectedProduct)" class="tamanos-section-amd">
         <h4>Selecciona un tamaño:</h4>
@@ -163,7 +168,10 @@
         <div class="cantidad-controls-amd">
           <button class="btn-cantidad-amd" (click)="decrementModalQuantity()">-</button>
           <span class="cantidad-value-amd">{{ modalQuantity }}</span>
-          <button class="btn-cantidad-amd" (click)="incrementModalQuantity()">+</button>
+          <!-- ✅ CORREGIDO: Botón + se deshabilita cuando no hay stock -->
+          <button class="btn-cantidad-amd" 
+                  (click)="incrementModalQuantity()"
+                  [disabled]="!puedeIncrementarModal()">+</button>
         </div>
       </div>
 

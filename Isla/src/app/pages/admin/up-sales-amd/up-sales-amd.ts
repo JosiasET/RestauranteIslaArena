@@ -74,7 +74,8 @@ export class UpSalesAmd implements OnInit {
       console.log('🥤 BEBIDAS DETALLADAS:', drinks.map(d => ({
         id: d.id, 
         nombre: d.nombre,
-        precio: d.precio
+        precio: d.precio,
+        cantidad_productos: d.cantidad_productos
       })));
       this.drinks = drinks;
       this.updateFilteredProducts();
@@ -99,6 +100,7 @@ export class UpSalesAmd implements OnInit {
         id: f.id, 
         nombre: f.nombre,
         precio: f.precio,
+        cantidad: f.cantidad,
         tiene_tamanos: f.tiene_tamanos,
         tamanos: f.tamanos
       })));
@@ -122,6 +124,57 @@ export class UpSalesAmd implements OnInit {
         this.waiters = [];
       }
     });
+  }
+
+  // ✅ CORREGIDO: Validar stock considerando la conversión de unidades a kg
+  private validarStock(producto: any, cantidad: number, tamano?: any): { valido: boolean, mensaje: string } {
+    // Para bebidas
+    if (this.drinks.some(d => d.id === producto.id)) {
+      const bebida = this.drinks.find(d => d.id === producto.id);
+      if (bebida && bebida.cantidad_productos < cantidad) {
+        return {
+          valido: false,
+          mensaje: `❌ No hay suficiente stock de ${producto.nombre}. Disponible: ${bebida.cantidad_productos}`
+        };
+      }
+    }
+    
+    // Para especialidades (fishes)
+    if (this.fishes.some(f => f.id === producto.id)) {
+      const especialidad = this.fishes.find(f => f.id === producto.id);
+      if (especialidad) {
+        let cantidadRequerida = cantidad;
+        
+        // Si tiene tamaños, calcular la cantidad total en kg
+        if (tamano && producto.tiene_tamanos) {
+          const equivalencia = this.getEquivalenciaPorUnidad(tamano);
+          cantidadRequerida = cantidad * equivalencia;
+        }
+        
+        if (especialidad.cantidad < cantidadRequerida) {
+          return {
+            valido: false,
+            mensaje: `❌ No hay suficiente stock de ${producto.nombre}. Disponible: ${especialidad.cantidad} kg`
+          };
+        }
+      }
+    }
+    
+    return { valido: true, mensaje: '' };
+  }
+
+  // ✅ NUEVO: Método para verificar si se puede incrementar la cantidad en el modal
+  puedeIncrementarModal(): boolean {
+    if (!this.selectedProduct) return false;
+
+    const nuevaCantidad = this.modalQuantity + 1;
+    const validacionStock = this.validarStock(
+      this.selectedProduct, 
+      nuevaCantidad, 
+      this.selectedSize
+    );
+    
+    return validacionStock.valido;
   }
 
   // Obtener texto del tipo de pedido
@@ -164,10 +217,14 @@ export class UpSalesAmd implements OnInit {
 
   selectSize(tamano: any) {
     this.selectedSize = tamano;
+    // Resetear cantidad cuando cambia el tamaño para recalcular stock
+    this.modalQuantity = 1;
   }
 
   incrementModalQuantity() {
-    this.modalQuantity++;
+    if (this.puedeIncrementarModal()) {
+      this.modalQuantity++;
+    }
   }
 
   decrementModalQuantity() {
@@ -181,6 +238,31 @@ export class UpSalesAmd implements OnInit {
       return this.selectedSize.precio;
     }
     return this.selectedProduct?.precio || 0;
+  }
+
+  // ✅ NUEVO: Obtener stock disponible para mostrar en el modal
+  getStockDisponible(): string {
+    if (!this.selectedProduct) return '';
+    
+    // Para bebidas
+    if (this.drinks.some(d => d.id === this.selectedProduct.id)) {
+      const bebida = this.drinks.find(d => d.id === this.selectedProduct.id);
+      return bebida ? `Stock: ${bebida.cantidad_productos} unidades` : '';
+    }
+    
+    // Para especialidades
+    if (this.fishes.some(f => f.id === this.selectedProduct.id)) {
+      const especialidad = this.fishes.find(f => f.id === this.selectedProduct.id);
+      if (especialidad) {
+        if (this.selectedProduct.tiene_tamanos && this.selectedSize) {
+          const maxUnidades = Math.floor(especialidad.cantidad / this.getEquivalenciaPorUnidad(this.selectedSize));
+          return `Stock: ${maxUnidades} unidades (${especialidad.cantidad} kg disponible)`;
+        }
+        return `Stock: ${especialidad.cantidad} kg`;
+      }
+    }
+    
+    return '';
   }
 
   getMinPrice(tamanos: any[]): number {
@@ -211,6 +293,18 @@ export class UpSalesAmd implements OnInit {
       return;
     }
 
+    // ✅ VALIDAR STOCK ANTES DE AGREGAR
+    const validacionStock = this.validarStock(
+      this.selectedProduct, 
+      this.modalQuantity, 
+      this.selectedSize
+    );
+    
+    if (!validacionStock.valido) {
+      alert(validacionStock.mensaje);
+      return;
+    }
+
     const productToAdd = {
       ...this.selectedProduct,
       precio: this.selectedSize ? this.selectedSize.precio : this.selectedProduct.precio
@@ -238,7 +332,20 @@ export class UpSalesAmd implements OnInit {
     });
     
     if (existingItem) {
-      existingItem.quantity += this.modalQuantity;
+      // ✅ VALIDAR STOCK PARA LA CANTIDAD ACTUAL + NUEVA
+      const nuevaCantidadTotal = existingItem.quantity + this.modalQuantity;
+      const validacionStockExistente = this.validarStock(
+        this.selectedProduct, 
+        nuevaCantidadTotal, 
+        this.selectedSize
+      );
+      
+      if (!validacionStockExistente.valido) {
+        alert(validacionStockExistente.mensaje);
+        return;
+      }
+      
+      existingItem.quantity = nuevaCantidadTotal;
     } else {
       this.cart.push({
         product: productToAdd,
@@ -281,7 +388,23 @@ export class UpSalesAmd implements OnInit {
   }
 
   increaseQuantity(index: number) {
-    this.cart[index].quantity++;
+    const item = this.cart[index];
+    const productType = this.getProductType(item.product);
+    
+    // ✅ VALIDAR STOCK ANTES DE INCREMENTAR
+    const nuevaCantidad = item.quantity + 1;
+    const validacionStock = this.validarStock(
+      item.product, 
+      nuevaCantidad, 
+      item.selectedSize
+    );
+    
+    if (!validacionStock.valido) {
+      alert(validacionStock.mensaje);
+      return;
+    }
+    
+    this.cart[index].quantity = nuevaCantidad;
   }
 
   decreaseQuantity(index: number) {
@@ -320,6 +443,20 @@ export class UpSalesAmd implements OnInit {
       return;
     }
 
+    // ✅ VALIDAR STOCK FINAL ANTES DE PROCESAR LA VENTA
+    for (let item of this.cart) {
+      const validacionStock = this.validarStock(
+        item.product, 
+        item.quantity, 
+        item.selectedSize
+      );
+      
+      if (!validacionStock.valido) {
+        alert(validacionStock.mensaje);
+        return;
+      }
+    }
+
     // Obtener nombre completo del mesero seleccionado
     const meseroSeleccionado = this.waiters.find(m => m.id?.toString() === this.selectedWaiter);
     const nombreMesero = meseroSeleccionado ? 
@@ -352,5 +489,22 @@ export class UpSalesAmd implements OnInit {
       return product.tamanos;
     }
     return [];
+  }
+
+  // ✅ MÉTODO PARA CALCULAR EQUIVALENCIA EN KG (PARA ESPECIALIDADES)
+  private getEquivalenciaPorUnidad(tamano: any): number {
+    if (!tamano) return 1;
+    
+    const nombreTamano = tamano.nombre.toLowerCase();
+    
+    if (nombreTamano.includes('1/4 kg') || nombreTamano === '1/4 kg') {
+      return 0.25;
+    } else if (nombreTamano.includes('1/2 kg') || nombreTamano === '1/2 kg' || nombreTamano.includes('medio kg')) {
+      return 0.5;
+    } else if (nombreTamano.includes('1 kg') || nombreTamano === '1 kg') {
+      return 1;
+    } else {
+      return 1;
+    }
   }
 }
