@@ -1,23 +1,38 @@
 <div class="Subir_p">
   <h2 class="Subtitulo">REALIZAR ORDEN</h2>
 
-  <!-- Selector de Mesa y Categoría -->
+  <!-- Selector de Mesa, Mesero, Categoría y Tipo de Pedido -->
   <div class="form-bar">
     <select [(ngModel)]="selectedTable" class="form-input">
       <option value="">Seleccionar Mesa</option>
       <option *ngFor="let table of tables" [value]="table">{{table}}</option>
     </select>
     
+    <!-- ✅ CORREGIDO: Solo mostrar usuario del mesero -->
     <select [(ngModel)]="selectedWaiter" class="form-input">
       <option value="">Seleccionar Mesero</option>
-      <option *ngFor="let waiter of waiters" [value]="waiter">{{waiter}}</option>
+      <option *ngFor="let waiter of waiters" [value]="waiter.id">
+        {{ waiter.usuario }}
+      </option>
     </select>
+    <div *ngIf="loadingWaiters" class="loading-waiters">
+      <small>Cargando meseros...</small>
+    </div>
+    <div *ngIf="!loadingWaiters && waiters.length === 0" class="no-waiters">
+      <small>No hay meseros disponibles</small>
+    </div>
 
     <select [(ngModel)]="selectedCategory" class="form-input" (change)="filterProducts()">
       <option value="food">Platillos</option>
       <option value="drinks">Bebidas</option>
       <option value="fish">Especiales del Mar</option>
       <option value="all">Todas las Categorías</option>
+    </select>
+
+    <!-- Selector de Tipo de Pedido -->
+    <select [(ngModel)]="orderType" class="form-input">
+      <option value="eat_in">🍽️ Comer aquí</option>
+      <option value="takeaway">🥡 Para llevar</option>
     </select>
   </div>
 
@@ -55,7 +70,7 @@
 
   <!-- Carrito de Compras -->
   <div class="carrito-venta" *ngIf="cart.length > 0">
-    <h3 class="sub_3">Carrito de Compras - Mesa: {{selectedTable || 'No seleccionada'}}</h3>
+    <h3 class="sub_3">Carrito de Compras - Mesa: {{selectedTable || 'No seleccionada'}} | Tipo: {{getOrderTypeText()}}</h3>
     <table>
       <thead>
         <tr>
@@ -180,6 +195,4 @@
       </button>
     </div>
   </div>
-</div>´
-
-
+</div>

@@ -1,18 +1,15 @@
+// En core/interface/Fish.ts - AGREGAR product_quantity
 export interface Fish {
-  id: number | string;  // ✅ Permitir number Y string para IDs offline
+  id: number | string;
   nombre: string;
   descripcion: string;
+  descripcion_real?: string;
   precio: number;
   imagen: string;
-  cantidad: number; // ✅ stock en kg/litros
-  
-  descripcion_real?: string;
+  cantidad: number; // Stock en el frontend
+  product_quantity?: number; // ✅ NUEVO: Stock para el backend
   tiene_tamanos?: boolean;
-  tipos?: any[];
+  tipos?: string[];
   tamanos?: any[];
-  
-  // ✅ AGREGAR ESTAS PROPIEDADES PARA OFFLINE
-  offline?: boolean;
-  pendingSync?: boolean;
-  tempId?: string;
+  offline?: boolean; // Para modo offline
 }

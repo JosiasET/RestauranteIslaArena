@@ -42,7 +42,23 @@ export class UpFishesAmd implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.log('🔄 Inicializando componente UpFishesAmd...');
+  console.log('🔄 Inicializando componente UpFishesAmd...');
+  
+  // ✅ DEBUG: Verificar datos cargados
+  this.subscription.add(
+    this.fishesService.saucer$.subscribe((especialidades: Fish[]) => {
+      console.log('🔄 Lista de especialidades actualizada:', especialidades.length);
+      this.todasLasEspecialidades = especialidades;
+      
+      // ✅ DEBUG: Ver stock de cada especialidad
+      especialidades.forEach(esp => {
+        console.log(`🔍 ${esp.nombre}: stock = ${esp.cantidad}, tipo = ${typeof esp.cantidad}`);
+      });
+      
+      this.isLoading = false;
+      this.cdRef.detectChanges();
+    })
+  );
     
     // ✅ VERIFICAR ESTADO OFFLINE/ONLINE
     this.isOffline = !navigator.onLine;
@@ -174,7 +190,7 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     }
   }
 
-  editarEspecialidad(especialidad: Fish) {
+    editarEspecialidad(especialidad: Fish) {
     if (!especialidad.id) {
       console.error('❌ No se puede editar: Especialidad sin ID', especialidad);
       alert('Error: La especialidad no tiene un ID válido');
@@ -182,17 +198,23 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     }
 
     console.log('✏️ Editando especialidad ID:', especialidad.id);
+    console.log('📊 Datos de la especialidad:', especialidad); // ✅ DEBUG
+    
     this.especialidadEditando = especialidad;
     this.nombre = especialidad.nombre;
     this.descripcion = especialidad.descripcion;
     this.descripcion_real = especialidad.descripcion_real || '';
     this.precio = especialidad.precio;
-    this.stock = especialidad.cantidad || 0;
+    
+    // ✅ CORREGIDO: Cargar el stock desde la especialidad
+    this.stock = especialidad.cantidad || especialidad.product_quantity || 0;
+    
     this.imageBase64 = especialidad.imagen;
     this.tiene_tamanos = especialidad.tiene_tamanos || false;
     this.tamanos = especialidad.tamanos || [];
     this.esModoEdicion = true;
     
+    console.log('📦 Stock cargado para edición:', this.stock); // ✅ DEBUG
     console.log('📋 Tamaños cargados para edición:', this.tamanos);
     
     this.cdRef.detectChanges();
@@ -205,103 +227,106 @@ export class UpFishesAmd implements OnInit, OnDestroy {
     }, 100);
   }
 
-  subirEspecialidad() {
-    // Validaciones
-    if (!this.nombre || !this.descripcion || !this.precio || !this.imageBase64) {
-      alert("Por favor, rellene todos los espacios");
+  // En up-fishes-amd.ts - CORREGIR subirEspecialidad()
+  // En up-fishes-amd.ts - CORREGIR subirEspecialidad
+subirEspecialidad() {
+  // Validaciones
+  if (!this.nombre || !this.descripcion || !this.precio || !this.imageBase64) {
+    alert("Por favor, rellene todos los espacios");
+    return;
+  }
+
+  if (this.precio <= 0) {
+    alert("El precio debe ser mayor a 0");
+    return;
+  }
+
+  // Validar stock
+  if (this.stock < 0) {
+    alert("El stock no puede ser negativo");
+    return;
+  }
+
+  // Validar tamaños si están habilitados
+  if (this.tiene_tamanos && this.tamanos.length === 0) {
+    alert("Debe agregar al menos un tamaño si ha habilitado esta opción");
+    return;
+  }
+
+  this.isSubmitting = true;
+  this.cdRef.detectChanges();
+
+  // ✅ CORREGIDO: Incluir stock en los datos
+  const especialidadData: any = {
+    id: this.esModoEdicion && this.especialidadEditando ? this.especialidadEditando.id : 0,
+    nombre: this.nombre,
+    descripcion: this.descripcion,
+    descripcion_real: this.descripcion_real,
+    precio: Number(this.precio),
+    cantidad: this.stock, // ✅ ESTE ES EL STOCK
+    product_quantity: this.stock, // ✅ ENVIAR EN AMBOS CAMPOS POR SI ACASO
+    imagen: this.imageBase64,
+    tiene_tamanos: this.tiene_tamanos,
+    tamanos: this.tiene_tamanos ? this.tamanos : undefined,
+    tipos: []
+  };
+
+  console.log('📦 Datos a enviar:', especialidadData); // ✅ DEBUG
+
+  if (this.esModoEdicion && this.especialidadEditando) {
+    // MODO EDICIÓN
+    if (!this.especialidadEditando.id) {
+      alert('Error: No se puede editar una especialidad sin ID');
+      this.isSubmitting = false;
+      this.cdRef.detectChanges();
       return;
     }
 
-    if (this.precio <= 0) {
-      alert("El precio debe ser mayor a 0");
-      return;
-    }
+    console.log('🔄 Actualizando especialidad ID:', this.especialidadEditando.id);
 
-    // Validar stock
-    if (this.stock < 0) {
-      alert("El stock no puede ser negativo");
-      return;
-    }
-
-    // Validar tamaños si están habilitados
-    if (this.tiene_tamanos && this.tamanos.length === 0) {
-      alert("Debe agregar al menos un tamaño si ha habilitado esta opción");
-      return;
-    }
-
-    this.isSubmitting = true;
-    this.cdRef.detectChanges();
-
-    // Crear objeto con ID temporal para nuevas especialidades
-    const especialidadData: Fish = {
-      id: this.esModoEdicion && this.especialidadEditando ? this.especialidadEditando.id : 0,
-      nombre: this.nombre,
-      descripcion: this.descripcion,
-      descripcion_real: this.descripcion_real,
-      precio: Number(this.precio),
-      cantidad: this.stock,
-      imagen: this.imageBase64,
-      tiene_tamanos: this.tiene_tamanos,
-      tamanos: this.tiene_tamanos ? this.tamanos : undefined,
-      tipos: []
-    };
-
-    if (this.esModoEdicion && this.especialidadEditando) {
-      // MODO EDICIÓN
-      if (!this.especialidadEditando.id) {
-        alert('Error: No se puede editar una especialidad sin ID');
+    this.fishesService.actualizarEspecialidad(especialidadData).subscribe({
+      next: (respuesta) => {
+        console.log('✅ Especialidad actualizada exitosamente:', respuesta);
+        this.esModoEdicion = false;
         this.isSubmitting = false;
-        this.cdRef.detectChanges();
-        return;
-      }
-
-      console.log('🔄 Actualizando especialidad:', especialidadData);
-
-      this.fishesService.actualizarEspecialidad(especialidadData).subscribe({
-        next: (respuesta) => {
-          console.log('✅ Especialidad actualizada exitosamente');
-          this.esModoEdicion = false;
-          this.isSubmitting = false;
-          
-          // ✅ MENSAJE MEJORADO
-          if (this.isOffline) {
-            alert("📱 Especialidad actualizada localmente - Se sincronizará cuando haya internet");
-          } else {
-            alert("✅ Especialidad actualizada exitosamente en el servidor");
-          }
-          
-          this.limpiarFormulario();
-        },
-        error: (err) => {
-          console.error('❌ Error actualizando:', err);
-          this.isSubmitting = false;
-          alert("Error al actualizar la especialidad: " + err.message);
-          this.cdRef.detectChanges();
+        
+        if (this.isOffline) {
+          alert("📱 Especialidad actualizada localmente - Se sincronizará cuando haya internet");
+        } else {
+          alert("✅ Especialidad actualizada exitosamente en el servidor");
         }
-      });
-    } else {
-      // MODO CREACIÓN
-      console.log('🔄 Subiendo nueva especialidad');
+        
+        this.limpiarFormulario();
+      },
+      error: (err) => {
+        console.error('❌ Error actualizando:', err);
+        this.isSubmitting = false;
+        alert("Error al actualizar la especialidad: " + err.message);
+        this.cdRef.detectChanges();
+      }
+    });
+  } else {
+    // MODO CREACIÓN
+    console.log('🔄 Subiendo nueva especialidad');
 
-      this.fishesService.agregarEspecialidad(especialidadData).subscribe({
-        next: (respuesta) => {
-          console.log('✅ Especialidad agregada exitosamente');
-          this.isSubmitting = false;
-          
-          // ✅ MENSAJE MEJORADO
-          if (this.isOffline) {
-            alert("📱 Especialidad guardada localmente - Se subirá automáticamente cuando recuperes internet");
-          } else {
-            alert("✅ Especialidad subida exitosamente al servidor");
-          }
-          
-          this.limpiarFormulario();
-        },
-        error: (err) => {
-          console.error('❌ Error subiendo:', err);
-          this.isSubmitting = false;
-          alert("Error al subir la especialidad: " + err.message);
-          this.cdRef.detectChanges();
+    this.fishesService.agregarEspecialidad(especialidadData).subscribe({
+      next: (respuesta) => {
+        console.log('✅ Especialidad agregada exitosamente:', respuesta);
+        this.isSubmitting = false;
+        
+        if (this.isOffline) {
+          alert("📱 Especialidad guardada localmente - Se subirá automáticamente cuando recuperes internet");
+        } else {
+          alert("✅ Especialidad subida exitosamente al servidor");
+        }
+        
+        this.limpiarFormulario();
+      },
+      error: (err) => {
+        console.error('❌ Error subiendo:', err);
+        this.isSubmitting = false;
+        alert("Error al subir la especialidad: " + err.message);
+        this.cdRef.detectChanges();
         }
       });
     }
@@ -348,6 +373,19 @@ export class UpFishesAmd implements OnInit, OnDestroy {
   // ✅ MÉTODO PARA MENSAJE OFFLINE
   getMensajeEstado(): string {
     return this.isOffline ? '📱 Modo offline - Los cambios se guardarán localmente' : '🌐 Conectado';
+  }
+
+  // En up-fishes-amd.ts - CORREGIR verificarDatosEspecialidades
+  verificarDatosEspecialidades() {
+    console.log('🔍 Verificando datos de especialidades:');
+    this.todasLasEspecialidades.forEach((esp: any) => { // ✅ Usar any temporalmente
+      console.log(`📊 ${esp.nombre}:`, {
+        id: esp.id,
+        cantidad: esp.cantidad,
+        product_quantity: esp.product_quantity,
+        tieneStock: (esp.cantidad > 0) || (esp.product_quantity > 0)
+      });
+    });
   }
 
   // ✅ MÉTODO PARA VER SI UNA ESPECIALIDAD ES OFFLINE

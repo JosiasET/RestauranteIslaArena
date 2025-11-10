@@ -12,9 +12,16 @@
         <span>Mesa:</span>
         <strong>{{ saleData?.table }}</strong>
       </div>
+      
+      <!-- ✅ CORREGIDO: Solo mostrar mesero (no seleccionar) -->
       <div class="summary-row">
         <span>Mesero:</span>
-        <strong>{{ saleData?.waiter }}</strong>
+        <strong class="waiter-display">{{ saleData?.waiter || 'No asignado' }}</strong>
+      </div>
+
+      <div class="summary-row">
+        <span>Tipo de Pedido:</span>
+        <strong>{{ getOrderTypeText() }}</strong>
       </div>
       <div class="summary-row">
         <span>Total:</span>
@@ -26,8 +33,11 @@
     <div class="products-list">
       <h4>Productos:</h4>
       <div *ngFor="let item of saleData?.products" class="product-item">
-        <span class="product-name">{{ item.product.nombre }} x{{ item.quantity }}</span>
-        <span class="product-subtotal">{{ item.product.precio * item.quantity | currency }}</span>
+        <span class="product-name">{{ item.product.nombre }} 
+          <span *ngIf="item.selectedSize">({{ item.selectedSize.nombre }})</span> 
+          x{{ item.quantity }}
+        </span>
+        <span class="product-subtotal">{{ (item.selectedSize?.precio || item.product.precio) * item.quantity | currency }}</span>
       </div>
     </div>
   </div>
@@ -110,17 +120,17 @@
     </div>
   </div>
 
- <!-- Acciones -->
-<div class="checkout-actions">
-  <!-- Botón corregido -->
-  <button routerLink="/gestoramd/upsales" class="btn-secondary">
-    ← Volver a Ventas
-  </button>
-  
-  <button (click)="confirmPayment()" 
-          class="btn-primary"
-          [disabled]="!canConfirmPayment()">
-    ✅ Confirmar Pago
-  </button>
-</div>
+  <!-- Acciones -->
+  <div class="checkout-actions">
+    <!-- Botón corregido -->
+    <button routerLink="/gestoramd/upsales" class="btn-secondary">
+      ← Volver a Ventas
+    </button>
+    
+    <button (click)="confirmPayment()" 
+            class="btn-primary"
+            [disabled]="!canConfirmPayment()">
+      ✅ Confirmar Pago
+    </button>
+  </div>
 </div>

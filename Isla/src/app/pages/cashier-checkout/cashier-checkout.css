@@ -286,4 +286,45 @@
   .btn-primary {
     width: 100%;
   }
+
+  /* ✅ ESTILOS PARA SELECT DE MESEROS */
+.waiter-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.waiter-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.waiter-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.loading-waiters,
+.no-waiters {
+  color: #666;
+  font-style: italic;
+}
+
+/* ✅ MEJORAS VISUALES */
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.summary-row span:first-child {
+  font-weight: 500;
+  color: #555;
+}
 }

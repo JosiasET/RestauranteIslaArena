@@ -2,17 +2,17 @@
   <!-- Header -->
   <div class="admin-header">
     <h1>📦 Barra de Pedidos</h1>
-    <p>Gestión visual de pedidos - Haz clic para ver detalles</p>
+    <p>Gestión visual de pedidos</p>
   </div>
 
-  <!-- Filtros rápidos -->
+  <!-- Filtros principales -->
   <div class="quick-filters">
-    <button class="filter-btn active" (click)="filterByStatus('')">📋 Todos ({{ stats.total }})</button>
-    <button class="filter-btn" (click)="filterByStatus('pendientes')">⏳ Pendientes ({{ stats.pendientes }})</button>
-    <button class="filter-btn" (click)="filterByStatus('en_proceso')">👨‍🍳 En Proceso ({{ stats.en_proceso }})</button>
-    <button class="filter-btn" (click)="filterByStatus('entregados')">✅ Entregados ({{ stats.entregados }})</button>
+    <button class="filter-btn active" 
+            (click)="setActiveView('active')"
+            [class.active]="activeView === 'active'">
+      ⏳ Pedidos Activos ({{ getActiveOrdersCount() }})
+    </button>
     
-    <!-- ✅ NUEVO: Botón para ver finalizados -->
     <button class="filter-btn finalizados-btn" 
             (click)="setActiveView('completed')"
             [class.active]="activeView === 'completed'">
@@ -20,46 +20,8 @@
     </button>
   </div>
 
-  <!-- ✅ NUEVA SECCIÓN: Vista de pedidos finalizados (solo lista simple) -->
-  <div *ngIf="activeView === 'completed'" class="completed-orders-section">
-    <div class="completed-header">
-      <h2>📋 Historial de Pedidos Finalizados</h2>
-      <p>Respaldo de pedidos completados - Solo consulta</p>
-    </div>
-
-    <!-- Loading -->
-    <div *ngIf="loading" class="loading-state">
-      <div class="spinner"></div>
-      <p>Cargando pedidos finalizados...</p>
-    </div>
-
-    <!-- Lista simple de pedidos finalizados -->
-    <div *ngIf="!loading" class="completed-orders-list">
-      <div *ngFor="let order of completedOrders" class="completed-order-item">
-        <div class="completed-order-info">
-          <div class="completed-order-code">{{ order.tracking_code }}</div>
-          <div class="completed-order-customer">{{ order.customer_name }}</div>
-          <div class="completed-order-date">{{ order.order_date | date:'medium' }}</div>
-          <div class="completed-order-total">${{ order.total_amount }}</div>
-        </div>
-        <div class="completed-order-actions">
-          <button class="btn-view-details" (click)="openOrderDetails(order)">
-            👁️ Ver Detalles
-          </button>
-        </div>
-      </div>
-
-      <!-- Empty state para finalizados -->
-      <div *ngIf="completedOrders.length === 0" class="empty-completed">
-        <div class="empty-icon">📭</div>
-        <h3>No hay pedidos finalizados</h3>
-        <p>Los pedidos marcados como "Finalizado" aparecerán aquí</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- La sección original de pedidos activos (solo mostrar en vista activa) -->
-  <div *ngIf="activeView === 'active'" class="active-orders-section">
+  <!-- Vista de pedidos activos -->
+  <div *ngIf="activeView === 'active'" class="active-orders-section">    
     <!-- Barra de búsqueda -->
     <div class="search-controls">
       <div class="search-box">
@@ -67,48 +29,89 @@
           type="text" 
           [(ngModel)]="searchTerm" 
           (input)="filterOrders()"
-          placeholder="🔍 Buscar pedido..."
+          placeholder="🔍 Buscar por código, cliente o teléfono..."
           class="search-input"
         >
       </div>
       <button class="refresh-btn" (click)="loadOrders()" [disabled]="loading">
-        {{ loading ? '🔄' : '🔄' }}
+        {{ loading ? '🔄 Cargando...' : '🔄 Actualizar' }}
       </button>
     </div>
 
-    <!-- Grid de pedidos tipo barra -->
+    <!-- Sub-filtros -->
+    <div class="sub-filters">
+      <button class="sub-filter-btn" 
+              (click)="filterByStatus('en_proceso')"
+              [class.active]="currentFilter === 'en_proceso'">
+        👨‍🍳 En Proceso ({{ stats.en_proceso }})
+      </button>
+      <button class="sub-filter-btn" 
+              (click)="filterByStatus('en_camino')"
+              [class.active]="currentFilter === 'en_camino'">
+        🚚 En Camino ({{ stats.en_camino }})
+      </button>
+      <button class="sub-filter-btn" 
+              (click)="filterByStatus('entregados')"
+              [class.active]="currentFilter === 'entregados'">
+        ✅ Entregados ({{ stats.entregados }})
+      </button>
+    </div>
+
+    <!-- Grid de pedidos ORGANIZADO -->
     <div class="orders-grid">
       
-      <!-- Loading (SOLO cuando está cargando) -->
+      <!-- Loading State -->
       <div *ngIf="loading" class="loading-state">
         <div class="spinner"></div>
-        <p>Cargando pedidos...</p>
+        <p>Cargando pedidos activos...</p>
       </div>
 
-      <!-- Empty State (SOLO cuando NO está cargando y NO hay pedidos) -->
+      <!-- Empty State -->
       <div *ngIf="!loading && filteredOrders.length === 0" class="empty-state">
         <div class="empty-icon">📦</div>
-        <h3>No hay pedidos</h3>
-        <p>No se encontraron pedidos con los filtros actuales.</p>
+        <h3>No hay pedidos activos</h3>
+        <p *ngIf="currentFilter">No se encontraron pedidos con el filtro "{{ getCurrentFilterText() }}"</p>
+        <p *ngIf="!currentFilter && searchTerm">No se encontraron pedidos para "{{ searchTerm }}"</p>
+        <p *ngIf="!currentFilter && !searchTerm">No hay pedidos en proceso en este momento</p>
+        <button class="btn-refresh" (click)="loadOrders()">🔄 Actualizar</button>
       </div>
 
-      <!-- Tarjetas de pedido (SOLO cuando NO está cargando y SÍ hay pedidos) -->
-      <div *ngIf="!loading && filteredOrders.length > 0">
+      <!-- Tarjetas de pedido ORGANIZADAS -->
+      <div *ngIf="!loading && filteredOrders.length > 0" class="orders-grid-content">
+        
+        <!-- TODAS LAS CARDS JUNTAS -->
         <div *ngFor="let order of filteredOrders" 
-             class="order-card" 
-             [class]="getOrderCardClass(order)"
-             (click)="openOrderDetails(order)">
+     class="order-card"
+     [class.online-card]="getOrderType(order) === 'takeaway'"
+     [class.mesa-card]="getOrderType(order) === 'eat_in'"
+     [class]="getOrderCardClass(order)"
+     (click)="openOrderDetails(order)">
           
-          <!-- Header de la tarjeta -->
+          <!-- Header -->
           <div class="card-header">
             <div class="order-code">{{ order.tracking_code }}</div>
             <div class="order-time">{{ getTimeAgo(order.order_date) }}</div>
+            <div class="order-type-badge" 
+                 [class.online]="getOrderType(order) === 'takeaway'"
+                 [class.mesa]="getOrderType(order) === 'eat_in'">
+              {{ getOrderTypeText(order) }}
+            </div>
           </div>
 
           <!-- Cliente -->
           <div class="customer-info">
             <div class="customer-name">👤 {{ order.customer_name }}</div>
-            <div class="customer-phone">📞 {{ order.customer_phone || 'N/A' }}</div>
+            <div class="customer-phone">📞 {{ order.customer_phone || 'Sin teléfono' }}</div>
+          </div>
+
+          <!-- Información específica según tipo -->
+          <div *ngIf="getOrderType(order) === 'takeaway' && (getDeliveryAddress(order).neighborhood || getDeliveryAddress(order).city)" 
+               class="address-preview">
+            📍 {{ getDeliveryAddress(order).neighborhood || getDeliveryAddress(order).city }}
+          </div>
+
+          <div *ngIf="getOrderType(order) === 'eat_in'" class="table-info">
+            🍽️ {{ getTableInfo(order) }}
           </div>
 
           <!-- Estado -->
@@ -121,19 +124,23 @@
           <!-- Información de pago -->
           <div class="payment-info">
             <div class="payment-method">{{ getPaymentMethodText(order.payment_method) }}</div>
-            <div class="payment-status" [class]="order.payment_verified ? 'verified' : 'pending'">
-              {{ order.payment_verified ? '✅' : '⏳' }}
+            <div class="payment-status" 
+                 [class.verified]="order.payment_verified" 
+                 [class.pending]="!order.payment_verified">
+              {{ order.payment_verified ? '✅ Verificado' : '⏳ Pendiente' }}
             </div>
           </div>
 
-          <!-- Total y cambio -->
+          <!-- Total y información de efectivo -->
           <div class="amount-info">
-            <div class="total-amount">💰 ${{ order.total_amount }}</div>
+            <div class="total-amount">💰 ${{ order.total_amount | number:'1.2-2' }}</div>
             
-            <!-- Mostrar información de efectivo si aplica -->
             <div *ngIf="order.payment_method === 'efectivo'" class="cash-info">
-              <div *ngIf="order.delivery_address?.cashAmount" class="cash-details">
-                <div class="cash-amount">💵 Paga con: ${{ order.delivery_address?.cashAmount }}</div>
+              <div class="cash-details">
+                <div class="cash-amount">
+                  {{ getOrderType(order) === 'eat_in' ? '💵 Recibido:' : '💵 Paga con:' }} 
+                  ${{ getCashAmount(order) | number:'1.2-2' }}
+                </div>
                 <div class="change-amount" 
                     [class.exact]="getChangeAmount(order) === 0"
                     [class.positive]="getChangeAmount(order) > 0"
@@ -141,19 +148,17 @@
                   🔄 Cambio: ${{ getChangeAmount(order) | number:'1.2-2' }}
                 </div>
               </div>
-              <div *ngIf="!order.delivery_address?.cashAmount" class="cash-warning">
-                ⚠️ No especificó con cuánto paga
-              </div>
             </div>
           </div>
 
-          <!-- Productos (resumen) -->
+          <!-- Productos -->
           <div class="products-preview">
-            <div *ngFor="let item of order.order_items.slice(0, 2)" class="product-preview">
-              {{ item.nombre }} x{{ item.cantidad }}
+            <div *ngFor="let item of getOrderItems(order).slice(0, 2)" class="product-preview">
+              <span class="product-name">{{ item.nombre }}</span>
+              <span class="product-quantity">x{{ item.cantidad }}</span>
             </div>
-            <div *ngIf="order.order_items.length > 2" class="more-items">
-              +{{ (order.order_items.length - 2) }} más
+            <div *ngIf="getOrderItems(order).length > 2" class="more-items">
+              +{{ getOrderItems(order).length - 2 }} más...
             </div>
           </div>
         </div>
@@ -161,26 +166,71 @@
     </div>
   </div>
 
-  <!-- Modal de detalles -->
+  <!-- Vista de pedidos finalizados -->
+  <div *ngIf="activeView === 'completed'" class="completed-orders-section">
+    <div class="completed-header">
+      <h2>📋 Historial de Pedidos Finalizados</h2>
+      <p>Respaldo de pedidos completados - Solo consulta</p>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando pedidos finalizados...</p>
+    </div>
+
+    <div *ngIf="!loading" class="completed-orders-list">
+      <div *ngFor="let order of completedOrders" class="completed-order-item">
+        <div class="completed-order-info">
+          <div class="completed-order-main">
+            <div class="completed-order-code">{{ order.tracking_code }}</div>
+            <div class="completed-order-customer">{{ order.customer_name }}</div>
+            <div class="completed-order-type">{{ getOrderTypeText(order) }}</div>
+          </div>
+          <div class="completed-order-details">
+            <div class="completed-order-date">{{ getTimeAgo(order.order_date) }}</div>
+            <div class="completed-order-total">${{ order.total_amount | number:'1.2-2' }}</div>
+          </div>
+        </div>
+        <div class="completed-order-actions">
+          <button class="btn-view-details" (click)="openOrderDetails(order)">
+            👁️ Ver Detalles
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="completedOrders.length === 0" class="empty-completed">
+        <div class="empty-icon">📭</div>
+        <h3>No hay pedidos finalizados</h3>
+        <p>Los pedidos marcados como "Finalizado" aparecerán aquí para consulta histórica</p>
+        <button class="btn-refresh" (click)="loadCompletedOrders()">🔄 Actualizar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de detalles del pedido -->
   <div *ngIf="selectedOrder" class="modal-overlay" (click)="closeOrderDetails()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       
-      <!-- Header del modal -->
       <div class="modal-header">
-        <h2>📋 Detalles del Pedido</h2>
+        <h2>📋 Detalles del Pedido - {{ selectedOrder.tracking_code }}</h2>
         <button class="close-btn" (click)="closeOrderDetails()">×</button>
       </div>
 
-      <!-- Información del pedido -->
       <div class="modal-body">
         
         <!-- Información básica -->
         <div class="detail-section">
-          <h3>Información del Cliente</h3>
+          <h3>👤 Información del Pedido</h3>
           <div class="detail-grid">
             <div class="detail-item">
               <label>Código:</label>
-              <span>{{ selectedOrder.tracking_code }}</span>
+              <span class="tracking-code">{{ selectedOrder.tracking_code }}</span>
+            </div>
+            <div class="detail-item">
+              <label>Tipo:</label>
+              <span class="order-type-modal {{ getOrderType(selectedOrder) }}">
+                {{ getOrderTypeText(selectedOrder) }}
+              </span>
             </div>
             <div class="detail-item">
               <label>Cliente:</label>
@@ -188,18 +238,22 @@
             </div>
             <div class="detail-item">
               <label>Teléfono:</label>
-              <span>{{ selectedOrder.customer_phone || 'N/A' }}</span>
+              <span>{{ selectedOrder.customer_phone || 'No proporcionado' }}</span>
             </div>
             <div class="detail-item">
               <label>Fecha:</label>
-              <span>{{ selectedOrder.order_date | date:'medium' }}</span>
+              <span>{{ getTimeAgo(selectedOrder.order_date) }}</span>
+            </div>
+            <div *ngIf="getOrderType(selectedOrder) === 'eat_in'" class="detail-item">
+              <label>Mesa/Mesero:</label>
+              <span>{{ getTableInfo(selectedOrder) }}</span>
             </div>
           </div>
         </div>
 
         <!-- Información de pago -->
         <div class="detail-section">
-          <h3>Información de Pago</h3>
+          <h3>💳 Información de Pago</h3>
           <div class="detail-grid">
             <div class="detail-item">
               <label>Método:</label>
@@ -220,25 +274,20 @@
             </div>
             <div class="detail-item">
               <label>Total:</label>
-              <span class="total-amount">${{ selectedOrder.total_amount }}</span>
+              <span class="total-amount">${{ selectedOrder.total_amount | number:'1.2-2' }}</span>
             </div>
             
             <!-- Información de efectivo -->
-            <div *ngIf="selectedOrder.payment_method === 'efectivo'" class="detail-item">
+            <div *ngIf="selectedOrder.payment_method === 'efectivo'" class="detail-item full-width">
               <label>Información Efectivo:</label>
               <div class="cash-details-modal">
-                <div *ngIf="selectedOrder.delivery_address?.cashAmount; else noCashInfo">
-                  <div>💵 Paga con: ${{ selectedOrder.delivery_address?.cashAmount }}</div>
-                  <div [class]="getChangeAmount(selectedOrder) >= 0 ? 'change-positive' : 'change-negative'">
-                    🔄 Cambio: ${{ getChangeAmount(selectedOrder) | number:'1.2-2' }}
-                  </div>
-                  <div *ngIf="getChangeAmount(selectedOrder) < 0" class="change-alert">
-                    ⚠️ El cliente no lleva suficiente dinero
-                  </div>
+                <div class="cash-amount-modal">💵 {{ getOrderType(selectedOrder) === 'eat_in' ? 'Recibido:' : 'Paga con:' }} ${{ getCashAmount(selectedOrder) | number:'1.2-2' }}</div>
+                <div [class]="getChangeAmount(selectedOrder) >= 0 ? 'change-positive' : 'change-negative'">
+                  🔄 Cambio: ${{ getChangeAmount(selectedOrder) | number:'1.2-2' }}
                 </div>
-                <ng-template #noCashInfo>
-                  <div class="cash-warning">⚠️ No especificó con cuánto paga</div>
-                </ng-template>
+                <div *ngIf="getChangeAmount(selectedOrder) < 0" class="change-alert">
+                  ⚠️ El cliente no lleva suficiente dinero
+                </div>
               </div>
             </div>
           </div>
@@ -246,9 +295,9 @@
 
         <!-- Productos -->
         <div class="detail-section">
-          <h3>🛒 Productos ({{ selectedOrder.order_items.length }})</h3>
+          <h3>🛒 Productos ({{ getOrderItems(selectedOrder).length }})</h3>
           <div class="products-list-detailed">
-            <div *ngFor="let item of selectedOrder.order_items" class="product-item-detailed">
+            <div *ngFor="let item of getOrderItems(selectedOrder)" class="product-item-detailed">
               <div class="product-info">
                 <span class="product-name">{{ item.nombre }}</span>
                 <span class="product-quantity">x{{ item.cantidad }}</span>
@@ -256,37 +305,70 @@
               <div class="product-price">${{ (item.precio * item.cantidad) | number:'1.2-2' }}</div>
             </div>
             <div class="products-total">
-              <strong>Total: ${{ selectedOrder.total_amount }}</strong>
+              <strong>Total: ${{ selectedOrder.total_amount | number:'1.2-2' }}</strong>
             </div>
           </div>
         </div>
 
-        <!-- Dirección -->
-        <div *ngIf="selectedOrder.delivery_address" class="detail-section">
+        <!-- Dirección - SOLO para pedidos online -->
+        <div *ngIf="getOrderType(selectedOrder) === 'takeaway' && getDeliveryAddress(selectedOrder).address" 
+             class="detail-section">
           <h3>📍 Dirección de Entrega</h3>
           <div class="address-details">
-            <p>{{ selectedOrder.delivery_address.address }}</p>
-            <p>{{ selectedOrder.delivery_address.neighborhood }}, {{ selectedOrder.delivery_address.city }}</p>
-            <p *ngIf="selectedOrder.delivery_address.references">
-              <strong>Referencias:</strong> {{ selectedOrder.delivery_address.references }}
+            <p><strong>Dirección:</strong> {{ getDeliveryAddress(selectedOrder).address }}</p>
+            <p *ngIf="getDeliveryAddress(selectedOrder).neighborhood"><strong>Colonia:</strong> {{ getDeliveryAddress(selectedOrder).neighborhood }}</p>
+            <p *ngIf="getDeliveryAddress(selectedOrder).city"><strong>Ciudad:</strong> {{ getDeliveryAddress(selectedOrder).city }}</p>
+            <p *ngIf="getDeliveryAddress(selectedOrder).references">
+              <strong>Referencias:</strong> {{ getDeliveryAddress(selectedOrder).references }}
             </p>
           </div>
         </div>
 
-        <!-- Controles de estado -->
-        <div class="detail-section">
+        <!-- Controles de estado para PEDIDOS ONLINE -->
+        <div *ngIf="getOrderType(selectedOrder) === 'takeaway'" class="detail-section">
           <h3>🔄 Actualizar Estado</h3>
           <div class="status-controls">
             <button 
               *ngFor="let status of statusOptions"
               class="status-btn" 
               [class.active]="selectedOrder.status === status.value"
+              [class.disabled]="selectedOrder.status === 'finalizado'"
               (click)="updateOrderStatus(selectedOrder, status.value)"
+              [disabled]="selectedOrder.status === 'finalizado'"
             >
               {{ status.icon }} {{ status.label }}
             </button>
           </div>
+          <p *ngIf="selectedOrder.status === 'finalizado'" class="finalized-notice">
+            ⚠️ Este pedido está finalizado y no puede modificarse
+          </p>
         </div>
+
+        <!-- ✅ NUEVO: Controles de estado para PEDIDOS DE MESA -->
+        <div *ngIf="getOrderType(selectedOrder) === 'eat_in'" class="detail-section">
+          <h3>🍽️ Gestionar Pedido de Mesa</h3>
+          <div class="mesa-status-controls">
+            
+            <button 
+              class="mesa-status-btn finalizar-btn" 
+              [class.active]="selectedOrder.status === 'finalizado'"
+              (click)="updateOrderStatus(selectedOrder, 'finalizado')">
+              🏁 Finalizar Pedido
+            </button>
+          </div>
+          
+          <div class="mesa-status-info">
+            <p *ngIf="selectedOrder.status === 'en_proceso'">⏳ El pedido está en proceso de preparación</p>
+            <p *ngIf="selectedOrder.status === 'entregado'">✅ Pedido entregado al cliente</p>
+            <p *ngIf="selectedOrder.status === 'finalizado'" class="finalized-notice">
+              ⚠️ Este pedido está finalizado y no puede modificarse
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-close" (click)="closeOrderDetails()">Cerrar</button>
       </div>
     </div>
   </div>

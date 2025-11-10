@@ -638,4 +638,92 @@
   .timeline-step {
     flex: 0 0 calc(50% - 1rem); /* ← 2 COLUMNAS EN MÓVIL PEQUEÑO */
   }
+
+  /* Estilos para el input con botón */
+.search-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.search-modal-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.search-modal-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+.search-button {
+  padding: 0.75rem 1.25rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-button:hover:not(:disabled) {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+
+.search-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.search-hint {
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+/* Mensaje de estado */
+.status-message {
+  background: #e7f3ff;
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+  text-align: center;
+  font-weight: 500;
+  color: #0066cc;
+  border-left: 4px solid #007bff;
+}
+
+/* Mensaje para pedidos finalizados */
+.finalized-message {
+  text-align: center;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  margin: 1rem 0;
+}
+
+.finalized-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
 }
