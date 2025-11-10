@@ -102,6 +102,7 @@ export class Checkoutpage implements OnInit {
       },
       
       // Datos para ORDER_TRACKING
+      // En el método placeOrder(), dentro de orderPayload:
       order_data: {
         tracking_code: this.trackingCode,
         order_items: this.cartItems,
@@ -118,7 +119,9 @@ export class Checkoutpage implements OnInit {
           state: this.customerData.state,
           references: this.customerData.references,
           cashAmount: this.paymentMethod === 'efectivo' ? this.cashAmount : null
-        }
+        },
+        // ✅ AGREGAR ESTA LÍNEA:
+        order_type: 'takeaway' // Para llevar
       }
     };
 

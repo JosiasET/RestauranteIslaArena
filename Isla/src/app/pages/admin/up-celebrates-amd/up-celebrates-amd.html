@@ -8,8 +8,8 @@
     </button>
   </div>
   
-  <!-- Formulario de nueva reserva -->
-  <div class="mostrarFormulario" class="formulario-reserva">
+  <!-- Formulario de nueva reserva - CORREGIDO: Agregar *ngIf -->
+  <div *ngIf="mostrarFormulario" class="formulario-reserva"> <!-- ✅ CORREGIDO -->
     <h3>Crear Nueva Reservación</h3>
     <div class="form-group">
       <label>Nombre *</label>
@@ -23,42 +23,41 @@
              placeholder="Ingrese apellidos (ej: González López)">
     </div>
     
-      
-      <div class="form-group">
-        <label>Fecha de Nacimiento *</label>
-        <input type="date" [(ngModel)]="nuevaReserva.fecha_nacimiento" class="form-input">
-      </div>
-      
-      <div class="form-group">
-        <label>Teléfono *</label>
-        <input type="tel" [(ngModel)]="nuevaReserva.telefono" class="form-input" placeholder="Ej: 555-1234">
-      </div>
-      
-      <div class="form-group">
-        <label>Fecha Preferida *</label>
-        <input type="date" [(ngModel)]="nuevaReserva.fecha_preferida" class="form-input">
-      </div>
-      
-      <div class="form-group">
-        <label>Hora Preferida *</label>
-        <input type="time" [(ngModel)]="nuevaReserva.hora_preferida" class="form-input">
-      </div>
-      
-      <!-- NUEVO CAMPO - CANTIDAD DE PERSONAS -->
-      <div class="form-group">
-        <label>👥 Cantidad de Personas *</label>
-        <input type="number" [(ngModel)]="nuevaReserva.cant_people" class="form-input" 
-               min="1" max="20" value="1" placeholder="Número de personas">
-      </div>
-      
-      <div class="form-group checkbox-group">
-        <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="nuevaReserva.acepta_verificacion">
-          Acepta verificación de INE
-        </label>
-      </div>
+    <div class="form-group">
+      <label>Fecha de Nacimiento *</label>
+      <input type="date" [(ngModel)]="nuevaReserva.fecha_nacimiento" class="form-input">
     </div>
     
+    <div class="form-group">
+      <label>Teléfono *</label>
+      <input type="tel" [(ngModel)]="nuevaReserva.telefono" class="form-input" placeholder="Ej: 555-1234">
+    </div>
+    
+    <div class="form-group">
+      <label>Fecha Preferida *</label>
+      <input type="date" [(ngModel)]="nuevaReserva.fecha_preferida" class="form-input">
+    </div>
+    
+    <div class="form-group">
+      <label>Hora Preferida *</label>
+      <input type="time" [(ngModel)]="nuevaReserva.hora_preferida" class="form-input">
+    </div>
+    
+    <!-- NUEVO CAMPO - CANTIDAD DE PERSONAS -->
+    <div class="form-group">
+      <label>👥 Cantidad de Personas *</label>
+      <input type="number" [(ngModel)]="nuevaReserva.cant_people" class="form-input" 
+             min="1" max="20" value="1" placeholder="Número de personas">
+    </div>
+    
+    <div class="form-group checkbox-group">
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="nuevaReserva.acepta_verificacion">
+        Acepta verificación de INE
+      </label>
+    </div>
+
+    <!-- CORREGIDO: Estos botones deben estar DENTRO del formulario -->
     <div class="form-actions">
       <button (click)="crearReserva()" class="btn-guardar" [disabled]="cargando">
         {{ cargando ? '⏳ Guardando...' : '💾 Guardar Reservación' }}
@@ -174,9 +173,9 @@
               🎁 Entregar
             </button>
             <button (click)="cancelarReserva(reserva)" class="btn-cancelar">❌ Cancelar</button>
-                   <button (click)="eliminarReserva(reserva)" class="btn-eliminar" 
-                  [disabled]="cargando"
-                title="Eliminar permanentemente">
+            <button (click)="eliminarReserva(reserva)" class="btn-eliminar" 
+                    [disabled]="cargando"
+                    title="Eliminar permanentemente">
               {{ cargando ? '⏳' : '🗑️' }} {{ cargando ? 'Eliminando...' : 'Eliminar' }}
             </button>
           </td>
@@ -257,3 +256,4 @@
     <h3>No hay reservaciones</h3>
     <p>No se encontraron reservaciones con los filtros aplicados.</p>
   </div>
+</div>

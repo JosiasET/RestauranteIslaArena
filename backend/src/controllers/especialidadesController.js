@@ -22,20 +22,22 @@ function normalizarIDs(rows) {
     ...p,
     id: p.id_product,
     nombre: p.name,
-    descripcion: p.subcategory,      // subcategory como descripción
-    descripcion_real: p.description, // description como descripción_real
+    descripcion: p.subcategory,
+    descripcion_real: p.description,
     precio: p.price,
     imagen: p.image,
     tiene_tamanos: p.has_sizes || false,
     tamanos: p.sizes ? (typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes) : [],
-    cantidad: 0 // por defecto, porque products no tiene cantidad
+    cantidad: p.product_quantity || 0 // ✅ CORREGIDO: Usar product_quantity real
   }));
 }
 
 const especialidadesController = {
-  // Crear especialidad
+  // Crear especialidad - ✅ CORREGIDO
   crearEspecialidad: async (req, res) => {
-    const { nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tamanos } = req.body;
+    const { nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tamanos, product_quantity } = req.body;
+
+    console.log('📥 CREAR - Datos recibidos:', { nombre, product_quantity }); // ✅ DEBUG
 
     if (!nombre || !precio) {
       return res.status(400).json({ error: "Nombre y precio son requeridos" });
@@ -52,8 +54,8 @@ const especialidadesController = {
 
       const result = await db.query(
         `INSERT INTO products 
-         (name, description, subcategory, price, category, image, has_sizes, sizes)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         (name, description, subcategory, price, category, image, has_sizes, sizes, product_quantity)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING *`,
         [
           nombre,
@@ -63,11 +65,15 @@ const especialidadesController = {
           categoria,
           buffer,
           tiene_tamanos || false,
-          tamanosJSON
+          tamanosJSON,
+          product_quantity || 0 // ✅ AGREGAR product_quantity
         ]
       );
 
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
+      
+      console.log('✅ CREAR - Especialidad creada con stock:', especialidad.cantidad); // ✅ DEBUG
+      
       res.json(especialidad);
     } catch (err) {
       console.error('❌ Error al crear especialidad:', err);
@@ -89,10 +95,12 @@ const especialidadesController = {
     }
   },
 
-  // Actualizar especialidad
+  // Actualizar especialidad - ✅ CORREGIDO
   actualizarEspecialidad: async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tamanos } = req.body;
+    const { nombre, descripcion, descripcion_real, precio, imagen, tiene_tamanos, tamanos, product_quantity } = req.body;
+
+    console.log('📥 ACTUALIZAR - Datos recibidos:', { id, nombre, product_quantity }); // ✅ DEBUG
 
     try {
       const buffer = processImage(imagen);
@@ -107,8 +115,8 @@ const especialidadesController = {
       if (buffer) {
         sql = `UPDATE products 
                SET name=$1, description=$2, subcategory=$3, price=$4, image=$5,
-                   has_sizes=$6, sizes=$7, updated_at=NOW()
-               WHERE id_product=$8 AND category='Especialidad'
+                   has_sizes=$6, sizes=$7, product_quantity=$8, updated_at=NOW()
+               WHERE id_product=$9 AND category='Especialidad'
                RETURNING *`;
         values = [
           nombre,
@@ -118,13 +126,14 @@ const especialidadesController = {
           buffer,
           tiene_tamanos || false,
           tamanosJSON,
+          product_quantity || 0, // ✅ AGREGAR product_quantity
           id
         ];
       } else {
         sql = `UPDATE products 
                SET name=$1, description=$2, subcategory=$3, price=$4,
-                   has_sizes=$5, sizes=$6, updated_at=NOW()
-               WHERE id_product=$7 AND category='Especialidad'
+                   has_sizes=$5, sizes=$6, product_quantity=$7, updated_at=NOW()
+               WHERE id_product=$8 AND category='Especialidad'
                RETURNING *`;
         values = [
           nombre,
@@ -133,9 +142,13 @@ const especialidadesController = {
           precio,
           tiene_tamanos || false,
           tamanosJSON,
+          product_quantity || 0, // ✅ AGREGAR product_quantity
           id
         ];
       }
+
+      console.log('🔧 ACTUALIZAR - Query ejecutado:', sql); // ✅ DEBUG
+      console.log('🔧 ACTUALIZAR - Valores:', values); // ✅ DEBUG
 
       const result = await db.query(sql, values);
       if (result.rows.length === 0) {
@@ -143,6 +156,9 @@ const especialidadesController = {
       }
 
       const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
+      
+      console.log('✅ ACTUALIZAR - Especialidad actualizada con stock:', especialidad.cantidad); // ✅ DEBUG
+      
       res.json(especialidad);
     } catch (err) {
       console.error('❌ Error al actualizar especialidad:', err);
@@ -171,7 +187,7 @@ const especialidadesController = {
     }
   },
 
-  // Obtener especialidades con stock (aunque no hay columna de stock)
+  // Obtener especialidades con stock
   obtenerEspecialidadesConStock: async (req, res) => {
     try {
       const result = await db.query(
@@ -185,9 +201,43 @@ const especialidadesController = {
     }
   },
 
-  // Actualizar stock de especialidad (no disponible)
+  // Actualizar stock de especialidad
   actualizarStockEspecialidad: async (req, res) => {
-    res.status(400).json({ error: "Función no disponible - la tabla products no tiene columna de stock" });
+    const { id } = req.params;
+    const { cantidad_productos, product_quantity, cantidad } = req.body;
+
+    const cantidadStock = cantidad_productos || product_quantity || cantidad;
+
+    if (cantidadStock === undefined || cantidadStock === null) {
+      return res.status(400).json({ error: "La cantidad es requerida" });
+    }
+
+    try {
+      const result = await db.query(
+        `UPDATE products 
+         SET product_quantity = $1, updated_at = NOW() 
+         WHERE id_product = $2 AND category = 'Especialidad' 
+         RETURNING *`,
+        [cantidadStock, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Especialidad no encontrada" });
+      }
+
+      const especialidad = normalizarIDs(formatImageResponse(result.rows))[0];
+      
+      console.log('✅ Stock de especialidad actualizado:', {
+        id: especialidad.id,
+        nombre: especialidad.nombre,
+        stock: cantidadStock
+      });
+      
+      res.json(especialidad);
+    } catch (err) {
+      console.error('❌ Error al actualizar stock de especialidad:', err);
+      res.status(500).json({ error: "Error al actualizar stock: " + err.message });
+    }
   }
 };
 

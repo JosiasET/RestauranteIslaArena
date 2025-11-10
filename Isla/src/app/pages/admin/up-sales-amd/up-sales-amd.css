@@ -693,4 +693,38 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  
+}
+
+/* ✅ ESTILOS PARA SELECT DE MESEROS */
+.loading-waiters,
+.no-waiters {
+  color: #666;
+  font-style: italic;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* ✅ MEJORAS VISUALES PARA FORM-BAR */
+.form-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.form-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }

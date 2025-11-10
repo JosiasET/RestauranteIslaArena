@@ -20,7 +20,7 @@
         <span class="stat-number">{{stats.totalKilos | number:'1.1-1'}}</span>
         <span class="stat-label">Total Kilos</span>
       </div>
-      <div class="stat-item stock-bajo-alert" class="stats.productosStockBajo > 0">
+      <div class="stat-item" [class.stock-bajo-alert]="stats.productosStockBajo > 0">
         <span class="stat-number">{{stats.productosStockBajo}}</span>
         <span class="stat-label">Stock Bajo</span>
       </div>
@@ -43,10 +43,9 @@
         <option value="">Todas las categorías</option>
         <option value="Bebida">Bebidas</option>
         <option value="Especialidad">Especialidades</option>
-        <option value="Marisco">Mariscos</option>
       </select>
 
-      <!-- NUEVO: Filtro por tipo de unidad -->
+      <!-- Filtro por tipo de unidad -->
       <select [(ngModel)]="tipoUnidadFiltro" (change)="aplicarFiltros()" class="filter-select">
         <option value="">Todos los tipos</option>
         <option value="unidades">Por Unidades</option>
@@ -87,7 +86,7 @@
         </thead>
         <tbody>
           <!-- LOADING STATE -->
-          <tr class="isLoading">
+          <tr *ngIf="isLoading">
             <td colspan="6" class="loading-row">
               <div class="loading-spinner">🔄</div>
               Cargando productos...
@@ -223,10 +222,13 @@
 
     <div class="unit-info">
       <div class="unit-info-item">
-        <strong>⚖️ Productos por Peso:</strong> Se miden en kilogramos (kg)
+        <strong>⚖️ Productos por Peso:</strong> Se miden en kilogramos (kg) - Especialidades
       </div>
       <div class="unit-info-item">
-        <strong>📦 Productos por Unidad:</strong> Se miden en unidades
+        <strong>📦 Productos por Unidad:</strong> Se miden en unidades - Bebidas
+      </div>
+      <div class="unit-info-item">
+        <strong>✅ Sistema actualizado:</strong> Todos los productos tienen control de stock
       </div>
     </div>
     

@@ -1,7 +1,7 @@
-// StockService.ts - VERSIÓN COMPLETA BASADA EN TU ESTRUCTURA
+// Stock.service.ts - VERSIÓN CORREGIDA Y LIMPIA
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap, catchError, throwError, forkJoin, map } from 'rxjs';
+import { BehaviorSubject, Observable, tap, catchError, forkJoin, map, throwError } from 'rxjs';
 
 export interface ProductoStock {
   id: number;
@@ -11,10 +11,10 @@ export interface ProductoStock {
   precio: number;
   categoria: string;
   imagen: string;
-  cantidad_productos: number; // ✅ PARA BEBIDAS
-  unidad?: number; // ✅ PARA ESPECIALIDADES
+  cantidad_productos: number;
   tiene_tamanos: boolean;
   tipo: 'bebida' | 'especialidad';
+  puedeActualizarStock: boolean;
 }
 
 @Injectable({
@@ -32,7 +32,6 @@ export class StockService {
 
   constructor(private http: HttpClient) {}
 
-  // Obtener todos los productos con stock (bebidas + especialidades)
   obtenerProductosConStock(): Observable<ProductoStock[]> {
     this.loadingSource.next(true);
     
@@ -44,26 +43,57 @@ export class StockService {
         console.log('📦 Bebidas recibidas:', bebidas);
         console.log('🐟 Especialidades recibidas:', especialidades);
 
-        // Normalizar bebidas - BASADO EN TU ESTRUCTURA
+        // Normalizar bebidas
         const bebidasNormalizadas = bebidas.map(bebida => ({
           ...bebida,
-          id: bebida.id_producto || bebida.id, // ✅ id_producto de la tabla Productos
+          id: bebida.id_producto || bebida.id,
+          nombre: bebida.name || bebida.nombre,
+          descripcion: bebida.description || bebida.descripcion,
           categoria: 'Bebida',
-          cantidad_productos: bebida.cantidad_productos || 0,
-          tipo: 'bebida' as const
+          cantidad_productos: Number(bebida.product_quantity) || Number(bebida.cantidad_productos) || 0, // ✅ FORZAR NÚMERO
+          tiene_tamanos: bebida.has_sizes || bebida.tiene_tamanos || false,
+          tipo: 'bebida' as const,
+          puedeActualizarStock: true
         }));
 
-        // Normalizar especialidades - BASADO EN TU ESTRUCTURA
-        const especialidadesNormalizadas = especialidades.map(especialidad => ({
-          ...especialidad,
-          id: especialidad.id_producto || especialidad.id, // ✅ id_producto de la tabla Productos
-          categoria: 'Especialidad',
-          cantidad_productos: especialidad.unidad || 0, // ✅ unidad para especialidades
-          tipo: 'especialidad' as const
-        }));
+        // ✅ CORREGIDO: Normalizar especialidades - FORZAR NÚMEROS
+        const especialidadesNormalizadas = especialidades.map(especialidad => {
+          // Buscar y convertir a número
+          let stock = especialidad.product_quantity !== undefined ? Number(especialidad.product_quantity) :
+                    especialidad.cantidad_productos !== undefined ? Number(especialidad.cantidad_productos) :
+                    especialidad.unidad !== undefined ? Number(especialidad.unidad) : 0;
+
+          // Si es NaN, establecer en 0
+          stock = isNaN(stock) ? 0 : stock;
+
+          return {
+            ...especialidad,
+            id: especialidad.id_producto || especialidad.id,
+            nombre: especialidad.name || especialidad.nombre,
+            descripcion: especialidad.description || especialidad.descripcion,
+            categoria: 'Especialidad',
+            cantidad_productos: stock, // ✅ SIEMPRE SERÁ NÚMERO
+            tiene_tamanos: especialidad.has_sizes || especialidad.tiene_tamanos || false,
+            tipo: 'especialidad' as const,
+            puedeActualizarStock: true
+          };
+        });
 
         const todosProductos = [...bebidasNormalizadas, ...especialidadesNormalizadas];
         console.log('📊 Total productos combinados:', todosProductos.length);
+        
+        // ✅ DEBUG MEJORADO: Verificar tipos de datos
+        console.log('🔍 Stocks cargados - Bebidas:', bebidasNormalizadas.map(b => ({ 
+          nombre: b.nombre, 
+          stock: b.cantidad_productos, 
+          tipo: typeof b.cantidad_productos 
+        })));
+        console.log('🔍 Stocks cargados - Especialidades:', especialidadesNormalizadas.map(e => ({ 
+          nombre: e.nombre, 
+          stock: e.cantidad_productos, 
+          tipo: typeof e.cantidad_productos 
+        })));
+        
         return todosProductos;
       }),
       tap(productos => {
@@ -79,36 +109,50 @@ export class StockService {
     );
   }
 
-  // Actualizar stock de un producto
+  // ✅ MÉTODO ACTUALIZAR STOCK - PARA AMBOS TIPOS
   actualizarStock(producto: ProductoStock, nuevaCantidad: number): Observable<any> {
     let apiUrl: string;
-    let body: any;
-
+    
+    // Determinar endpoint según tipo de producto
     if (producto.tipo === 'bebida') {
       apiUrl = `${this.bebidasApiUrl}/stock/${producto.id}`;
-      body = { cantidad_productos: nuevaCantidad };
     } else {
       apiUrl = `${this.especialidadesApiUrl}/stock/${producto.id}`;
-      body = { cantidad: nuevaCantidad };
     }
 
-    console.log('🔄 Actualizando stock:', { producto: producto.nombre, nuevaCantidad, apiUrl });
+    const body = { 
+      product_quantity: nuevaCantidad,
+      cantidad_productos: nuevaCantidad
+    };
+
+    console.log('🔄 Actualizando stock:', { 
+      producto: producto.nombre, 
+      tipo: producto.tipo,
+      nuevaCantidad, 
+      apiUrl 
+    });
 
     return this.http.put(apiUrl, body).pipe(
       tap((productoActualizado: any) => {
-        console.log('✅ Stock actualizado:', productoActualizado);
-        
-        // Actualizar la lista local
-        const productosActuales = this.productosSource.getValue();
-        const productosActualizados = productosActuales.map(p =>
-          p.id === producto.id && p.tipo === producto.tipo 
-            ? { ...p, cantidad_productos: nuevaCantidad } 
-            : p
-        );
-        this.productosSource.next(productosActualizados);
+        console.log('✅ Stock actualizado exitosamente:', productoActualizado);
+        this.actualizarListaLocal(producto, nuevaCantidad);
       }),
       catchError(this.handleError)
     );
+  }
+
+  private actualizarListaLocal(producto: ProductoStock, nuevaCantidad: number): void {
+    const productosActuales = this.productosSource.getValue();
+    const productosActualizados = productosActuales.map(p => {
+      if (p.id === producto.id && p.tipo === producto.tipo) {
+        console.log(`🔄 Actualizando local: ${p.nombre} de ${p.cantidad_productos} a ${nuevaCantidad}`);
+        return { ...p, cantidad_productos: nuevaCantidad };
+      }
+      return p;
+    });
+    
+    console.log('📊 Lista local actualizada');
+    this.productosSource.next(productosActualizados);
   }
 
   // Buscar productos
@@ -143,20 +187,52 @@ export class StockService {
     this.productosSource.next(productosFiltrados);
   }
 
-  // Obtener estadísticas rápidas
-  obtenerEstadisticas(): { total: number, bebidas: number, especialidades: number, stockBajo: number } {
+  // Obtener estadísticas
+  obtenerEstadisticas(): { 
+    total: number, 
+    bebidas: number, 
+    especialidades: number, 
+    conStock: number 
+  } {
     const productos = this.productosSource.getValue();
     return {
       total: productos.length,
       bebidas: productos.filter(p => p.tipo === 'bebida').length,
       especialidades: productos.filter(p => p.tipo === 'especialidad').length,
-      stockBajo: productos.filter(p => p.cantidad_productos <= 10).length
+      conStock: productos.length // TODOS tienen stock ahora
     };
   }
 
   // Recargar productos
   recargarProductos(): void {
     this.obtenerProductosConStock().subscribe();
+  }
+
+  // ✅ MÉTODO DE DIAGNÓSTICO
+  diagnosticarEstructuraEspecialidades(): void {
+    console.log('🔍 Diagnosticando estructura de especialidades...');
+    
+    this.http.get<any[]>(`${this.especialidadesApiUrl}/stock`).subscribe({
+      next: (especialidades) => {
+        if (especialidades && especialidades.length > 0) {
+          console.log('📋 Estructura completa del primer producto especialidad:', especialidades[0]);
+          console.log('🔍 Todas las claves disponibles:', Object.keys(especialidades[0]));
+          
+          // Mostrar específicamente los campos de stock
+          const primerProducto = especialidades[0];
+          console.log('🔍 Campos de stock disponibles:');
+          console.log('   - product_quantity:', primerProducto.product_quantity);
+          console.log('   - cantidad_productos:', primerProducto.cantidad_productos);
+          console.log('   - unidad:', primerProducto.unidad);
+          console.log('   - product_quantity type:', typeof primerProducto.product_quantity);
+        } else {
+          console.log('📭 No hay especialidades para diagnosticar');
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error en diagnóstico:', err);
+      }
+    });
   }
 
   private handleError(error: HttpErrorResponse) {

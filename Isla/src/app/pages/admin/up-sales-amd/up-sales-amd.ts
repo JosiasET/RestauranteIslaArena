@@ -9,6 +9,8 @@ import { SaleDataService } from '../../../core/service/SaleDataService';
 import { Drinkinterface } from '../../../core/interface/drink';
 import { foodInterface } from '../../../core/interface/foodInterface';
 import { Fish } from '../../../core/interface/Fish';
+import { MeseroService } from '../../../core/service/WaiterService';
+import { MeseroInterface } from '../../../core/interface/waiter';
 
 interface CartItem {
   product: any;
@@ -30,6 +32,7 @@ export class UpSalesAmd implements OnInit {
   selectedTable: string = '';
   selectedWaiter: string = '';
   selectedCategory: string = 'food';
+  orderType: string = 'eat_in';
   
   // Catalogs
   drinks: Drinkinterface[] = [];
@@ -48,17 +51,24 @@ export class UpSalesAmd implements OnInit {
   
   // Static lists
   tables: string[] = ['Mesa 1', 'Mesa 2', 'Mesa 3', 'Mesa 4', 'Mesa 5', 'Mesa 6'];
-  waiters: string[] = ['Mesero 1', 'Mesero 2'];
+  
+  // Lista de meseros reales
+  waiters: MeseroInterface[] = [];
+  loadingWaiters: boolean = true;
 
   constructor(
     private drinkService: DrinkService,
     private foodService: FoodService,
     private fishesService: FishesService,
     private saleDataService: SaleDataService,
+    private meseroService: MeseroService,
     private router: Router
   ) {}
 
   ngOnInit() {
+    // Cargar meseros
+    this.loadWaiters();
+    
     // Load drinks
     this.drinkService.saucer$.subscribe(drinks => {
       console.log('🥤 BEBIDAS DETALLADAS:', drinks.map(d => ({
@@ -95,6 +105,36 @@ export class UpSalesAmd implements OnInit {
       this.fishes = fishes;
       this.updateFilteredProducts();
     });
+  }
+
+  // Cargar meseros desde el servicio
+  loadWaiters() {
+    this.loadingWaiters = true;
+    this.meseroService.cargarMeseros().subscribe({
+      next: (meseros: MeseroInterface[]) => {
+        this.waiters = meseros.filter(mesero => mesero.activo);
+        this.loadingWaiters = false;
+        console.log('👥 Meseros cargados:', this.waiters.length);
+      },
+      error: (error) => {
+        console.error('Error cargando meseros:', error);
+        this.loadingWaiters = false;
+        this.waiters = [];
+      }
+    });
+  }
+
+  // Obtener texto del tipo de pedido
+  getOrderTypeText(): string {
+    return this.orderType === 'eat_in' ? '🍽️ Comer aquí' : '🥡 Para llevar';
+  }
+
+  // Obtener nombre completo del mesero seleccionado
+  getSelectedWaiterName(): string {
+    if (!this.selectedWaiter) return 'Mesero no seleccionado';
+    
+    const mesero = this.waiters.find(m => m.id?.toString() === this.selectedWaiter);
+    return mesero ? `${mesero.nombre} ${mesero.apellido}` : 'Mesero no encontrado';
   }
 
   // MÉTODOS DEL MODAL
@@ -280,12 +320,19 @@ export class UpSalesAmd implements OnInit {
       return;
     }
 
+    // Obtener nombre completo del mesero seleccionado
+    const meseroSeleccionado = this.waiters.find(m => m.id?.toString() === this.selectedWaiter);
+    const nombreMesero = meseroSeleccionado ? 
+      `${meseroSeleccionado.nombre} ${meseroSeleccionado.apellido}` : 
+      this.selectedWaiter || 'No asignado';
+
     const saleData = {
       table: this.selectedTable,
-      waiter: this.selectedWaiter || 'No asignado',
+      waiter: nombreMesero,
       products: [...this.cart],
       total: this.calculateTotal(),
-      date: new Date()
+      date: new Date(),
+      orderType: this.orderType
     };
 
     this.saleDataService.setSaleData(saleData);

@@ -44,14 +44,19 @@ export class FishesService {
   }
 
   // Función para normalizar los datos del backend
+    // En FishesService.ts - CORREGIR normalizarEspecialidad
   private normalizarEspecialidad(especialidad: any): Fish {
+    // ✅ CORREGIDO: Convertir string a número
+    const cantidad = especialidad.cantidad ? Number(especialidad.cantidad) : 
+                    especialidad.product_quantity ? Number(especialidad.product_quantity) : 0;
+
     return {
       id: especialidad.id_especialidad || especialidad.id,
       nombre: especialidad.nombre,
       descripcion: especialidad.descripcion,
       precio: especialidad.precio,
       imagen: especialidad.imagen,
-      cantidad: especialidad.cantidad || 0,
+      cantidad: cantidad, // ✅ AHORA ES NÚMERO
       descripcion_real: especialidad.descripcion_real || especialidad.descripcion,
       tiene_tamanos: especialidad.tiene_tamanos || false,
       tipos: especialidad.tipos || [],
@@ -60,27 +65,35 @@ export class FishesService {
   }
 
   // ✅ CARGAR ESPECIALIDADES (ONLINE/OFFLINE)
-  cargarEspecialidades(): Observable<Fish[]> {
-    this.loadingSource.next(true);
-    
-    if (navigator.onLine) {
-      return this.http.get<any[]>(this.apiUrl).pipe(
-        map(especialidades => especialidades.map(esp => this.normalizarEspecialidad(esp))),
-        tap(especialidades => {
-          console.log('✅ Especialidades cargadas desde API:', especialidades.length);
-          this.saucerSource.next(especialidades);
-          this.loadingSource.next(false);
-          this.guardarCacheEspecialidades(especialidades);
-        }),
-        catchError(err => {
-          console.error('❌ Error API, cargando desde cache:', err);
-          return this.cargarEspecialidadesOffline();
-        })
-      );
-    } else {
-      return this.cargarEspecialidadesOffline();
-    }
+  // En FishesService.ts - agregar debug en cargarEspecialidades
+cargarEspecialidades(): Observable<Fish[]> {
+  this.loadingSource.next(true);
+  
+  if (navigator.onLine) {
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map(especialidades => {
+        console.log('🔍 Respuesta del backend:', especialidades); // ✅ DEBUG
+        return especialidades.map(esp => this.normalizarEspecialidad(esp));
+      }),
+      tap(especialidades => {
+        console.log('✅ Especialidades cargadas desde API:', especialidades.length);
+        // ✅ DEBUG: Ver stock de cada especialidad
+        especialidades.forEach(esp => {
+          console.log(`📦 ${esp.nombre}: stock = ${esp.cantidad}`);
+        });
+        this.saucerSource.next(especialidades);
+        this.loadingSource.next(false);
+        this.guardarCacheEspecialidades(especialidades);
+      }),
+      catchError(err => {
+        console.error('❌ Error API, cargando desde cache:', err);
+        return this.cargarEspecialidadesOffline();
+      })
+    );
+  } else {
+    return this.cargarEspecialidadesOffline();
   }
+}
 
   private cargarEspecialidadesOffline(): Observable<Fish[]> {
     return new Observable(observer => {
@@ -221,6 +234,7 @@ export class FishesService {
     });
   }
 
+  // En FishesService.ts - agregar en actualizarEspecialidad
   actualizarEspecialidad(especialidad: Fish): Observable<Fish> {
     if (navigator.onLine) {
       const especialidadCompleta = {
@@ -228,11 +242,18 @@ export class FishesService {
         descripcion_real: especialidad.descripcion_real || '',
         tiene_tamanos: especialidad.tiene_tamanos || false,
         tipos: especialidad.tipos || [],
-        tamanos: especialidad.tamanos || []
+        tamanos: especialidad.tamanos || [],
+        product_quantity: especialidad.cantidad || 0 // ✅ ENVIAR STOCK
       };
 
+      console.log('📤 ACTUALIZANDO - Datos enviados al backend:', especialidadCompleta);
+      console.log('📤 ACTUALIZANDO - URL:', `${this.apiUrl}/${especialidad.id}`);
+
       return this.http.put<any>(`${this.apiUrl}/${especialidad.id}`, especialidadCompleta).pipe(
-        map(especialidadRespuesta => this.normalizarEspecialidad(especialidadRespuesta)),
+        map(especialidadRespuesta => {
+          console.log('📥 ACTUALIZANDO - Respuesta del backend:', especialidadRespuesta);
+          return this.normalizarEspecialidad(especialidadRespuesta);
+        }),
         tap(actualizada => {
           console.log('✅ Especialidad actualizada en API:', actualizada);
           const especialidadesActuales = this.saucerSource.getValue();
@@ -251,7 +272,7 @@ export class FishesService {
       return this.actualizarEspecialidadOffline(especialidad);
     }
   }
-
+  
   private actualizarEspecialidadOffline(especialidad: Fish): Observable<Fish> {
     return new Observable(observer => {
       try {
