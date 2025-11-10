@@ -1,7 +1,8 @@
 <div class="admin-container">
+  <div class="mobile-overlay" [class.active]="mobileMenuOpen && isMobile" (click)="mobileMenuOpen = false"></div>
   <div class="admin-layout">
     <!-- Panel lateral -->
-    <div class="admin-sidebar">
+    <div class="admin-sidebar" [class.mobile-open]="mobileMenuOpen && isMobile">
       <div class="sidebar-header">
         <!-- LOGO COMO BOTÓN - Navega al dashboard -->
         <div class="logo" (click)="irAlGestorPrincipal()" style="cursor: pointer;">
@@ -59,6 +60,11 @@
           <div class="nav-icon">📦</div>
           <span class="nav-text">Gestión de Stock</span>
         </a>
+
+        <div class="logout-nav-item" (click)="cerrarSesion()">
+          <div class="nav-icon">🚪</div>
+          <span class="nav-text">Cerrar Sesión</span>
+        </div>
       </nav>
 
       <div class="sidebar-footer">
@@ -73,6 +79,7 @@
     <div class="admin-content">
       <header class="content-header">
         <div class="header-left">
+          <button class="mobile-menu-btn" (click)="toggleMobileMenu()">☰</button>
           <h1>Panel de Administración</h1>
           <p>Gestiona tu restaurante de manera eficiente</p>
         </div>

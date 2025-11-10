@@ -57,22 +57,26 @@ export class Gestoramd implements OnInit {
   // Verificar si está en móvil
   checkScreenSize() {
     this.isMobile = window.innerWidth <= 768;
+    console.log('📱 Es móvil:', this.isMobile, '- Ancho:', window.innerWidth);
     
     // Si se cambia a desktop y el menú móvil está abierto, cerrarlo
     if (!this.isMobile && this.mobileMenuOpen) {
       this.mobileMenuOpen = false;
+      console.log('💻 Cambió a desktop, cerrando menú móvil');
     }
   }
 
   // Alternar menú móvil
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
+    console.log('🍔 Menú móvil:', this.mobileMenuOpen ? 'ABIERTO' : 'CERRADO');
   }
 
   // Cerrar menú móvil
   closeMobileMenu() {
-    if (this.isMobile) {
+    if (this.isMobile && this.mobileMenuOpen) {
       this.mobileMenuOpen = false;
+      console.log('❌ Cerrando menú móvil');
     }
   }
 
@@ -99,7 +103,7 @@ export class Gestoramd implements OnInit {
   irAlGestorPrincipal() {
     console.log('🏠 Navegando al dashboard principal');
     this.closeMobileMenu();
-    this.router.navigate(['/gestoramd/dashboard']);
+    this.router.navigate(['/gestoramd']);
   }
 
   // Navegar a otras secciones
@@ -110,6 +114,7 @@ export class Gestoramd implements OnInit {
   }
 
   cerrarSesion() {
+    console.log('🚪 Cerrando sesión');
     this.closeMobileMenu();
     this.router.navigate(['']);
   }
