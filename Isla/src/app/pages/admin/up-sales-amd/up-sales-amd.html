@@ -1,206 +1,206 @@
-<div class="Subir_p">
-  <h2 class="Subtitulo">REALIZAR ORDEN</h2>
+  <div class="Subir_p">
+    <h2 class="Subtitulo">REALIZAR ORDEN</h2>
 
-  <!-- Selector de Mesa, Mesero, Categoría y Tipo de Pedido -->
-  <div class="form-bar">
-    <select [(ngModel)]="selectedTable" class="form-input">
-      <option value="">Seleccionar Mesa</option>
-      <option *ngFor="let table of tables" [value]="table">{{table}}</option>
-    </select>
-    
-    <!-- Selector de Meseros Reales -->
-    <select [(ngModel)]="selectedWaiter" class="form-input">
-      <option value="">Seleccionar Mesero</option>
-      <option *ngFor="let waiter of waiters" [value]="waiter.id">
-        {{ waiter.usuario }}
-      </option>
-    </select>
-    <div *ngIf="loadingWaiters" class="loading-waiters">
-      <small>Cargando meseros...</small>
+    <!-- Selector de Mesa, Mesero, Categoría y Tipo de Pedido -->
+    <div class="form-bar">
+      <select [(ngModel)]="selectedTable" class="form-input">
+        <option value="">Seleccionar Mesa</option>
+        <option *ngFor="let table of tables" [value]="table">{{table}}</option>
+      </select>
+      
+      <!-- Selector de Meseros Reales -->
+      <select [(ngModel)]="selectedWaiter" class="form-input">
+        <option value="">Seleccionar Mesero</option>
+        <option *ngFor="let waiter of waiters" [value]="waiter.id">
+          {{ waiter.usuario }}
+        </option>
+      </select>
+      <div *ngIf="loadingWaiters" class="loading-waiters">
+        <small>Cargando meseros...</small>
+      </div>
+      <div *ngIf="!loadingWaiters && waiters.length === 0" class="no-waiters">
+        <small>No hay meseros disponibles</small>
+      </div>
+
+      <select [(ngModel)]="selectedCategory" class="form-input" (change)="filterProducts()">
+        <option value="food">Platillos</option>
+        <option value="drinks">Bebidas</option>
+        <option value="fish">Especiales del Mar</option>
+        <option value="all">Todas las Categorías</option>
+      </select>
+
+      <!-- Selector de Tipo de Pedido -->
+      <select [(ngModel)]="orderType" class="form-input">
+        <option value="eat_in">🍽️ Comer aquí</option>
+        <option value="takeaway">🥡 Para llevar</option>
+      </select>
     </div>
-    <div *ngIf="!loadingWaiters && waiters.length === 0" class="no-waiters">
-      <small>No hay meseros disponibles</small>
-    </div>
 
-    <select [(ngModel)]="selectedCategory" class="form-input" (change)="filterProducts()">
-      <option value="food">Platillos</option>
-      <option value="drinks">Bebidas</option>
-      <option value="fish">Especiales del Mar</option>
-      <option value="all">Todas las Categorías</option>
-    </select>
-
-    <!-- Selector de Tipo de Pedido -->
-    <select [(ngModel)]="orderType" class="form-input">
-      <option value="eat_in">🍽️ Comer aquí</option>
-      <option value="takeaway">🥡 Para llevar</option>
-    </select>
-  </div>
-
-  <!-- Catálogo de Productos -->
-  <div class="catalogo-productos">
-    <h3 class="sub_3">Productos Disponibles</h3>
-    
-    <!-- Productos Filtrados -->
-    <div class="productos-grid">
-      <div *ngFor="let product of filteredProducts" 
-           class="producto-card" 
-           (click)="openProductModal(product)">
-        <img [src]="product.imagen" [alt]="product.nombre" class="producto-img">
-        <div class="producto-info">
-          <h5>{{product.nombre}}</h5>
-          
-          <!-- Mostrar si tiene tamaños disponibles (solo para food) -->
-          <div *ngIf="productHasSizes(product)" class="tamanos-badge">
-            📏 Tamaños disponibles
+    <!-- Catálogo de Productos -->
+    <div class="catalogo-productos">
+      <h3 class="sub_3">Productos Disponibles</h3>
+      
+      <!-- Productos Filtrados -->
+      <div class="productos-grid">
+        <div *ngFor="let product of filteredProducts" 
+            class="producto-card" 
+            (click)="openProductModal(product)">
+          <img [src]="product.imagen" [alt]="product.nombre" class="producto-img">
+          <div class="producto-info">
+            <h5>{{product.nombre}}</h5>
+            
+            <!-- Mostrar si tiene tamaños disponibles (solo para food) -->
+            <div *ngIf="productHasSizes(product)" class="tamanos-badge">
+              📏 Tamaños disponibles
+            </div>
+            
+            <!-- Mostrar precio base si no tiene tamaños -->
+            <p *ngIf="!productHasSizes(product)" class="producto-precio">
+              {{product.precio | currency}}
+            </p>
+            
+            <!-- Mostrar rango de precios si tiene tamaños -->
+            <p *ngIf="productHasSizes(product)" class="producto-precio-rango">
+              Desde {{getMinPrice(getProductSizes(product)) | currency}}
+            </p>
           </div>
-          
-          <!-- Mostrar precio base si no tiene tamaños -->
-          <p *ngIf="!productHasSizes(product)" class="producto-precio">
-            {{product.precio | currency}}
-          </p>
-          
-          <!-- Mostrar rango de precios si tiene tamaños -->
-          <p *ngIf="productHasSizes(product)" class="producto-precio-rango">
-            Desde {{getMinPrice(getProductSizes(product)) | currency}}
-          </p>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Carrito de Compras -->
-  <div class="carrito-venta" *ngIf="cart.length > 0">
-    <h3 class="sub_3">Carrito de Compras - Mesa: {{selectedTable || 'No seleccionada'}} | Tipo: {{getOrderTypeText()}}</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Tamaño</th>
-          <th>Cantidad</th>
-          <th>Precio</th>
-          <th>Subtotal</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of cart; let i = index">
-          <td class="nombre-cell">{{ item.product.nombre }}</td>
-          <td class="tamano-cell">
-            {{ item.selectedSize?.nombre || 'Único' }}
-          </td>
-          <td class="cantidad-cell">
-            <button (click)="decreaseQuantity(i)" class="btn-cantidad">-</button>
-            {{ item.quantity }}
-            <button (click)="increaseQuantity(i)" class="btn-cantidad">+</button>
-          </td>
-          <td class="precio-cell">{{ (item.selectedSize?.precio || item.product.precio) | currency }}</td>
-          <td class="subtotal-cell">
-            {{ ((item.selectedSize?.precio || item.product.precio) * item.quantity) | currency }}
-          </td>
-          <td class="acciones-cell">
-            <button (click)="removeFromCart(i)" class="btn-eliminar">🗑</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Carrito de Compras -->
+    <div class="carrito-venta" *ngIf="cart.length > 0">
+      <h3 class="sub_3">Carrito de Compras - Mesa: {{selectedTable || 'No seleccionada'}} | Tipo: {{getOrderTypeText()}}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Tamaño</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Subtotal</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of cart; let i = index">
+            <td class="nombre-cell">{{ item.product.nombre }}</td>
+            <td class="tamano-cell">
+              {{ item.selectedSize?.nombre || 'Único' }}
+            </td>
+            <td class="cantidad-cell">
+              <button (click)="decreaseQuantity(i)" class="btn-cantidad">-</button>
+              {{ item.quantity }}
+              <button (click)="increaseQuantity(i)" class="btn-cantidad">+</button>
+            </td>
+            <td class="precio-cell">{{ (item.selectedSize?.precio || item.product.precio) | currency }}</td>
+            <td class="subtotal-cell">
+              {{ ((item.selectedSize?.precio || item.product.precio) * item.quantity) | currency }}
+            </td>
+            <td class="acciones-cell">
+              <button (click)="removeFromCart(i)" class="btn-eliminar">🗑</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <!-- Total y Botones de Acción -->
-    <div class="total-section">
-      <h4>Total: {{ calculateTotal() | currency }}</h4>
-      <div class="action-buttons">
-        <button (click)="processSale()" class="submit-btn" [disabled]="!selectedTable">
-          💳 Procesar Venta
-        </button>
-        <button (click)="clearCart()" class="cancel-btn">
-          🗑 Limpiar Carrito
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mensaje cuando el carrito está vacío -->
-  <div *ngIf="cart.length === 0" class="empty-state">
-    <div class="empty-icon">🛒</div>
-    <h3>Carrito vacío</h3>
-    <p>Selecciona productos del catálogo para comenzar una venta.</p>
-  </div>
-</div>
-
-<!-- MODAL PARA SELECCIÓN DE TAMAÑOS - CON VALIDACIÓN DE STOCK -->
-<div *ngIf="showProductModal && selectedProduct" class="modal-overlay-amd" (click)="closeProductModal()">
-  <div class="modal-content-amd" (click)="$event.stopPropagation()">
-    
-    <div class="modal-header-amd">
-      <h3>{{ selectedProduct.nombre }}</h3>
-      <button class="btn-cerrar-amd" (click)="closeProductModal()">×</button>
-    </div>
-
-    <div class="modal-body-amd">
-      
-      <!-- ✅ NUEVO: Mostrar stock disponible -->
-      <div class="stock-info-amd" *ngIf="getStockDisponible()">
-        <span class="stock-text">{{ getStockDisponible() }}</span>
-      </div>
-
-      <!-- Selección de tamaños (SOLO PARA FOOD) -->
-      <div *ngIf="productHasSizes(selectedProduct)" class="tamanos-section-amd">
-        <h4>Selecciona un tamaño:</h4>
-        <div class="tamanos-grid-amd">
-          <button *ngFor="let tamano of getProductSizes(selectedProduct)" 
-                  class="btn-tamano-amd"
-                  [class.selected]="selectedSize?.nombre === tamano.nombre"
-                  (click)="selectSize(tamano)">
-            <span class="tamano-nombre-amd">{{ tamano.nombre }}</span>
-            <span class="tamano-precio-amd">{{ tamano.precio | currency }}</span>
+      <!-- Total y Botones de Acción -->
+      <div class="total-section">
+        <h4>Total: {{ calculateTotal() | currency }}</h4>
+        <div class="action-buttons">
+          <button (click)="processSale()" class="submit-btn" [disabled]="!selectedTable">
+            💳 Procesar Venta
+          </button>
+          <button (click)="clearCart()" class="cancel-btn">
+            🗑 Limpiar Carrito
           </button>
         </div>
       </div>
-
-      <!-- Si no tiene tamaños, mostrar precio único -->
-      <div *ngIf="!productHasSizes(selectedProduct)" class="precio-unico-amd">
-        <h4>Precio:</h4>
-        <div class="precio-unico-value">{{ selectedProduct.precio | currency }}</div>
-      </div>
-
-      <!-- Contador de cantidad -->
-      <div class="cantidad-section-amd">
-        <h4>Cantidad:</h4>
-        <div class="cantidad-controls-amd">
-          <button class="btn-cantidad-amd" (click)="decrementModalQuantity()">-</button>
-          <span class="cantidad-value-amd">{{ modalQuantity }}</span>
-          <!-- ✅ CORREGIDO: Botón + se deshabilita cuando no hay stock -->
-          <button class="btn-cantidad-amd" 
-                  (click)="incrementModalQuantity()"
-                  [disabled]="!puedeIncrementarModal()">+</button>
-        </div>
-      </div>
-
-      <!-- Resumen del pedido -->
-      <div class="resumen-section-amd">
-        <h4>Resumen:</h4>
-        <div class="resumen-detalle-amd">
-          <div class="resumen-linea-amd">
-            <span>{{ selectedProduct.nombre }}</span>
-            <span>{{ modalQuantity }} x {{ getCurrentPrice() | currency }}</span>
-          </div>
-          <div class="resumen-linea-amd" *ngIf="selectedSize">
-            <span class="opcion-detalle-amd">{{ selectedSize.nombre }}</span>
-          </div>
-          <div class="resumen-total-amd">
-            <span>Total:</span>
-            <span>{{ (getCurrentPrice() * modalQuantity) | currency }}</span>
-          </div>
-        </div>
-      </div>
-
     </div>
 
-    <div class="modal-footer-amd">
-      <button class="btn-cancelar-amd" (click)="closeProductModal()">Cancelar</button>
-      <button class="btn-confirmar-amd" (click)="addToCartWithOptions()" 
-              [disabled]="productHasSizes(selectedProduct) && !selectedSize">
-        Agregar - {{ (getCurrentPrice() * modalQuantity) | currency }}
-      </button>
+    <!-- Mensaje cuando el carrito está vacío -->
+    <div *ngIf="cart.length === 0" class="empty-state">
+      <div class="empty-icon">🛒</div>
+      <h3>Carrito vacío</h3>
+      <p>Selecciona productos del catálogo para comenzar una venta.</p>
     </div>
   </div>
-</div>
+
+  <!-- MODAL PARA SELECCIÓN DE TAMAÑOS - CON VALIDACIÓN DE STOCK -->
+  <div *ngIf="showProductModal && selectedProduct" class="modal-overlay-amd" (click)="closeProductModal()">
+    <div class="modal-content-amd" (click)="$event.stopPropagation()">
+      
+      <div class="modal-header-amd">
+        <h3>{{ selectedProduct.nombre }}</h3>
+        <button class="btn-cerrar-amd" (click)="closeProductModal()">×</button>
+      </div>
+
+      <div class="modal-body-amd">
+        
+        <!-- ✅ NUEVO: Mostrar stock disponible -->
+        <div class="stock-info-amd" *ngIf="getStockDisponible()">
+          <span class="stock-text">{{ getStockDisponible() }}</span>
+        </div>
+
+        <!-- Selección de tamaños (SOLO PARA FOOD) -->
+        <div *ngIf="productHasSizes(selectedProduct)" class="tamanos-section-amd">
+          <h4>Selecciona un tamaño:</h4>
+          <div class="tamanos-grid-amd">
+            <button *ngFor="let tamano of getProductSizes(selectedProduct)" 
+                    class="btn-tamano-amd"
+                    [class.selected]="selectedSize?.nombre === tamano.nombre"
+                    (click)="selectSize(tamano)">
+              <span class="tamano-nombre-amd">{{ tamano.nombre }}</span>
+              <span class="tamano-precio-amd">{{ tamano.precio | currency }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Si no tiene tamaños, mostrar precio único -->
+        <div *ngIf="!productHasSizes(selectedProduct)" class="precio-unico-amd">
+          <h4>Precio:</h4>
+          <div class="precio-unico-value">{{ selectedProduct.precio | currency }}</div>
+        </div>
+
+        <!-- Contador de cantidad -->
+        <div class="cantidad-section-amd">
+          <h4>Cantidad:</h4>
+          <div class="cantidad-controls-amd">
+            <button class="btn-cantidad-amd" (click)="decrementModalQuantity()">-</button>
+            <span class="cantidad-value-amd">{{ modalQuantity }}</span>
+            <!-- ✅ CORREGIDO: Botón + se deshabilita cuando no hay stock -->
+            <button class="btn-cantidad-amd" 
+                    (click)="incrementModalQuantity()"
+                    [disabled]="!puedeIncrementarModal()">+</button>
+          </div>
+        </div>
+
+        <!-- Resumen del pedido -->
+        <div class="resumen-section-amd">
+          <h4>Resumen:</h4>
+          <div class="resumen-detalle-amd">
+            <div class="resumen-linea-amd">
+              <span>{{ selectedProduct.nombre }}</span>
+              <span>{{ modalQuantity }} x {{ getCurrentPrice() | currency }}</span>
+            </div>
+            <div class="resumen-linea-amd" *ngIf="selectedSize">
+              <span class="opcion-detalle-amd">{{ selectedSize.nombre }}</span>
+            </div>
+            <div class="resumen-total-amd">
+              <span>Total:</span>
+              <span>{{ (getCurrentPrice() * modalQuantity) | currency }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer-amd">
+        <button class="btn-cancelar-amd" (click)="closeProductModal()">Cancelar</button>
+        <button class="btn-confirmar-amd" (click)="addToCartWithOptions()" 
+                [disabled]="productHasSizes(selectedProduct) && !selectedSize">
+          Agregar - {{ (getCurrentPrice() * modalQuantity) | currency }}
+        </button>
+      </div>
+    </div>
+  </div>
